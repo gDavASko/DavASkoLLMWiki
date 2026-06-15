@@ -11,14 +11,14 @@ Instead of a monolith knowledge base, the wiki uses distinct, hierarchical folde
 ### Conceptual Hierarchy
 ```mermaid
 graph TD
-    ProjectLayer[Project Wiki: dentistry-cow-wiki] --> FrameworkLayer[Framework Wiki: kbpro-wiki]
+    ProjectLayer[Project Wiki: dentistry-cow-wiki] --> FrameworkLayer[Framework Wiki: davasko-wiki]
     FrameworkLayer --> EngineLayer[Engine Wiki: unity-wiki]
     EngineLayer --> RootLayer[Core LLM Wiki: llm-wiki]
 ```
 
 - **Core LLM Layer (`llm-wiki`)**: Completely independent. Contains general rules for writing code with AI, managing plans, and general helper scripts.
 - **Engine Layer (`unity-wiki`)**: Knows about the development platform (e.g. Unity, Unreal, Next.js). Inherits from the LLM Layer.
-- **Framework Layer (`kbpro-wiki`)**: Knows about the target core libraries, custom packages, and architecture protocols. Inherits from the Engine Layer.
+- **Framework Layer (`davasko-wiki`)**: Knows about the target core libraries, custom packages, and architecture protocols. Inherits from the Engine Layer.
 - **Project Layer (`dentistry-cow-wiki`)**: Contains business logic, game design documents (GDD), and gameplay module definitions. Inherits from the Framework Layer.
 
 ---

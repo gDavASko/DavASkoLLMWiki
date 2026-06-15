@@ -13,20 +13,20 @@
 
 ```mermaid
 graph TD
-    Project[Проектный слой: например, dentistry-cow-wiki] --> Framework[Слой фреймворка: например, kbpro-wiki]
+    Project[Проектный слой: например, dentistry-cow-wiki] --> Framework[Слой фреймворка: например, davasko-wiki]
     Framework --> Engine[Слой движка: например, unity-wiki]
     Engine --> Root[Общий ИИ-слой: llm-wiki]
 ```
 
 - **`llm-wiki`** (Общий ИИ-слой): Содержит общие правила взаимодействия с ИИ, стандарты ведения планов работ (ExecPlans) и базовые сценарии.
 - **`unity-wiki`** (Слой движка): Описывает правила платформы (Unity), стандарты именования и стили написания C#-кода.
-- **`kbpro-wiki`** (Слой фреймворка): Хранит информацию о модульной архитектуре KBPro, её пакетах и правилах жизненного цикла.
+- **`davasko-wiki`** (Слой фреймворка): Хранит информацию о модульной архитектуре DavASko, её пакетах и правилах жизненного цикла.
 - **`dentistry-cow-wiki`** (Проектный слой): Содержит геймдизайн-документы (GDD), описание игровых модулей и скрипты автоматизации для конкретного проекта.
 
 Каждый слой содержит манифест `wiki.json`, определяющий зависимости:
 ```json
 {
-  "name": "kbpro-wiki",
+  "name": "davasko-wiki",
   "dependencies": ["unity-wiki", "llm-wiki"]
 }
 ```
@@ -106,8 +106,8 @@ sequenceDiagram
 Для разворачивания базы знаний выполните следующие шаги:
 
 ### Шаг 1: Копирование скриптов и правил
-1. Создайте в корне проекта папку базы знаний (например, `kbpro-ai-docs`).
-2. Скопируйте шаблоны скриптов из `templates/system-scripts/` в папку `kbpro-ai-docs/system/`.
+1. Создайте в корне проекта папку базы знаний (например, `davasko-ai-docs`).
+2. Скопируйте шаблоны скриптов из `templates/system-scripts/` в папку `davasko-ai-docs/system/`.
 3. Поместите скрипт `templates/sync-ai-rules.ps1` в корень проекта.
 
 ### Шаг 2: Инициализация слоев
@@ -145,8 +145,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\sync-ai-rules.ps1
 ### Шаг 5: Проверка готовности
 Запустите проверку базы знаний:
 ```powershell
-node kbpro-ai-docs/system/lint-wiki.js
-node kbpro-ai-docs/system/validate-links.js
+node davasko-ai-docs/system/lint-wiki.js
+node davasko-ai-docs/system/validate-links.js
 ```
 
 Если валидация завершилась с **0 ошибок**, ваша база знаний полностью готова к работе с ИИ-ассистентами!

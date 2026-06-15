@@ -368,7 +368,7 @@ layers.forEach(layer => {
 });
 
 // Output results
-console.log('=== KBPro LLM Wiki Lint ===');
+console.log('=== DavASko LLM Wiki Lint ===');
 console.log(`Layers parsed: ${layers.join(', ')}`);
 
 if (warnings.length > 0) {

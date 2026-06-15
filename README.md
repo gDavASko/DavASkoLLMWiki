@@ -13,20 +13,20 @@ Dependencies flow strictly **downward**. A higher-level layer can depend on and 
 
 ```mermaid
 graph TD
-    Project[Project Layer: e.g. dentistry-cow-wiki] --> Framework[Framework Layer: e.g. kbpro-wiki]
+    Project[Project Layer: e.g. dentistry-cow-wiki] --> Framework[Framework Layer: e.g. davasko-wiki]
     Framework --> Engine[Engine Layer: e.g. unity-wiki]
     Engine --> Root[Core LLM Layer: llm-wiki]
 ```
 
 - **`llm-wiki`** (Core Layer): Contains universal AI rules, project planning guides, and general helper scripts.
 - **`unity-wiki`** (Engine Layer): Contains game engine details, naming styles, physics guidelines, and assembly rules.
-- **`kbpro-wiki`** (Framework Layer): Contains core packages, architectural principles, and custom libraries definitions.
+- **`davasko-wiki`** (Framework Layer): Contains core packages, architectural principles, and custom libraries definitions.
 - **`dentistry-cow-wiki`** (Project Layer): Contains gameplay design documents (GDD), scene lists, and project-specific task builders.
 
 Each layer contains a manifest file `wiki.json` specifying its dependencies:
 ```json
 {
-  "name": "kbpro-wiki",
+  "name": "davasko-wiki",
   "dependencies": ["unity-wiki", "llm-wiki"]
 }
 ```
@@ -106,8 +106,8 @@ sequenceDiagram
 Follow these steps to initialize the DavASko LLM Wiki in any project:
 
 ### Step 1: Clone Rules and Scripts
-1. Create a submodule or folder named `kbpro-ai-docs` in your repository.
-2. Copy the contents of the `templates/system-scripts/` directory into `kbpro-ai-docs/system/`.
+1. Create a submodule or folder named `davasko-ai-docs` in your repository.
+2. Copy the contents of the `templates/system-scripts/` directory into `davasko-ai-docs/system/`.
 3. Copy the script `templates/sync-ai-rules.ps1` to the project root directory.
 
 ### Step 2: Initialize Layers
@@ -145,8 +145,8 @@ This makes the skill globally available to all projects on this machine.
 ### Step 5: Verify the Setup
 Validate the database setup:
 ```powershell
-node kbpro-ai-docs/system/lint-wiki.js
-node kbpro-ai-docs/system/validate-links.js
+node davasko-ai-docs/system/lint-wiki.js
+node davasko-ai-docs/system/validate-links.js
 ```
 
 If the validation passes with **0 errors**, your workspace is fully prepared for structured AI collaboration!

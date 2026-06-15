@@ -31,7 +31,7 @@ The agent drafts the `implementation_plan.md` in the artifacts folder (written i
 ## Proposed Changes
 
 ### База знаний (Слой `unity-wiki`)
-#### [NEW] [pragmatic-ai-coding.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
+#### [NEW] [pragmatic-ai-coding.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/DavASko/davasko-ai-docs/unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
 
 ## Verification Plan
 - Запуск `ingest-newdata.js`
@@ -71,7 +71,7 @@ Practical recommendations on utilizing AI coding assistants with a heavy focus o
 ## Step 4. Run the Ingestion Script
 The agent executes the ingestion script:
 ```bash
-node Assets/KBPro/kbpro-ai-docs/system/ingest-newdata.js
+node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js
 ```
 
 The script automatically:

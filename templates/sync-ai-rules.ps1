@@ -3,7 +3,7 @@
 $ErrorActionPreference = "Stop"
 
 $ScriptDir  = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$RulesDir   = Join-Path $ScriptDir "Assets\KBPro\kbpro-ai-docs\llm-wiki\raw\ide-rules"
+$RulesDir   = Join-Path $ScriptDir "Assets\DavASko\davasko-ai-docs\llm-wiki\raw\ide-rules"
 
 if (-not (Test-Path $RulesDir)) {
     Write-Error "ide-rules directory not found: $RulesDir`nRun: git submodule update --init --recursive"
@@ -105,7 +105,7 @@ foreach ($T in $Targets) {
 }
 
 # 2. Synchronize Claude Commands (from llm-wiki/raw/claude-commands/ to .claude/commands/)
-$ClaudeCmdsSource = Join-Path $ScriptDir "Assets\KBPro\kbpro-ai-docs\llm-wiki\raw\claude-commands"
+$ClaudeCmdsSource = Join-Path $ScriptDir "Assets\DavASko\davasko-ai-docs\llm-wiki\raw\claude-commands"
 $ClaudeCmdsDest = Join-Path $ScriptDir ".claude\commands"
 if (Test-Path $ClaudeCmdsSource) {
     if (-not (Test-Path $ClaudeCmdsDest)) {
@@ -119,11 +119,11 @@ if (Test-Path $ClaudeCmdsSource) {
     }
 }
 
-# 3. Synchronize Skills from all layers (llm-wiki, unity-wiki, kbpro-wiki)
+# 3. Synchronize Skills from all layers (llm-wiki, unity-wiki, davasko-wiki)
 $SkillsDirs = @(
-    (Join-Path $ScriptDir "Assets\KBPro\kbpro-ai-docs\llm-wiki\raw\ai-skills~"),
-    (Join-Path $ScriptDir "Assets\KBPro\kbpro-ai-docs\unity-wiki\raw\ai-skills~"),
-    (Join-Path $ScriptDir "Assets\KBPro\kbpro-ai-docs\kbpro-wiki\raw\ai-skills~")
+    (Join-Path $ScriptDir "Assets\DavASko\davasko-ai-docs\llm-wiki\raw\ai-skills~"),
+    (Join-Path $ScriptDir "Assets\DavASko\davasko-ai-docs\unity-wiki\raw\ai-skills~"),
+    (Join-Path $ScriptDir "Assets\DavASko\davasko-ai-docs\davasko-wiki\raw\ai-skills~")
 )
 
 $AllSkillDirs = @()

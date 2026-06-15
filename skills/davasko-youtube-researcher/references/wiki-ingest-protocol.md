@@ -26,7 +26,7 @@ A brief overview (1-2 paragraphs) explaining the video topic and its direct valu
 Themed sections detailing the discussions, workflows, or technical concepts in the video.
 
 ## Architectural Recommendations
-Concrete practical action items showing what and how we can apply in the Unity / KBPro codebase (e.g. "adopt TDD for LogicSystems", "write a custom prefab validator").
+Concrete practical action items showing what and how we can apply in the Unity / DavASko codebase (e.g. "adopt TDD for LogicSystems", "write a custom prefab validator").
 
 ## Related Pages
 - [link-to-other-wiki-page]
@@ -38,7 +38,7 @@ Concrete practical action items showing what and how we can apply in the Unity /
 
 Before editing any files in the permanent layers, draft an `implementation_plan.md` in the artifacts folder (written in Russian). The plan must detail:
 - Which video files are being analyzed.
-- Which layers (`unity-wiki`, `kbpro-wiki`, `dentistry-cow-wiki`) and directories the new files will be imported to.
+- Which layers (`unity-wiki`, `davasko-wiki`, `dentistry-cow-wiki`) and directories the new files will be imported to.
 - Wait for explicit user review and approval in the chat via: **«Реализуем план»**.
 
 ---
@@ -55,7 +55,7 @@ NewData/
   │           └── ai-vibe-code-review/
   │                 └── my-video-summary.md   <-- summary file
   │
-  ├── kbpro-wiki/
+  ├── davasko-wiki/
   │     └── Architecture/
   │           └── my-architecture-summary.md  <-- summary file
   │
@@ -72,11 +72,11 @@ NewData/
 
 After placing the files, execute the ingestion automation script:
 ```bash
-node Assets/KBPro/kbpro-ai-docs/system/ingest-newdata.js
+node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js
 ```
 
 The script automatically performs the following tasks:
-1. Moves the `.md` files to `Assets/KBPro/kbpro-ai-docs/<layer-name>/raw/<subfolder-path>/` and converts them to UTF-8 with BOM.
+1. Moves the `.md` files to `Assets/DavASko/davasko-ai-docs/<layer-name>/raw/<subfolder-path>/` and converts them to UTF-8 with BOM.
 2. Moves `.meta` files (if present) or generates a new GUID for wiki pages.
 3. Generates source summaries in `<layer-name>/wiki/sources/`.
 4. Appends links to local index lists `index.md`, local changelogs `log.md`, and the root `log.md` file.
