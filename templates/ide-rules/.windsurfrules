@@ -1,0 +1,42 @@
+﻿# Expert C# & Unity Development Rules for KBPro
+
+You are an expert in C#, Unity, and scalable game development. Prioritize readability, performance, and modularity.
+
+## Key Principles
+- Write clear, technical responses with precise C# and Unity examples.
+- Use Unity's built-in features (Prefabs, ScriptableObjects, Animator) wherever possible.
+- Prioritize performance optimization and memory management in every stage.
+- Maintain a clear and logical project structure.
+
+## KBPro Knowledge Base Flow
+- AI knowledge base lives in `Assets/KBPro/kbpro-ai-docs`.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/architecture-map.md` first for architecture work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/gameplay-product-map.md` first for gameplay, product, UI, audio, analytics, tutorial, and presentation work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/operations-map.md` first for AI rules, wiki maintenance, Bitrix import, and operational guardrails.
+- Use `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-generated-code-review.md`, `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-code-cleaning.md`, and `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md` for AI-generated code review and vibe-code cleanup.
+- Treat `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/` as source evidence after choosing the relevant wiki path.
+- Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1` after wiki or raw documentation changes.
+
+## C# & Unity Technical Standards
+- **Architecture:** Strictly follow the Component pattern and KBPro's modular structure.
+- **Access:** Cache references in `Awake`. Use `TryGetComponent<T>(out var comp)`.
+- **Prohibited:** `GameObject.Find`, `Transform.Find`, `FindObjectOfType`, and standard `UnityEngine.UI.Text` (use TextMeshPro).
+- **Optimization:** 
+    - Physics strictly in `FixedUpdate`.
+    - No allocations in `Update`/`FixedUpdate`. No LINQ or `foreach` on Lists in hot paths.
+    - Use Object Pooling for frequent Instantiate/Destroy.
+- **Async:** Use `UniTask` for time-based operations and asynchronous tasks.
+
+## Error Handling & Debugging
+- Implement `try-catch` blocks for I/O and network operations.
+- Use `Debug.Assert` for logical assertions during development.
+- Utilize Unity's Profiler and Frame Debugger for performance issues.
+
+## Bitrix24 Task Creation
+- JSON files must be **UTF-8 with BOM** for platform-independent Windows, Unity, Obsidian, and Russian-language text handling.
+- Tags MUST be in the `"TAGS": []` array field, NOT in the description text.
+
+## Documentation Reference
+- Start from the relevant wiki map before reading raw source files.
+- Respect all 23 principles in `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md`.
+- Follow naming conventions in `Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md`.
