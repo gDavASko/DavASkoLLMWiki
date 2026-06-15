@@ -33,7 +33,21 @@ Each layer contains a manifest file `wiki.json` specifying its dependencies:
 
 ---
 
-## 2. Directory Structure of a Layer
+## 2. Knowledge Priorities & Conflict Resolution
+
+Knowledge has different weights depending on its "proximity to the project":
+
+$$\text{Project Layer} > \text{Framework Layer} > \text{Engine Layer} > \text{Core LLM Layer}$$
+
+### The Priority Override Rules
+If a page, rule, or concept exists in multiple layers (e.g. both `unity-wiki` and `llm-wiki` contain a rule with conflicting conventions):
+1. **Default Option**: The version in the most specific (project-level) layer is chosen and followed by default.
+2. **Warn User**: The AI assistant must print a warning message notifying the user about the duplicate rules.
+3. **Offer Choice**: The AI assistant must prompt the user to choose between using the default (project-level) rule or overriding it with the general base rule.
+
+---
+
+## 3. Directory Structure of a Layer
 
 Every layer in the system conforms to the following directory layout:
 
@@ -56,35 +70,6 @@ Every layer in the system conforms to the following directory layout:
     ├── transcripts/            # Text transcripts of meetings or videos
     └── ai-skills~/             # Portable AI skills (SKILL.md and assets)
 ```
-
----
-
-## 3. Data Standards & Coding
-
-To keep the knowledge base fully readable across Windows, macOS, Linux, Unity, Obsidian, and AI agents, all files must adhere to these rules:
-
-1. **UTF-8 with BOM Encoding**: Every text, script, JSON, and markdown file MUST use UTF-8 with BOM (`EF BB BF`). This ensures Cyrillic (Russian) characters are supported natively by PowerShell, CLI utilities, and IDE rules.
-2. **Page Format**: All pages must begin with a YAML frontmatter block:
-   ```yaml
-   ---
-   title: "My Concept Page"
-   type: concept
-   status: draft
-   sources:
-     - my-layer/raw/docs/my-source.md
-   last_updated: 2026-06-15
-   related:
-     - "[[another-page]]"
-   ---
-   ```
-3. **Required Page Fields**: To pass validation, every wiki page (excluding logs and stubs) must contain the following fields:
-   - `**Summary**:` — A 1-2 sentence description of the page.
-   - `**Sources**:` — List of paths to source documents in the `raw/` folder.
-   - `**Last updated**:` — ISO date string (`YYYY-MM-DD`).
-   - `## Related Pages` — Section at the bottom with wiki-links.
-4. **Wiki Links**: Double-bracket links `[[page-name]]` must use lowercase hyphenated filenames.
-5. **Citations**: Claims made on compiled pages must reference the raw source using `(source: path/to/raw/file.md)`.
-6. **Unity `.meta` files**: If the wiki resides inside a Unity project, every file must have a corresponding `.meta` file containing a unique GUID.
 
 ---
 
@@ -111,7 +96,7 @@ sequenceDiagram
 
 - **`lint-wiki.js`**: Checks that all links resolve correctly, pages have the correct frontmatter/headers, UTF-8 BOM is present, and no secrets or Bitrix webhooks are committed.
 - **`validate-links.js`**: Scans the entire project workspace (including rules files) to identify broken wiki and markdown file links.
-- **`query-wiki.js`**: Provides CLI page searching and handles the single-file ingestion process.
+- **`query-wiki.js`**: Provides CLI page searching and handles the single-file ingestion process. If a page exists in multiple layers, it prints a priority conflict warning and defaults to the most specific layer.
 - **`ingest-newdata.js`**: Automatically processes the `NewData/` incoming folder, routes files to layers, generates summaries, updates indexes/logs, and runs checks.
 
 ---
@@ -139,19 +124,29 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
 2. Configure agent instructions in `AGENTS.md` and `GEMINI.md` to point to the newly created layers.
 
 ### Step 4: Install AI Skills
-1. Copy the portable skills you want to use (from the `skills/` directory of this repository) into your layer's `raw/ai-skills~/` folder. For example:
-   - `llm-wiki/raw/ai-skills~/davasko-llm-wiki/`
-   - `llm-wiki/raw/ai-skills~/davasko-youtube-researcher/`
+You can install the portable skills from this repository either project-locally or globally:
 
-### Step 5: Synchronize and Validate
-1. Run the synchronizer from the project root to deploy rules and compile skill adapters for your IDE:
-   ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\sync-ai-rules.ps1
-   ```
-2. Validate the database setup:
-   ```powershell
-   node kbpro-ai-docs/system/lint-wiki.js
-   node kbpro-ai-docs/system/validate-links.js
-   ```
+#### Option A: Project-Local Installation (Recommended)
+Copy the skills you want to use from the `skills/` directory of this repository into your layer's `raw/ai-skills~/` folder:
+- `llm-wiki/raw/ai-skills~/davasko-llm-wiki/`
+- `llm-wiki/raw/ai-skills~/davasko-youtube-researcher/`
+
+Run the synchronizer to deploy rules and compile skill adapters for your IDE:
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\sync-ai-rules.ps1
+```
+
+#### Option B: Global Installation
+Copy the skill folders from the `skills/` directory into your system's global AI configurations directory:
+- Path: `C:\Users\<YourUsername>\.gemini\config\skills\` (e.g. copy the folder `skills/davasko-youtube-researcher/` there).
+
+This makes the skill globally available to all projects on this machine.
+
+### Step 5: Verify the Setup
+Validate the database setup:
+```powershell
+node kbpro-ai-docs/system/lint-wiki.js
+node kbpro-ai-docs/system/validate-links.js
+```
 
 If the validation passes with **0 errors**, your workspace is fully prepared for structured AI collaboration!

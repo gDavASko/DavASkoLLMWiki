@@ -1,6 +1,6 @@
 ﻿# Architecture Setup Guide
 
-The **DavASko LLM Wiki** is a multi-layered, Obsidian-compatible knowledge base designed to cleanly separate general AI rules, engine-specific rules, framework-specific details, and project-specific documentation.
+The **DavASko LLM Wiki** is a multi-layered, Obsidian-compatible knowledge base designed specifically to cleanly separate general AI rules, engine-specific rules, framework-specific details, and project-specific documentation.
 
 ---
 
@@ -23,7 +23,21 @@ graph TD
 
 ---
 
-## 2. Layer Manifest: `wiki.json`
+## 2. Priority Levels of Knowledge
+
+When resolving links, searching for pages, or applying rules, the system adheres to a strict priority hierarchy based on "proximity to the project":
+
+$$\text{Project Layer} > \text{Framework Layer} > \text{Engine Layer} > \text{Core LLM Layer}$$
+
+### Priority Conflict Resolution Rules
+If a page, rule, or concept exists in multiple layers (e.g., both `unity-wiki` and `llm-wiki` contain a page/rule with conflicting conventions):
+1. **Default to Specifics**: The version in the most specific (higher-priority) layer is followed by default.
+2. **Warn the User**: The AI assistant must print a warning message notifying the user about the duplicate definitions in the layers.
+3. **Offer Choice**: The AI assistant must ask the user whether to continue with the default (more specific) version or override it with the base version.
+
+---
+
+## 3. Layer Manifest: `wiki.json`
 
 Every layer directory MUST contain a `wiki.json` file in its root. This manifest defines the layer name and its explicit dependencies.
 
@@ -43,7 +57,7 @@ Every layer directory MUST contain a `wiki.json` file in its root. This manifest
 
 ---
 
-## 3. Directory Layout of a Layer
+## 4. Directory Layout of a Layer
 
 Each layer must have the following directories:
 
@@ -57,19 +71,19 @@ Each layer must have the following directories:
 │   ├── stubs.md                ← Placeholder/stub links
 │   ├── concepts/               ← Reusable ideas and rules
 │   ├── entities/               ← Classes, packages, tools, scenes
-│   ├── runbooks/               ← Step-by-step procedures
+│   ├── runbooks/               ← Step-by-step developer checklists and guides
 │   ├── sources/                ← AI-generated summaries of raw materials
-│   ├── syntheses/              ← Comparative analyses
+│   ├── syntheses/              ← Comparative designs and analyses
 │   └── decisions/              ← Architectural decisions (ADRs)
-└── raw/                        ← Immutable source materials (read-only)
-    ├── docs/                   ← Copied source docs
-    ├── transcripts/            ← Meeting or review notes
-    └── ai-skills~/             ← Portable AI skills package folders
+└── raw/                        # Immutable source materials (read-only)
+    ├── docs/                   # Copied source docs
+    ├── transcripts/            # Meeting or review notes
+    └── ai-skills~/             # Portable AI skills (SKILL.md and assets)
 ```
 
 ---
 
-## 4. Resolving Cyclic Dependencies: The Stub Mechanism
+## 5. Resolving Cyclic Dependencies: The Stub Mechanism
 
 Dependencies flow **downward** (e.g., Project Layer can reference Engine Layer, but Engine Layer cannot reference Project Layer). 
 

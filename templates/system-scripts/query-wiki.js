@@ -76,6 +76,7 @@ function getDependencyChain(contextLayer) {
 // Search for a page by name across the dependency chain
 function findPage(pageName, chain) {
   const subdirs = ['concepts', 'runbooks', 'entities', 'sources', 'syntheses', 'decisions', 'maps'];
+  const matches = [];
   
   for (const layer of chain) {
     const wikiDir = path.join(submoduleRoot, layer, 'wiki');
@@ -84,16 +85,27 @@ function findPage(pageName, chain) {
     for (const sd of subdirs) {
       const candidate = path.join(wikiDir, sd, `${pageName}.md`);
       if (fs.existsSync(candidate)) {
-        return {
+        matches.push({
           layer,
           subfolder: sd,
           absolutePath: candidate,
           relativePath: path.relative(projectRoot, candidate).replace(/\\/g, '/')
-        };
+        });
       }
     }
   }
-  return null;
+  
+  if (matches.length === 0) return null;
+  
+  if (matches.length > 1) {
+    console.warn(`\n[WARNING] Priority Conflict: Page "${pageName}" exists in multiple layers:`);
+    matches.forEach((m, idx) => {
+      console.warn(`  [${idx}] ${m.layer} (Path: ${m.relativePath})`);
+    });
+    console.warn(`Defaulting to the most specific project layer: "${matches[0].layer}"\n`);
+  }
+  
+  return matches[0];
 }
 
 // Helper to generate a random 32-character hex GUID for Unity .meta files
