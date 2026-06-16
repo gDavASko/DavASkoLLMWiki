@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 const submoduleRoot = path.resolve(__dirname, '..');
@@ -24,6 +24,106 @@ function readUtf8(filePath) {
   return content;
 }
 
+// Helper to parse simple YAML frontmatter
+function parseFrontmatter(text) {
+  const result = {};
+  if (!text || !text.startsWith('---')) return result;
+  const parts = text.split('---');
+  if (parts.length < 3) return result;
+  const yamlLines = parts[1].split('\n');
+  
+  let currentKey = null;
+
+  yamlLines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    
+    // Check list item
+    if (trimmed.startsWith('-') && currentKey) {
+      if (!Array.isArray(result[currentKey])) {
+        result[currentKey] = [];
+      }
+      const val = trimmed.substring(1).trim().replace(/^['"]|['"]$/g, '');
+      result[currentKey].push(val);
+      return;
+    }
+    
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) return;
+    
+    const key = line.substring(0, colonIndex).trim();
+    const value = line.substring(colonIndex + 1).trim().replace(/^['"]|['"]$/g, '');
+    
+    currentKey = key;
+    if (value === '') {
+      result[key] = [];
+    } else if (value === 'true') {
+      result[key] = true;
+    } else if (value === 'false') {
+      result[key] = false;
+    } else {
+      result[key] = value;
+    }
+  });
+  
+  return result;
+}
+
+// Helper to check raw source deprecation and validation status
+function checkRawSourceStatus(filePath) {
+  // 1. Explicit .deprecated companion file
+  const deprecatedFile = filePath + '.deprecated';
+  if (fs.existsSync(deprecatedFile)) {
+    try {
+      const reason = readUtf8(deprecatedFile).trim();
+      return { deprecated: true, reason: reason || 'explicitly deprecated via companion file', validated: false };
+    } catch (e) {}
+  }
+
+  // 2. Frontmatter check if markdown
+  let isMarkdown = filePath.endsWith('.md');
+  let frontmatter = {};
+  if (isMarkdown) {
+    try {
+      const text = readUtf8(filePath);
+      frontmatter = parseFrontmatter(text);
+    } catch (e) {}
+  }
+
+  if (frontmatter.deprecated === true) {
+    return { deprecated: true, reason: 'explicitly deprecated via frontmatter', validated: false };
+  }
+
+  // 3. Age check (> 365 days)
+  try {
+    const stats = fs.statSync(filePath);
+    const mtimeMs = stats.mtimeMs;
+    const ageDays = (Date.now() - mtimeMs) / (1000 * 60 * 60 * 24);
+    
+    if (ageDays > 365) {
+      let validated = false;
+      const validatedFile = filePath + '.validated';
+      if (fs.existsSync(validatedFile)) {
+        validated = true;
+      } else if (frontmatter.last_validated) {
+        const valDate = new Date(frontmatter.last_validated);
+        if (!isNaN(valDate.getTime())) {
+          const valAgeDays = (Date.now() - valDate.getTime()) / (1000 * 60 * 60 * 24);
+          if (valAgeDays <= 365) {
+            validated = true;
+          }
+        }
+      }
+      
+      if (!validated) {
+        return { deprecated: true, reason: `implicit deprecation by age (${Math.floor(ageDays)} days without validation)`, validated: false };
+      }
+    }
+  } catch (e) {}
+
+  return { deprecated: false, validated: false };
+}
+
 // Helper to recursively find files matching extensions
 function getFilesRecursively(dir, extensions) {
   let results = [];
@@ -47,6 +147,7 @@ function getFilesRecursively(dir, extensions) {
 // 1. Dynamic Layer Scanning and Manifest Parsing
 const layers = [];
 fs.readdirSync(submoduleRoot).forEach(file => {
+  if (file === 'plans') return; // Skip plans directory in root
   const fullPath = path.join(submoduleRoot, file);
   if (fs.statSync(fullPath).isDirectory()) {
     const manifestPath = path.join(fullPath, 'wiki.json');
@@ -67,6 +168,32 @@ layers.forEach(layer => {
   } catch (err) {
     addIssue(`[Manifest] Error parsing ${layer}/wiki.json: ${err.message}`);
   }
+});
+
+// 1a. DFS check for cyclic dependencies
+const tempVisited = new Set();
+const permVisited = new Set();
+
+function checkCycle(l) {
+  if (tempVisited.has(l)) {
+    addIssue(`[Cycle Detection] Cyclic dependency detected involving layer: ${l}`);
+    return;
+  }
+  if (permVisited.has(l)) return;
+
+  tempVisited.add(l);
+  const manifest = manifests[l];
+  if (manifest && manifest.dependencies && Array.isArray(manifest.dependencies)) {
+    manifest.dependencies.forEach(dep => {
+      checkCycle(dep);
+    });
+  }
+  tempVisited.delete(l);
+  permVisited.add(l);
+}
+
+layers.forEach(layer => {
+  checkCycle(layer);
 });
 
 // Resolve dependency chains for all layers
@@ -96,6 +223,8 @@ layers.forEach(layer => {
 const wikiPagesRegistry = {};
 // Store file names without extension to their full paths
 const wikiPagesMap = {}; 
+// Global page registry to check for duplicate names across all layers
+const globalPagesRegistry = {};
 
 layers.forEach(layer => {
   const wikiDir = path.join(submoduleRoot, layer, 'wiki');
@@ -110,6 +239,15 @@ layers.forEach(layer => {
     wikiPagesRegistry[layer][pageName] = f;
     
     wikiPagesMap[rel] = f;
+
+    // Check duplicate page names across all layers (excluding indexes/logs/stubs/contradictions)
+    if (pageName !== 'index' && pageName !== 'log' && pageName !== 'stubs' && pageName !== 'contradictions') {
+      if (globalPagesRegistry[pageName]) {
+        addIssue(`[Duplicate Page Name] Page name "${pageName}" is defined in multiple files: ${globalPagesRegistry[pageName]} and ${rel}`);
+      } else {
+        globalPagesRegistry[pageName] = rel;
+      }
+    }
   });
 });
 
@@ -150,6 +288,14 @@ function resolveWikiLink(linkTarget, sourceLayer) {
   return { resolved: false };
 }
 
+// Metrics tracking structure
+const metrics = {
+  layers: {}
+};
+layers.forEach(l => {
+  metrics.layers[l] = { pagesCount: 0, draftsCount: 0, reviewedCount: 0, stableCount: 0, deprecatedCount: 0, rawCount: 0, rawMentionedCount: 0 };
+});
+
 // Run validations
 layers.forEach(layer => {
   const wikiDir = path.join(submoduleRoot, layer, 'wiki');
@@ -162,6 +308,9 @@ layers.forEach(layer => {
     const rel = path.relative(submoduleRoot, f).replace(/\\/g, '/');
     const filename = path.basename(f);
 
+    // Update metrics: pages count
+    metrics.layers[layer].pagesCount++;
+
     // 1. Bitrix REST check
     if (/https?:\/\/[^\s"'`]*bitrix24\.ru\/rest\//i.test(text)) {
       addIssue(`${rel} contains a hardcoded Bitrix24 REST webhook URL`);
@@ -170,30 +319,80 @@ layers.forEach(layer => {
     // 2. Obsidian [[links]] check
     const linkRegex = /\[\[([^\]|#]+)/g;
     let match;
+    const warnedLinks = new Set();
     while ((match = linkRegex.exec(text)) !== null) {
       const linkTarget = match[1].trim();
+      if (warnedLinks.has(linkTarget)) continue;
+      
       const resolution = resolveWikiLink(linkTarget, layer);
       
       if (!resolution.resolved) {
         addIssue(`${rel} links to missing wiki page [[${linkTarget}]]`);
+        warnedLinks.add(linkTarget);
       } else if (resolution.type === 'stub') {
         addWarning(`${rel} links to placeholder/stub [[${linkTarget}]]`);
+        warnedLinks.add(linkTarget);
       }
     }
 
-    // 3. Required headers check (excluding log.md)
-    if (filename !== 'log.md' && filename !== 'stubs.md') {
-      const requiredFields = [
-        '**Summary**:',
-        '**Sources**:',
-        '**Last updated**:',
-        '## Related'
-      ];
-      requiredFields.forEach(field => {
-        if (!text.includes(field)) {
-          addIssue(`${rel} missing required page field: ${field}`);
+    // 3. Required frontmatter check (excluding log.md, stubs.md, contradictions.md, index.md)
+    if (filename !== 'log.md' && filename !== 'stubs.md' && filename !== 'contradictions.md' && filename !== 'index.md') {
+      const front = parseFrontmatter(text);
+      
+      // Update metrics: statuses count
+      if (front.status === 'draft') metrics.layers[layer].draftsCount++;
+      else if (front.status === 'reviewed') metrics.layers[layer].reviewedCount++;
+      else if (front.status === 'stable') metrics.layers[layer].stableCount++;
+      else if (front.status === 'deprecated') metrics.layers[layer].deprecatedCount++;
+
+      // Validate title
+      if (!front.title && !text.includes('# ')) {
+        addIssue(`${rel} missing title (must have title in frontmatter or H1 header in body)`);
+      }
+
+      // Validate type
+      const allowedTypes = ['source-summary', 'concept', 'entity', 'synthesis', 'runbook', 'decision', 'contradiction', 'map', 'index'];
+      if (front.type) {
+        if (!allowedTypes.includes(front.type)) {
+          addIssue(`${rel} has invalid page type: '${front.type}'. Allowed: ${allowedTypes.join(', ')}`);
         }
-      });
+      } else {
+        addIssue(`${rel} missing required frontmatter field: type`);
+      }
+
+      // Validate status
+      const allowedStatuses = ['draft', 'reviewed', 'stable', 'deprecated', 'accepted', 'rejected', 'active'];
+      if (front.status) {
+        if (!allowedStatuses.includes(front.status)) {
+          addIssue(`${rel} has invalid page status: '${front.status}'. Allowed: ${allowedStatuses.join(', ')}`);
+        }
+      } else {
+        addIssue(`${rel} missing required frontmatter field: status`);
+      }
+
+      // Validate sources (either in frontmatter list or specified in body text)
+      const hasSources = (front.sources && front.sources.length > 0) || text.includes('**Sources**:') || text.includes('**sources**:') || text.includes('(source:');
+      if (!hasSources) {
+        addIssue(`${rel} missing required page sources`);
+      }
+
+      // Validate last_updated
+      const hasLastUpdated = front.last_updated || text.includes('**Last updated**:') || text.includes('**last updated**:');
+      if (!hasLastUpdated) {
+        addIssue(`${rel} missing required page field: last_updated`);
+      }
+
+      // Validate related
+      const hasRelated = (front.related && front.related.length > 0) || /## Related( Pages| pages)?/i.test(text);
+      if (!hasRelated) {
+        addIssue(`${rel} missing required page field: related`);
+      }
+
+      // Check for summary in body (must have summary description)
+      const hasSummary = text.includes('**Summary**:') || text.includes('**summary**:') || text.includes('## Key Claims');
+      if (!hasSummary) {
+        addIssue(`${rel} missing page summary`);
+      }
     }
 
     // 4. Citation sources checks: (source: path)
@@ -209,28 +408,43 @@ layers.forEach(layer => {
           return;
         }
 
-        // Resolve source file: path must exist relative to submodule root
-        // Wait, source can be e.g. "raw/code_style.md" inside unity-wiki
-        // If cited as relative inside the layer, like "raw/code_style.md"
-        // Let's resolve relative to current layer and dependency layers
         let sourceFound = false;
+        let resolvedPath = '';
         const chain = dependencyChains[layer] || [layer];
         
         for (const depLayer of chain) {
-          // Check absolute or layer-relative path
-          // If cited as "unity-wiki/raw/code_style.md"
           const candidate1 = path.join(submoduleRoot, source);
-          // If cited as "raw/code_style.md" relative to depLayer
           const candidate2 = path.join(submoduleRoot, depLayer, source);
           
-          if (fs.existsSync(candidate1) || fs.existsSync(candidate2)) {
+          if (fs.existsSync(candidate1)) {
             sourceFound = true;
+            resolvedPath = candidate1;
+            break;
+          } else if (fs.existsSync(candidate2)) {
+            sourceFound = true;
+            resolvedPath = candidate2;
             break;
           }
         }
         
         if (!sourceFound) {
           addIssue(`${rel} cites missing source file: ${source}`);
+        } else {
+          // Check raw source deprecation status
+          const status = checkRawSourceStatus(resolvedPath);
+          if (status.deprecated) {
+            let currentWikiPageDeprecated = false;
+            try {
+              const front = parseFrontmatter(text);
+              if (front.status === 'deprecated' || front.deprecated === true) {
+                currentWikiPageDeprecated = true;
+              }
+            } catch (e) {}
+            
+            if (!currentWikiPageDeprecated) {
+              addWarning(`${rel} cites deprecated raw source ${source} (${status.reason})`);
+            }
+          }
         }
       });
     }
@@ -251,9 +465,7 @@ layers.forEach(layer => {
     const escapedName = name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     const linkPattern = new RegExp(`\\[\\[${escapedName}(\\]\\]|[#|])`);
     
-    // Check all pages in layers that depend on this layer or are this layer
     for (const otherLayer of layers) {
-      // Check if otherLayer can depend on this page's layer
       const otherChain = dependencyChains[otherLayer] || [otherLayer];
       if (!otherChain.includes(layer)) continue;
       
@@ -339,13 +551,11 @@ layers.forEach(layer => {
   });
 });
 
-// Unused raw sources check
+// Unused raw sources check with skills filtering
 layers.forEach(layer => {
   const rawDir = path.join(submoduleRoot, layer, 'raw');
   if (!fs.existsSync(rawDir)) return;
   
-  // Get all files inside raw/ (excluding .meta)
-  const rawFiles = fs.readdirSync(rawDir);
   const extensions = ['.md', '.json', '.ps1', '.clinerules', '.cursorrules', '.windsurfrules', 'mcp_config.json'];
   
   // Combine all texts from all wiki pages in all layers
@@ -361,15 +571,36 @@ layers.forEach(layer => {
   const allRawFiles = getFilesRecursively(rawDir, extensions);
   allRawFiles.forEach(f => {
     const rel = path.relative(submoduleRoot, f).replace(/\\/g, '/');
-    if (!allWikiText.includes(rel)) {
+    
+    // SKIP skills folders to avoid false positive noise (~100 warnings)
+    if (rel.includes('ai-skills~/')) return;
+
+    metrics.layers[layer].rawCount++;
+    if (allWikiText.includes(rel)) {
+      metrics.layers[layer].rawMentionedCount++;
+    } else {
       addWarning(`raw source is not mentioned by any wiki page: ${rel}`);
     }
   });
 });
 
 // Output results
-console.log('=== DavASko LLM Wiki Lint ===');
+console.log('=== KBPro LLM Wiki Lint ===');
 console.log(`Layers parsed: ${layers.join(', ')}`);
+
+// Print Metrics
+console.log('\n=== Metrics ===');
+layers.forEach(l => {
+  const m = metrics.layers[l];
+  const coveragePercent = m.rawCount > 0 ? Math.round((m.rawMentionedCount / m.rawCount) * 100) : 100;
+  console.log(`Layer: ${l}`);
+  console.log(`  - Total Wiki Pages: ${m.pagesCount}`);
+  console.log(`    - Drafts: ${m.draftsCount}`);
+  console.log(`    - Reviewed: ${m.reviewedCount}`);
+  console.log(`    - Stable: ${m.stableCount}`);
+  console.log(`    - Deprecated: ${m.deprecatedCount}`);
+  console.log(`  - Raw Sources: ${m.rawCount} (Cited: ${m.rawMentionedCount}, Coverage: ${coveragePercent}%)`);
+});
 
 if (warnings.length > 0) {
   console.log('\nWarnings:');

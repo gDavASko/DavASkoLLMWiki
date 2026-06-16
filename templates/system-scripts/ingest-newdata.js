@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -49,13 +49,13 @@ function run() {
   console.log('--- Начинаем универсальный импорт из NewData ---');
 
   // Допустимые слои базы знаний
-  const validLayers = ['unity-wiki', 'davasko-wiki', 'dentistry-cow-wiki'];
+  const validLayers = ['unity-wiki', 'kbpro-wiki', 'dentistry-cow-wiki'];
   const layersInNewData = fs.readdirSync(newDataDir).filter(f => {
     return fs.statSync(path.join(newDataDir, f)).isDirectory() && validLayers.includes(f);
   });
 
   if (layersInNewData.length === 0) {
-    console.log('В NewData нет структурированных папок слоев (unity-wiki, davasko-wiki, dentistry-cow-wiki).');
+    console.log('В NewData нет структурированных папок слоев (unity-wiki, kbpro-wiki, dentistry-cow-wiki).');
     console.log('Пожалуйста, разложите файлы согласно wiki-ingest-protocol.');
     return;
   }

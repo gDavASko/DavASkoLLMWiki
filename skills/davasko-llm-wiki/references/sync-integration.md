@@ -38,7 +38,7 @@ Obsolete files are automatically deleted to prevent orphaned instructions.
 ## 3. Synchronizer PowerShell Script
 
 The script `sync-ai-rules.ps1` runs in the project root. The full source code is available in the repository at:
-- **`sync-ai-rules.ps1` template**: [sync-ai-rules.ps1](file://../../templates/sync-ai-rules.ps1)
+- **`sync-ai-rules.ps1` template**: [sync-ai-rules.ps1](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/sync-ai-rules.ps1)
 
 When initializing a new workspace, copy this script to the root directory, configure the paths to your wiki layers in the script, and run it:
 ```powershell

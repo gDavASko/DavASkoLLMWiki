@@ -1,4 +1,4 @@
-﻿# DavASko LLM Wiki
+# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -9,19 +9,21 @@ A multi-layered, self-validating, and Obsidian-compatible knowledge base framewo
 The **DavASko LLM Wiki** separates knowledge into hierarchical, independent folders called **layers**. This ensures that general AI rules, engine-specific constraints, framework conventions, and project-specific documentation are kept in separate contexts.
 
 ### The Dependency Chain
-Dependencies flow strictly **downward**. A higher-level layer can depend on and link to a lower-level layer, but not vice versa.
+Dependencies flow strictly **downward**. A higher-level layer can depend on and link to a lower-level layer, but not vice versa. Multiple independent project layers can run in parallel and inherit from the common framework layer.
 
 ```mermaid
 graph TD
-    Project[Project Layer: e.g. dentistry-cow-wiki] --> Framework[Framework Layer: e.g. davasko-wiki]
-    Framework --> Engine[Engine Layer: e.g. unity-wiki]
+    Project1[Project 1 Layer: dentistry-cow-wiki] --> Framework[Framework Layer: kbpro-wiki]
+    Project2[Project 2 Layer: plombir-buildings-wiki] --> Framework
+    Project3[Project 3 Layer: railway-wiki] --> Framework
+    Framework --> Engine[Engine Layer: unity-wiki]
     Engine --> Root[Core LLM Layer: llm-wiki]
 ```
 
-- **`llm-wiki`** (Core Layer): Contains universal AI rules, project planning guides, and general helper scripts.
+- **`llm-wiki`** (Core Layer): Contains universal AI rules, developer guidelines, video transcripts, and general helper scripts.
 - **`unity-wiki`** (Engine Layer): Contains game engine details, naming styles, physics guidelines, and assembly rules.
-- **`davasko-wiki`** (Framework Layer): Contains core packages, architectural principles, and custom libraries definitions.
-- **`dentistry-cow-wiki`** (Project Layer): Contains gameplay design documents (GDD), scene lists, and project-specific task builders.
+- **`kbpro-wiki`** (Framework Layer): Contains core framework packages, architectural principles, C# code styles, and custom libraries definitions.
+- **`dentistry-cow-wiki`, `plombir-buildings-wiki`, `railway-wiki`** (Project Layers): Contain GDDs, scene lists, gameplay logic, and module definitions for their respective projects. Each project is fully isolated from others.
 
 Each layer contains a manifest file `wiki.json` specifying its dependencies:
 ```json
@@ -47,10 +49,24 @@ If a page, rule, or concept exists in multiple layers (e.g. both `unity-wiki` an
 
 ---
 
-## 3. Directory Structure of a Layer
+## 3. Directory Layout and Plans Isolation
 
-Every layer in the system conforms to the following directory layout:
+The system separates planning documentation (ExecPlans, checklists) from the durable knowledge base:
 
+### Workspace Root Layout
+```
+<workspace-root>/
+├── plans/                      # Centralized planning: task.md, implementation plans
+├── system/                     # Maintenance scripts (lint-wiki.js, etc.)
+├── NewData/                    # Buffer folder for manual document ingestion
+├── llm-wiki/                   # Core LLM Layer (contains rules, scripts, transcripts)
+├── unity-wiki/                 # Engine Layer (Unity specific)
+├── kbpro-wiki/                 # Framework Layer (framework conventions, C# code styles)
+└── <project-wiki>/             # Isolated project-specific layers (e.g. dentistry-cow-wiki)
+```
+
+### Folder Structure of a Single Layer
+Each individual layer directory must conform to the following directory layout:
 ```
 <layer-directory>/
 ├── wiki.json                   # Manifest file specifying dependencies
@@ -67,7 +83,7 @@ Every layer in the system conforms to the following directory layout:
 │   └── decisions/              # Architectural Decision Records (ADRs)
 └── raw/                        # Immutable source materials (read-only)
     ├── docs/                   # Copied project documentation
-    ├── transcripts/            # Text transcripts of meetings or videos
+    ├── transcripts/            # Text transcripts of meetings (llm-wiki/raw/transcripts/ only)
     └── ai-skills~/             # Portable AI skills (SKILL.md and assets)
 ```
 
@@ -98,6 +114,8 @@ sequenceDiagram
 - **`validate-links.js`**: Scans the entire project workspace (including rules files) to identify broken wiki and markdown file links.
 - **`query-wiki.js`**: Provides CLI page searching and handles the single-file ingestion process. If a page exists in multiple layers, it prints a priority conflict warning and defaults to the most specific layer.
 - **`ingest-newdata.js`**: Automatically processes the `NewData/` incoming folder, routes files to layers, generates summaries, updates indexes/logs, and runs checks.
+- **`update-links.js`**: Safe path migration script using path-boundary regular expressions to prevent substring corruption.
+- **`run-evals.js`**: Automated regression test runner to verify LLM Q&A performance on key topics.
 
 ---
 
@@ -110,10 +128,11 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
 2. Copy the contents of the `templates/system-scripts/` directory into `davasko-ai-docs/system/`.
 3. Copy the script `templates/sync-ai-rules.ps1` to the project root directory.
 
-### Step 2: Initialize Layers
-1. Create directories for your layers (e.g. `llm-wiki/`, `unity-wiki/`, `project-wiki/`).
-2. Add a `wiki.json` manifest to each layer define its dependency chain.
-3. In each layer, create the basic folder structures and write initial placeholder lists:
+### Step 2: Initialize Layers and Plans
+1. Create directories for your layers (e.g. `llm-wiki/`, `unity-wiki/`, `kbpro-wiki/`, and project-specific layers).
+2. Create a `plans/` directory in the workspace root.
+3. Add a `wiki.json` manifest to each layer to define its dependency chain.
+4. In each layer, create the basic folder structures and write initial placeholder lists:
    - `wiki/index.md`
    - `wiki/stubs.md`
    - `wiki/log.md`
@@ -143,10 +162,11 @@ Copy the skill folders from the `skills/` directory into your system's global AI
 This makes the skill globally available to all projects on this machine.
 
 ### Step 5: Verify the Setup
-Validate the database setup:
+Validate the database setup and run regression tests:
 ```powershell
 node davasko-ai-docs/system/lint-wiki.js
 node davasko-ai-docs/system/validate-links.js
+node davasko-ai-docs/system/run-evals.js
 ```
 
 If the validation passes with **0 errors**, your workspace is fully prepared for structured AI collaboration!

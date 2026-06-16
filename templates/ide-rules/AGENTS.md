@@ -1,22 +1,22 @@
-﻿# Codex Instructions - DavASko Project
+﻿# Codex Instructions - KBPro Project
 
-Ты - AI-ассистент команды разработки DavASko. В этом проекте используется Unity, C#, модульная архитектура и набор плагинов из сабмодулей платформы DavASko.
+Ты - AI-ассистент команды разработки KBPro. В этом проекте используется Unity, C#, модульная архитектура и набор плагинов из сабмодулей платформы KBPro.
 
 ## Главное правило: база знаний
 
 Перед тем как писать код, предлагать архитектуру, ревьюить изменения или декомпозировать задачи, сначала изучи релевантные документы из базы знаний:
 
-- `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/README.md` - обзор сценариев использования базы знаний.
-- `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/principals.md` - основные принципы DavASko.
-- `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/architecture.md` - архитектура проекта и платформы.
-- `Assets/DavASko/davasko-ai-docs/unity-wiki/raw/code_style.md` - стиль C# и Unity-кода.
+- `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/README.md` - обзор сценариев использования базы знаний.
+- `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md` - основные принципы KBPro.
+- `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/architecture.md` - архитектура проекта и платформы.
+- `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/code_style.md` - стиль C# и Unity-кода.
 
-Если задача касается конкретной подсистемы, сначала найди релевантные markdown-файлы в `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/Architecture/` и используй их как источник требований.
+Если задача касается конкретной подсистемы, сначала найди релевантные markdown-файлы в `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/Architecture/` и используй их как источник требований.
 
 ## Unity и C# стандарты
 
-- Следуй Component pattern и модульной структуре DavASko.
-- Не изобретай новую инфраструктуру, если в DavASko уже есть готовая система.
+- Следуй Component pattern и модульной структуре KBPro.
+- Не изобретай новую инфраструктуру, если в KBPro уже есть готовая система.
 - Кэшируй ссылки в `Awake`; используй `TryGetComponent<T>(out var comp)`.
 - Не используй `GameObject.Find`, `Transform.Find`, `FindObjectOfType` и `UnityEngine.UI.Text`; для текста используй TextMeshPro.
 - Физику выполняй в `FixedUpdate`.
@@ -26,31 +26,31 @@
 - Для I/O и сетевых операций добавляй обработку ошибок.
 - Для проверок логики в разработке используй `Debug.Assert`.
 
-## Жизненный цикл DavASko
+## Жизненный цикл KBPro
 
 - В модулях и системах соблюдай правила жизненного цикла из `principals.md`.
 - Не пропускай обязательные вызовы `base.Initialize()` и `base.Dispose()`.
-- Перед изменением инициализации, DI, загрузки ресурсов или модульных границ прочитай соответствующие документы из `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/Architecture/CoreFramework/`.
+- Перед изменением инициализации, DI, загрузки ресурсов или модульных границ прочитай соответствующие документы из `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/Architecture/CoreFramework/`.
 
 ## Работа с задачами Bitrix24
 
 - JSON-файлы сохраняй в UTF-8 без BOM.
 - Теги должны находиться в поле `"TAGS": []`, а не в тексте описания.
-- Для декомпозиции ТЗ используй `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/Architecture/CoreFramework/Guides/HowToDecomposeTask_ForAI.md`.
+- Для декомпозиции ТЗ используй `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDecomposeTask_ForAI.md`.
 
 ## Правила работы с базой знаний (Knowledge Base Protocol)
 
 - **Поиск информации**: Перед выполнением любой задачи всегда используй оркестратор для поиска страниц и ключевых слов:
-  - Поиск страницы по имени: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --page <имя_страницы>`
-  - Полнотекстовый поиск: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --search "<запрос>"`
+  - Поиск страницы по имени: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --page <имя_страницы>`
+  - Полнотекстовый поиск: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --search "<запрос>"`
 - **Импорт новых данных**: При необходимости добавить новый файл или документацию, сохрани файл в `NewData/` и выполни импорт через оркестратор:
-  - Команда импорта: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --ingest NewData/<файл> --layer <целевой_слой> [--subfolder <подпапка>]`
-  - Доступные слои: `unity-wiki`, `davasko-wiki`, `dentistry-cow-wiki`.
-- **Правило декомпозиции**: If an imported document contains details belonging to multiple layers (e.g. Unity patterns + DavASko APIs + project details), you MUST propose a split schema to the user. Do not ingest monolith files into a single layer without user approval.
+  - Команда импорта: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --ingest NewData/<файл> --layer <целевой_слой> [--subfolder <подпапка>]`
+  - Доступные слои: `unity-wiki`, `kbpro-wiki`, `dentistry-cow-wiki`.
+- **Правило декомпозиции**: If an imported document contains details belonging to multiple layers (e.g. Unity patterns + KBPro APIs + project details), you MUST propose a split schema to the user. Do not ingest monolith files into a single layer without user approval.
 - **Работа с заглушками (Stubs)**: Ссылки на несуществующие страницы или страницы более высоких слоев регистрируй в файле `dentistry-cow-wiki/wiki/stubs.md` соответствующего слоя для предотвращения ошибок линтера. При импорте файла, закрывающего заглушку, удаляй её из `stubs.md`.
-- **Логирование изменений**: Подробные изменения записывай в локальный `dentistry-cow-wiki/wiki/log.md` слоя (сохраняй в UTF-8 с BOM). В глобальный лог `Assets/DavASko/davasko-ai-docs/log.md` добавляй только краткую запись о факте изменений со ссылкой на измененный локальный лог и диапазон строк (в формате `[layer/dentistry-cow-wiki/wiki/log.md#L45-L52](file:///path/to/log.md#L45-L52)`).
+- **Логирование изменений**: Подробные изменения записывай в локальный лог соответствующего слоя (сохраняй в UTF-8 с BOM): если код меняется в сабмодулях фреймворка (например, `Assets/KBPro/kbpro-modules` и др.) — это коровая часть, лог пишется в `kbpro-wiki/wiki/log.md`; если изменения в основном проекте (не в сабмодулях) — это проектная часть, лог пишется в `dentistry-cow-wiki/wiki/log.md`. В глобальный лог `Assets/KBPro/kbpro-ai-docs/log.md` добавляй только краткую запись о факте изменений со ссылкой на измененный локальный лог и диапазон строк (в формате `[layer/kbpro-wiki/wiki/log.md#L45-L52](file:///path/to/log.md#L45-L52)`).
 - **Валидация базы**: После любых изменений базы знаний запускай линтер:
-  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\DavASko\davasko-ai-docs\system/lint-wiki.ps1`
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1`
 
 ## Рабочий процесс Codex
 

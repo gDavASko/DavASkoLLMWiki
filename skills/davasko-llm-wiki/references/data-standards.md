@@ -52,23 +52,11 @@ related:
 - `synthesis`: Cross-source analyses, conclusions, or comparison tables.
 - `runbook`: Practical step-by-step procedures.
 - `decision`: Architectural Decisions Records (ADRs) explaining choices and context.
-- `contradiction`: Explanations of conflicts between sources, code behaviors, or priority layers.
+- `contradiction`: Explanations of conflicts between sources or code behaviors.
 
 ---
 
-## 3. Recording Priority Contradictions
-
-If there is a conflict of priority between layers (e.g. a base layer concept is contradicted or overridden by a project-specific constraint), the AI agent must not delete the old page. Instead:
-1. Create or update a page of type `contradiction` under `wiki/contradictions/` (or update `contradictions.md` of the project layer).
-2. Record the conflict clearly:
-   - Identify which layers and files contain the contradiction.
-   - Summarize the base rule and the project override.
-   - Cite the sources of both sides.
-   - Describe the resolution chosen for the project.
-
----
-
-## 4. Page Layout Template
+## 3. Page Layout Template
 
 Every wiki page must use this strict layout to pass the linter:
 
@@ -102,15 +90,17 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 
 ---
 
-## 5. Linking and Citation Policies
+## 4. Linking and Citation Policies
 
 - **Wiki Links**: Use Obsidian double-bracket style `[[page-name]]` for references between pages. Filenames must be in lowercase kebab-case (e.g. `module-lifecycle.md` should be linked as `[[module-lifecycle]]`).
 - **Source Citations**: Any factual claim made in `wiki/` pages MUST be supported by a citation pointing to an immutable raw file in `raw/` or a file in the project repository using this exact format: `(source: layer-name/raw/docs/source-doc.md)`.
-- **File Links**: When linking to actual files in instructions or plans, use markdown links with absolute/relative `file:///` URIs, e.g., `[MyClass](file:///path/to/MyClass.cs)`. Never surround file link text with backticks.
+- **Plans Isolation & Linking**: All execution plans, stabilization plans, task lists (`task.md`), and walkthroughs (`walkthrough.md`) must be placed in the root-level `plans/` directory of the workspace, completely isolated from individual layer repositories. Links to these plan files must use standard Markdown links with absolute or relative `file:///` URIs (e.g., `[task.md](file:///path/to/plans/task.md)`) and must never wrap the link text in backticks.
+- **File Links**: When linking to actual source code or configuration files, use markdown links with absolute or relative `file:///` URIs, e.g., `[MyClass](file:///path/to/MyClass.cs)`. Never surround the file link text with backticks.
+- **C# Code Style Location**: The C# code style guidelines (`code_style.md`) must reside inside the framework layer: `kbpro-wiki/raw/code_style.md` (NOT in `unity-wiki/raw/code_style.md`), since coding style conventions are a property of the core KBPro framework. All references to code style must link to this path.
 
 ---
 
-## 6. Unity AssetDatabase Integration
+## 5. Unity AssetDatabase Integration
 
 If the knowledge base is located inside a Unity project repository (under `Assets/`), every folder and file inside `wiki/`, `raw/`, and `evals/` must have a corresponding `.meta` file. 
 

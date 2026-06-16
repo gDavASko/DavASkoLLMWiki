@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -76,36 +76,35 @@ function getDependencyChain(contextLayer) {
 // Search for a page by name across the dependency chain
 function findPage(pageName, chain) {
   const subdirs = ['concepts', 'runbooks', 'entities', 'sources', 'syntheses', 'decisions', 'maps'];
-  const matches = [];
   
   for (const layer of chain) {
     const wikiDir = path.join(submoduleRoot, layer, 'wiki');
     if (!fs.existsSync(wikiDir)) continue;
     
+    // Check root wiki folder first
+    const rootCandidate = path.join(wikiDir, `${pageName}.md`);
+    if (fs.existsSync(rootCandidate)) {
+      return {
+        layer,
+        subfolder: '',
+        absolutePath: rootCandidate,
+        relativePath: path.relative(projectRoot, rootCandidate).replace(/\\/g, '/')
+      };
+    }
+    
     for (const sd of subdirs) {
       const candidate = path.join(wikiDir, sd, `${pageName}.md`);
       if (fs.existsSync(candidate)) {
-        matches.push({
+        return {
           layer,
           subfolder: sd,
           absolutePath: candidate,
           relativePath: path.relative(projectRoot, candidate).replace(/\\/g, '/')
-        });
+        };
       }
     }
   }
-  
-  if (matches.length === 0) return null;
-  
-  if (matches.length > 1) {
-    console.warn(`\n[WARNING] Priority Conflict: Page "${pageName}" exists in multiple layers:`);
-    matches.forEach((m, idx) => {
-      console.warn(`  [${idx}] ${m.layer} (Path: ${m.relativePath})`);
-    });
-    console.warn(`Defaulting to the most specific project layer: "${matches[0].layer}"\n`);
-  }
-  
-  return matches[0];
+  return null;
 }
 
 // Helper to generate a random 32-character hex GUID for Unity .meta files
@@ -308,14 +307,73 @@ TextScriptImporter:
   }
 }
 
+// Highlight occurrences in a line with ANSI yellow/bold
+function highlightQuery(line, query) {
+  const idx = line.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return line;
+  const before = line.substring(0, idx);
+  const match = line.substring(idx, idx + query.length);
+  const after = line.substring(idx + query.length);
+  return before + '\x1b[33m\x1b[1m' + match + '\x1b[0m' + highlightQuery(after, query);
+}
+
+// Helper to extract snippets (matching line + 2 lines of context) and merge overlapping
+function getSnippets(text, query) {
+  const lines = text.split(/\r?\n/);
+  const matchingIndices = [];
+  lines.forEach((line, index) => {
+    if (line.toLowerCase().includes(query.toLowerCase())) {
+      matchingIndices.push(index);
+    }
+  });
+
+  if (matchingIndices.length === 0) return [];
+
+  // Merge overlapping ranges
+  const ranges = [];
+  matchingIndices.forEach(idx => {
+    const start = Math.max(0, idx - 2);
+    const end = Math.min(lines.length - 1, idx + 2);
+    if (ranges.length === 0) {
+      ranges.push({ start, end });
+    } else {
+      const last = ranges[ranges.length - 1];
+      if (start <= last.end + 1) {
+        last.end = Math.max(last.end, end);
+      } else {
+        ranges.push({ start, end });
+      }
+    }
+  });
+
+  // Build snippet texts
+  return ranges.map(range => {
+    const snippetLines = [];
+    for (let i = range.start; i <= range.end; i++) {
+      const lineNum = i + 1;
+      const isMatchLine = matchingIndices.includes(i);
+      let formattedLine = lines[i];
+      if (isMatchLine) {
+        formattedLine = highlightQuery(formattedLine, query);
+      }
+      snippetLines.push(`      ${lineNum}: ${formattedLine}`);
+    }
+    return snippetLines.join('\n');
+  });
+}
+
 // Command dispatcher
 function printUsage() {
   console.log(`Usage:
   node query-wiki.js --page <name>                  - Search page across layers
   node query-wiki.js --search <text>                - Full-text search across layers
+  node query-wiki.js --context <layer>              - Specify context layer (default: auto-detected)
+  node query-wiki.js --list-layers                  - List all layers and dependencies
+  node query-wiki.js --info                         - Show general statistics and info
   node query-wiki.js --ingest <path> --layer <name> - Ingest new data
     Options for ingest:
       --subfolder <name>  (Specify subfolder under raw, e.g. GDDDocs)
+      --no-validate       (Skip validation during ingestion)
 `);
 }
 
@@ -336,13 +394,83 @@ function parseArgs() {
   return params;
 }
 
+// Dynamically determine the context layer
+function detectContextLayer() {
+  const params = parseArgs();
+  if (params.context) {
+    return params.context;
+  }
+
+  const cwd = process.cwd();
+  const relative = path.relative(submoduleRoot, cwd);
+  if (!relative.startsWith('..') && !path.isAbsolute(relative)) {
+    const parts = relative.split(path.sep);
+    if (parts.length > 0 && parts[0]) {
+      const candidate = parts[0];
+      const manifestPath = path.join(submoduleRoot, candidate, 'wiki.json');
+      if (fs.existsSync(manifestPath)) {
+        return candidate;
+      }
+    }
+  }
+
+  return 'dentistry-cow-wiki';
+}
+
 function run() {
   const params = parseArgs();
+  const contextLayer = detectContextLayer();
+  const chain = getDependencyChain(contextLayer);
   
-  if (params.page) {
+  if (params['list-layers']) {
+    console.log('Available Layers & Dependency Chains:');
+    const allLayers = [];
+    fs.readdirSync(submoduleRoot).forEach(file => {
+      const fullPath = path.join(submoduleRoot, file);
+      if (fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'wiki.json'))) {
+        allLayers.push(file);
+      }
+    });
+    
+    allLayers.forEach(l => {
+      const lChain = getDependencyChain(l);
+      console.log(`  - ${l} (dependencies: ${lChain.slice(1).join(', ') || 'none'})`);
+    });
+  } else if (params.info) {
+    console.log('Vault Information:');
+    const allLayers = [];
+    fs.readdirSync(submoduleRoot).forEach(file => {
+      const fullPath = path.join(submoduleRoot, file);
+      if (fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'wiki.json'))) {
+        allLayers.push(file);
+      }
+    });
+    
+    let totalWikiPages = 0;
+    let totalRawSources = 0;
+    
+    console.log(`Submodule Root: ${submoduleRoot}`);
+    console.log(`Context Layer: ${contextLayer} (chain: ${chain.join(' -> ')})`);
+    console.log(`Layers count: ${allLayers.length}`);
+    
+    allLayers.forEach(l => {
+      const wikiDir = path.join(submoduleRoot, l, 'wiki');
+      let pagesCount = 0;
+      if (fs.existsSync(wikiDir)) {
+        pagesCount = getFilesRecursively(wikiDir, ['.md']).length;
+        totalWikiPages += pagesCount;
+      }
+      const rawDir = path.join(submoduleRoot, l, 'raw');
+      let rawCount = 0;
+      if (fs.existsSync(rawDir)) {
+        rawCount = getFilesRecursively(rawDir, ['.md', '.json', '.ps1', '.clinerules', '.cursorrules', '.windsurfrules', 'mcp_config.json']).length;
+        totalRawSources += rawCount;
+      }
+      console.log(`  Layer [${l}]: ${pagesCount} wiki pages, ${rawCount} raw sources`);
+    });
+    console.log(`Total: ${totalWikiPages} wiki pages, ${totalRawSources} raw sources`);
+  } else if (params.page) {
     const pageName = params.page;
-    // Default context layer is dentistry-cow-wiki
-    const chain = getDependencyChain('dentistry-cow-wiki');
     const page = findPage(pageName, chain);
     if (page) {
       console.log(`Page: [[${pageName}]]`);
@@ -351,12 +479,11 @@ function run() {
       console.log(`Relative path: ${page.relativePath}`);
       console.log(`Absolute path: ${page.absolutePath}`);
     } else {
-      console.log(`Page [[${pageName}]] not found in dentistry-cow-wiki or dependencies.`);
+      console.log(`Page [[${pageName}]] not found in context ${contextLayer} or its dependencies.`);
     }
   } else if (params.search) {
     const query = params.search.toLowerCase();
-    const chain = getDependencyChain('dentistry-cow-wiki');
-    console.log(`Searching for "${query}" across layers...`);
+    console.log(`Searching for "${query}" with context "${contextLayer}" (chain: ${chain.join(', ')})...`);
     
     let matchesCount = 0;
     chain.forEach(layer => {
@@ -368,12 +495,17 @@ function run() {
         const text = readUtf8(f);
         if (text.toLowerCase().includes(query)) {
           const rel = path.relative(projectRoot, f).replace(/\\/g, '/');
-          console.log(`  [MATCH] ${layer} | ${rel}`);
+          console.log(`\n\x1b[32m\x1b[1m[MATCH] ${layer} | ${rel}\x1b[0m`);
+          const snippets = getSnippets(text, params.search);
+          snippets.forEach(s => {
+            console.log(s);
+            console.log('      ---');
+          });
           matchesCount++;
         }
       });
     });
-    console.log(`Found ${matchesCount} matching documents.`);
+    console.log(`\nFound ${matchesCount} matching documents.`);
   } else if (params.ingest) {
     const file = params.ingest;
     const layer = params.layer;

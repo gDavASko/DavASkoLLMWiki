@@ -1,4 +1,4 @@
-﻿# Expert C# & Unity Development Rules for DavASko
+﻿# Expert C# & Unity Development Rules for KBPro
 
 You are an expert in C#, Unity, and scalable game development. Prioritize readability, performance, and modularity.
 
@@ -8,17 +8,17 @@ You are an expert in C#, Unity, and scalable game development. Prioritize readab
 - Prioritize performance optimization and memory management in every stage.
 - Maintain a clear and logical project structure.
 
-## DavASko Knowledge Base Flow
-- AI knowledge base lives in `Assets/DavASko/davasko-ai-docs`.
-- Use `Assets/DavASko/davasko-ai-docs/davasko-wiki/wiki/maps/architecture-map.md` first for architecture work.
-- Use `Assets/DavASko/davasko-ai-docs/davasko-wiki/wiki/maps/gameplay-product-map.md` first for gameplay, product, UI, audio, analytics, tutorial, and presentation work.
-- Use `Assets/DavASko/davasko-ai-docs/davasko-wiki/wiki/maps/operations-map.md` first for AI rules, wiki maintenance, Bitrix import, and operational guardrails.
-- Use `Assets/DavASko/davasko-ai-docs/unity-wiki/wiki/runbooks/ai-generated-code-review.md`, `Assets/DavASko/davasko-ai-docs/unity-wiki/wiki/runbooks/ai-code-cleaning.md`, and `Assets/DavASko/davasko-ai-docs/unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md` for AI-generated code review and vibe-code cleanup.
-- Treat `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/` as source evidence after choosing the relevant wiki path.
-- Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\DavASko\davasko-ai-docs\system/lint-wiki.ps1` after wiki or raw documentation changes.
+## KBPro Knowledge Base Flow
+- AI knowledge base lives in `Assets/KBPro/kbpro-ai-docs`.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/architecture-map.md` first for architecture work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/gameplay-product-map.md` first for gameplay, product, UI, audio, analytics, tutorial, and presentation work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/operations-map.md` first for AI rules, wiki maintenance, Bitrix import, and operational guardrails.
+- Use `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-generated-code-review.md`, `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-code-cleaning.md`, and `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md` for AI-generated code review and vibe-code cleanup.
+- Treat `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/` as source evidence after choosing the relevant wiki path.
+- Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1` after wiki or raw documentation changes.
 
 ## C# & Unity Technical Standards
-- **Architecture:** Strictly follow the Component pattern and DavASko's modular structure.
+- **Architecture:** Strictly follow the Component pattern and KBPro's modular structure.
 - **Access:** Cache references in `Awake`. Use `TryGetComponent<T>(out var comp)`.
 - **Prohibited:** `GameObject.Find`, `Transform.Find`, `FindObjectOfType`, and standard `UnityEngine.UI.Text` (use TextMeshPro).
 - **Optimization:** 
@@ -38,5 +38,5 @@ You are an expert in C#, Unity, and scalable game development. Prioritize readab
 
 ## Documentation Reference
 - Start from the relevant wiki map before reading raw source files.
-- Respect all 23 principles in `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/principals.md`.
-- Follow naming conventions in `Assets/DavASko/davasko-ai-docs/unity-wiki/raw/code_style.md`.
+- Respect all 23 principles in `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md`.
+- Follow naming conventions in `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/code_style.md`.
