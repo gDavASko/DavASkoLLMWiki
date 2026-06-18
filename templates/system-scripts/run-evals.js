@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const submoduleRoot = path.resolve(__dirname, '..');
@@ -134,7 +134,7 @@ function runEvals() {
     process.exit(1);
   }
 
-  console.log('=== Running KBPro LLM Wiki Regression Evals ===');
+  console.log('=== Running DavASko LLM Wiki Regression Evals ===');
   const questions = parseQuestions(questionsFile);
   console.log(`Loaded ${questions.length} regression questions.\n`);
 

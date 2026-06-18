@@ -1,4 +1,4 @@
-﻿# DavASko LLM Wiki
+﻿﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -47,7 +47,7 @@ If a page, rule, or concept exists in multiple layers (e.g. both `engine-wiki` a
 2. **Warn User**: The AI assistant must print a warning message notifying the user about the duplicate rules.
 3. **Offer Choice**: The AI assistant must prompt the user to choose between using the default (project-level) rule or overriding it with the general base rule.
 4. **Grep Search Gaps**: If the AI assistant searches the codebase using low-level search tools (grep, ripgrep) because of undocumented patterns or missing references, it MUST document the findings in the most appropriate layer of the knowledge base.
-5. **Aesthetic Independence**: Rules, schemas, and instructions MUST NOT contain proprietary names or paths (such as client-specific folders or proprietary framework names like KBPro) in general-purpose layers. Keep all conventions abstract, generalized, and portable.
+5. **Aesthetic Independence**: Rules, schemas, and instructions MUST NOT contain proprietary names or paths (such as client-specific folders or proprietary framework names) in general-purpose layers. Keep all conventions abstract, generalized, and portable.
 
 ---
 

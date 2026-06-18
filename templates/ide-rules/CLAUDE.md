@@ -1,9 +1,9 @@
-﻿# CLAUDE.md — dentistry-cow
+﻿﻿# CLAUDE.md — dentistry-cow
 
 ## Project
 - **Unity Version:** 6000.0.67f1 (from ProjectSettings/ProjectVersion.txt)
 - **Primary Code Paths:** `Assets/Core` and `Assets/Dentistry-cow`
-- **Platform Submodules:** `Assets/KBPro/*` (including `kbpro-modules`, `kbpro-logicservice`, `kbpro-servicelocator`, `kbpro-eventbus`, `kbpro.configsystem`, `kbpro-datasystem`, `kbpro-uisystem`, `kbpro-audiosystem`, `kbpro-timers`, `kbpro-parenttimer`, `kbpro-idprocessors`, `kbpro-modifier`, `kbpro-ai`, `kbpro-spine`, `kbpro-rustore`, `kbpro-analytic`, `kbpro-plugins`)
+- **Platform Submodules:** `Assets/DavASko/*` (including `davasko-modules`, `davasko-logicservice`, `davasko-servicelocator`, `davasko-eventbus`, `davasko.configsystem`, `davasko-datasystem`, `davasko-uisystem`, `davasko-audiosystem`, `davasko-timers`, `davasko-parenttimer`, `davasko-idprocessors`, `davasko-modifier`, `davasko-ai`, `davasko-spine`, `davasko-rustore`, `davasko-analytic`, `davasko-plugins`)
 - **Key Dependencies:** UniTask, UniRx, DOTween, Addressables, URP 17, Input System, Cinemachine, TextMeshPro, Odin/NaughtyAttributes, Spine, RuStore SDK, AppMetrica, Google Play packages.
 
 ## MCP Servers (.mcp.json)
@@ -16,21 +16,21 @@
 | `fetch` | Browser fetching capabilities (via Puppeteer). | When retrieving live web documentation. |
 
 ## How to Work in This Project
-- **Read Before Coding:** Read [architecture.md](Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/architecture.md), [code_style.md](Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md), and [principals.md](Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md) inside `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/`.
-- **Read Before AI Code Review:** Read `ai-generated-code-review.md` and `unity-ai-code-review-checklist.md` under `Assets/KBPro/kbpro-ai-docs/wiki/runbooks/` and `wiki/concepts/`.
-- **Tool Guidance:** Prioritize reading files before editing. Use Grep/Glob patterns to target queries. Use specialized local skills (like `kbpro-code-navigator`) before starting changes.
+- **Read Before Coding:** Read [architecture.md](Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/architecture.md), [code_style.md](Assets/DavASko/davasko-ai-docs/unity-wiki/raw/code_style.md), and [principals.md](Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/principals.md) inside `Assets/DavASko/davasko-ai-docs/davasko-wiki/raw/`.
+- **Read Before AI Code Review:** Read `ai-generated-code-review.md` and `unity-ai-code-review-checklist.md` under `Assets/DavASko/davasko-ai-docs/wiki/runbooks/` and `wiki/concepts/`.
+- **Tool Guidance:** Prioritize reading files before editing. Use Grep/Glob patterns to target queries. Use specialized local skills (like `davasko-code-navigator`) before starting changes.
 - **Do Not Touch:** `Library/`, `Temp/`, `Logs/`, `obj/`, generated `.csproj` files, or Unity `.meta` files (unless adding/deleting project files).
 
 ## ExecPlans
-- For complex changes, refactoring, or migrations, follow [PLANS.md](Assets/KBPro/kbpro-ai-docs/llm-wiki/raw/PLANS.md).
-- Create a self-contained ExecPlan and store it under `Assets/KBPro/kbpro-ai-docs/`.
+- For complex changes, refactoring, or migrations, follow [PLANS.md](Assets/DavASko/davasko-ai-docs/llm-wiki/raw/PLANS.md).
+- Create a self-contained ExecPlan and store it under `Assets/DavASko/davasko-ai-docs/`.
 
-## KBPro Architecture Rules
-- Preserve KBPro module boundaries and dependency directions.
+## DavASko Architecture Rules
+- Preserve DavASko module boundaries and dependency directions.
 - Use `LogicSystem`, `GameComponent`, `ModuleScope`, `[InjectSystems]`, and `[InjectComponent]` where the module framework is used.
-- Use `LazySrv<T>` and KBPro `ServiceLocator` patterns for platform services when the surrounding code does so.
+- Use `LazySrv<T>` and DavASko `ServiceLocator` patterns for platform services when the surrounding code does so.
 - Use `EventBus<T>`, `EventBinding<T>`, and event messages for decoupled communication. Always unregister in `Dispose`.
-- Call `base.Initialize()` and `base.Dispose()` in KBPro lifecycle overrides.
+- Call `base.Initialize()` and `base.Dispose()` in DavASko lifecycle overrides.
 - Use `DataService`, config assets, data trees, and ID processors for game data instead of ad hoc registries.
 - Use `[ConstSelector]`, generated constants, and typed IDs instead of magic strings.
 - Use the UI MVP stack (`UIPBase`, `UIVBase`, `UIPWindow`, `UIVWindow`, `IUIShowParams`) for UI.
@@ -58,22 +58,22 @@
 ## Developer Commands
 - **Git status:** `git status --short`
 - **Sync rules script:** `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Utils\sync-ai-rules.ps1`
-- **Lint AI knowledge base:** `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1`
+- **Lint AI knowledge base:** `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\DavASko\davasko-ai-docs\system/lint-wiki.ps1`
 - **Build runtime C#:** `dotnet build .\Assembly-CSharp.csproj --no-restore /p:BuildProjectReferences=false /m:1 /v:minimal`
 - **Build editor C#:** `dotnet build .\Assembly-CSharp-Editor.csproj --no-restore /p:BuildProjectReferences=false /m:1 /v:minimal`
 
 ## Knowledge Base Protocol (Rules for KB Maintenance)
 - **Search First**: Before answering any query or modifying code, look up pages using the orchestrator:
-  - Search by page name: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --page <page_name>`
-  - Full-text search: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --search "<query>"`
+  - Search by page name: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --page <page_name>`
+  - Full-text search: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --search "<query>"`
 - **Ingest via Pipeline**: To ingest new documents or files, place them in the incoming buffer `NewData/` first, then run:
-  - Ingest command: `node Assets/KBPro/kbpro-ai-docs/system/query-wiki.js --ingest NewData/<file_name> --layer <target_layer> [--subfolder <subfolder>]`
-  - Layers: `unity-wiki`, `kbpro-wiki`, `dentistry-cow-wiki`.
-- **Decomposition**: If an imported document contains details belonging to multiple layers (e.g. Unity patterns + KBPro APIs + project details), you MUST propose a split schema to the user. Do not ingest monolith files into a single layer without user approval.
+  - Ingest command: `node Assets/DavASko/davasko-ai-docs/system/query-wiki.js --ingest NewData/<file_name> --layer <target_layer> [--subfolder <subfolder>]`
+  - Layers: `unity-wiki`, `davasko-wiki`, `dentistry-cow-wiki`.
+- **Decomposition**: If an imported document contains details belonging to multiple layers (e.g. Unity patterns + DavASko APIs + project details), you MUST propose a split schema to the user. Do not ingest monolith files into a single layer without user approval.
 - **Stub Handling**: When referring to pages in higher layers or missing docs, add stubs to `dentistry-cow-wiki/wiki/stubs.md` to prevent lint errors. When ingesting a file that closes a stub, ensure the stub is automatically or manually removed from `stubs.md`.
 - **Change Logging**: Log detailed changes into the layer's local `dentistry-cow-wiki/wiki/log.md` (UTF-8 with BOM). Then, append a fact reference in the root `log.md` with a link pointing directly to the new lines in the local log (e.g. `[layer/dentistry-cow-wiki/wiki/log.md#L45-L52](../dentistry-cow-wiki/wiki/log.md#L45-L52)`).
 - **Validation**: After any knowledge base change, always validate using:
-  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1`
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\DavASko\davasko-ai-docs\system/lint-wiki.ps1`
 
 ## Self-Check Before Finishing
 - Commit messages: Use imperative mood and Conventional Commit prefixes (`feat:`, `fix:`, `refactor:`, `perf:`, `test:`, `docs:`, `chore:`).
@@ -87,12 +87,12 @@
 - Do not reformat or refactor third-party vendor code.
 
 ## Documentation
-- Add or update documentation under `Assets/KBPro/kbpro-ai-docs`.
-- For AI-maintained wiki pages, follow `Assets/KBPro/kbpro-ai-docs/LLM-WIKI.md`.
+- Add or update documentation under `Assets/DavASko/davasko-ai-docs`.
+- For AI-maintained wiki pages, follow `Assets/DavASko/davasko-ai-docs/LLM-WIKI.md`.
 
 ## Self-Check Before Finishing
 1. Run `git status --short`.
 2. Build C# assemblies using `dotnet build`.
 3. Check that subscriptions, timers, tweens, async tasks, and pooled objects are disposed or released.
 4. Verify `.meta` files are correct and no unrelated changes were introduced.
-5. Update `Assets/KBPro/kbpro-ai-docs` documentation if needed.
+5. Update `Assets/DavASko/davasko-ai-docs` documentation if needed.

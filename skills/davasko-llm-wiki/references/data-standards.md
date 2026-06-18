@@ -1,4 +1,4 @@
-﻿# Knowledge Base Data Standards
+﻿﻿# Knowledge Base Data Standards
 
 To maintain compatibility with Obsidian, Unity, Windows, and multiple AI tooling agents, all files within the **DavASko LLM Wiki** must adhere to strict formatting and encoding standards.
 
@@ -101,7 +101,7 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 - **C# Code Style Location**: The C# code style guidelines (`code_style.md`) must reside inside the framework layer: `framework-wiki/raw/code_style.md` (NOT in `engine-wiki/raw/code_style.md`), since coding style conventions are a property of the core Framework framework. All references to code style must link to this path.
 - **Full-Text Search Gaps Policy**: If the AI assistant has to perform grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods across the codebase due to missing information, maps, or undocumented patterns in the knowledge base, the assistant must document these findings. The new code symbols, directories, and logic patterns must be described and added to the most appropriate layer of the knowledge base. This ensures that future searches are performed directly via the wiki query system, eliminating redundant low-level code searches.
 - **Document Versioning & Stale Links Protocol**: Every wiki page frontmatter MUST contain a `version: X.Y.Z` field. Any time a page is created or updated, bump its version (minor/patch) and update the `last_updated: YYYY-MM-DD HH:MM` field with local date/time. All links (`[[page-name]]`) must explicitly declare the expected version as `[[page-name]] (vX.Y.Z)`. If the target document is updated to a higher version, the referencing page becomes stale (outdated), its status changes to `status: stale`, outdated links must be listed in the `stale_links` frontmatter block, and it must be registered in the layer's `wiki/stale-documents.md` note.
-- **Dependencies Paths**: Manifests or documentation explaining layer dependencies must include absolute/relative paths to the target dependency folder (e.g., `[kbpro-wiki](../kbpro-wiki)`).
+- **Dependencies Paths**: Manifests or documentation explaining layer dependencies must include absolute/relative paths to the target dependency folder (e.g., `[davasko-wiki](../davasko-wiki)`).
 - **Aesthetic Independence & Generalization**: All documentation, code rules, and instructions stored in the knowledge base must be kept in a generic, project-agnostic format. Avoid hardcoding proprietary framework names or third-party project identifiers (such as project submodules or specific client directories) in general-purpose rules. Keep files portable and transferable to any target workspace.
 
 ---

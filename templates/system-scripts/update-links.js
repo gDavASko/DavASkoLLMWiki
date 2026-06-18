@@ -1,4 +1,4 @@
-// DEPRECATED: Migration tool. Use with caution to prevent double replacement of substrings.
+﻿// DEPRECATED: Migration tool. Use with caution to prevent double replacement of substrings.
 const fs = require('fs');
 const path = require('path');
 
@@ -55,43 +55,43 @@ function main() {
   // 1. Hardcoded raw mappings
   const rawMappings = {
     // raw files
-    'raw/project-docs/code_style.md': 'kbpro-wiki/raw/code_style.md',
-    'raw/project-docs/code_style.md.meta': 'kbpro-wiki/raw/code_style.md.meta',
-    'unity-wiki/raw/code_style.md': 'kbpro-wiki/raw/code_style.md',
-    'unity-wiki/raw/code_style.md.meta': 'kbpro-wiki/raw/code_style.md.meta',
+    'raw/project-docs/code_style.md': 'davasko-wiki/raw/code_style.md',
+    'raw/project-docs/code_style.md.meta': 'davasko-wiki/raw/code_style.md.meta',
+    'unity-wiki/raw/code_style.md': 'davasko-wiki/raw/code_style.md',
+    'unity-wiki/raw/code_style.md.meta': 'davasko-wiki/raw/code_style.md.meta',
     'raw/shader-ai-guidelines.md': 'unity-wiki/raw/shader-ai-guidelines.md',
     'raw/shader-ai-guidelines.md.meta': 'unity-wiki/raw/shader-ai-guidelines.md.meta',
     'raw/project-docs/OptimizationDocs': 'unity-wiki/raw/OptimizationDocs',
     
-    'raw/project-docs/principals.md': 'kbpro-wiki/raw/principals.md',
-    'raw/project-docs/principals.md.meta': 'kbpro-wiki/raw/principals.md.meta',
-    'raw/project-docs/architecture.md': 'kbpro-wiki/raw/architecture.md',
-    'raw/project-docs/architecture.md.meta': 'kbpro-wiki/raw/architecture.md.meta',
-    'raw/project-docs/SETUP_NEW_PROJECT.md': 'kbpro-wiki/raw/SETUP_NEW_PROJECT.md',
-    'raw/project-docs/SETUP_NEW_PROJECT.md.meta': 'kbpro-wiki/raw/SETUP_NEW_PROJECT.md.meta',
-    'raw/project-docs/Architecture': 'kbpro-wiki/raw/Architecture',
-    'raw/ModuleComponents.md': 'kbpro-wiki/raw/ModuleComponents.md',
-    'raw/ModuleComponents.md.meta': 'kbpro-wiki/raw/ModuleComponents.md.meta',
-    'raw/ModuleSystems.md': 'kbpro-wiki/raw/ModuleSystems.md',
-    'raw/ModuleSystems.md.meta': 'kbpro-wiki/raw/ModuleSystems.md.meta',
+    'raw/project-docs/principals.md': 'davasko-wiki/raw/principals.md',
+    'raw/project-docs/principals.md.meta': 'davasko-wiki/raw/principals.md.meta',
+    'raw/project-docs/architecture.md': 'davasko-wiki/raw/architecture.md',
+    'raw/project-docs/architecture.md.meta': 'davasko-wiki/raw/architecture.md.meta',
+    'raw/project-docs/SETUP_NEW_PROJECT.md': 'davasko-wiki/raw/SETUP_NEW_PROJECT.md',
+    'raw/project-docs/SETUP_NEW_PROJECT.md.meta': 'davasko-wiki/raw/SETUP_NEW_PROJECT.md.meta',
+    'raw/project-docs/Architecture': 'davasko-wiki/raw/Architecture',
+    'raw/ModuleComponents.md': 'davasko-wiki/raw/ModuleComponents.md',
+    'raw/ModuleComponents.md.meta': 'davasko-wiki/raw/ModuleComponents.md.meta',
+    'raw/ModuleSystems.md': 'davasko-wiki/raw/ModuleSystems.md',
+    'raw/ModuleSystems.md.meta': 'davasko-wiki/raw/ModuleSystems.md.meta',
     
     'raw/project-docs/PLANS.md': 'llm-wiki/raw/PLANS.md',
     'raw/project-docs/PLANS.md.meta': 'llm-wiki/raw/PLANS.md.meta',
     'raw/project-docs/GDDDocs': 'dentistry-cow-wiki/raw/GDDDocs',
     'raw/project-docs/create_plombir_tasks.ps1': 'dentistry-cow-wiki/raw/create_plombir_tasks.ps1',
     'raw/project-docs/create_plombir_tasks.ps1.meta': 'dentistry-cow-wiki/raw/create_plombir_tasks.ps1.meta',
-    'raw/project-docs/test_bitrix_webhook.ps1': 'kbpro-wiki/raw/test_bitrix_webhook.ps1',
-    'raw/project-docs/test_bitrix_webhook.ps1.meta': 'kbpro-wiki/raw/test_bitrix_webhook.ps1.meta',
+    'raw/project-docs/test_bitrix_webhook.ps1': 'davasko-wiki/raw/test_bitrix_webhook.ps1',
+    'raw/project-docs/test_bitrix_webhook.ps1.meta': 'davasko-wiki/raw/test_bitrix_webhook.ps1.meta',
     'raw/project-docs/claude-commands': 'llm-wiki/raw/claude-commands',
     'raw/project-docs/ide-rules': 'llm-wiki/raw/ide-rules',
     'raw/project-docs/ai-skills': 'llm-wiki/raw/ai-skills~',
     'raw/project-docs/ai-skills~': 'llm-wiki/raw/ai-skills~',
 
     // execution plans (pattern search will also be done, but let's list the known stabilization plans)
-    'raw/project-docs/ExecPlan_ModuleSystem_Stabilization.md': 'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md',
-    'raw/project-docs/ExecPlan_ModuleSystem_Stabilization.md.meta': 'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta',
-    'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md': 'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md',
-    'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta',
+    'raw/project-docs/ExecPlan_ModuleSystem_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md',
+    'raw/project-docs/ExecPlan_ModuleSystem_Stabilization.md.meta': 'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta',
+    'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md',
+    'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta',
     
     // system tools and configs
     'lint-wiki.js': 'system/lint-wiki.js',
@@ -128,12 +128,12 @@ function main() {
     'dentistry-cow-wiki/raw/ide-rules.meta': 'llm-wiki/raw/ide-rules.meta',
     'dentistry-cow-wiki/raw/claude-commands': 'llm-wiki/raw/claude-commands',
     'dentistry-cow-wiki/raw/claude-commands.meta': 'llm-wiki/raw/claude-commands.meta',
-    'dentistry-cow-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md': 'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md',
-    'dentistry-cow-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta': 'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta',
-    'dentistry-cow-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md': 'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md',
-    'dentistry-cow-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta',
-    'dentistry-cow-wiki/raw/test_bitrix_webhook.ps1': 'kbpro-wiki/raw/test_bitrix_webhook.ps1',
-    'dentistry-cow-wiki/raw/test_bitrix_webhook.ps1.meta': 'kbpro-wiki/raw/test_bitrix_webhook.ps1.meta',
+    'dentistry-cow-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md',
+    'dentistry-cow-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta': 'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta',
+    'dentistry-cow-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md',
+    'dentistry-cow-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta',
+    'dentistry-cow-wiki/raw/test_bitrix_webhook.ps1': 'davasko-wiki/raw/test_bitrix_webhook.ps1',
+    'dentistry-cow-wiki/raw/test_bitrix_webhook.ps1.meta': 'davasko-wiki/raw/test_bitrix_webhook.ps1.meta',
 
     'dentistry-cow-wiki/wiki/concepts/execplans.md': 'llm-wiki/wiki/concepts/execplans.md',
     'dentistry-cow-wiki/wiki/concepts/execplans.md.meta': 'llm-wiki/wiki/concepts/execplans.md.meta',
@@ -144,12 +144,12 @@ function main() {
     'dentistry-cow-wiki/wiki/maps/operations-map.md': 'llm-wiki/wiki/maps/operations-map.md',
     'dentistry-cow-wiki/wiki/maps/operations-map.md.meta': 'llm-wiki/wiki/maps/operations-map.md.meta',
 
-    'dentistry-cow-wiki/wiki/runbooks/bitrix-task-import.md': 'kbpro-wiki/wiki/runbooks/bitrix-task-import.md',
-    'dentistry-cow-wiki/wiki/runbooks/bitrix-task-import.md.meta': 'kbpro-wiki/wiki/runbooks/bitrix-task-import.md.meta',
-    'dentistry-cow-wiki/wiki/runbooks/decompose-task-to-backlog.md': 'kbpro-wiki/wiki/runbooks/decompose-task-to-backlog.md',
-    'dentistry-cow-wiki/wiki/runbooks/decompose-task-to-backlog.md.meta': 'kbpro-wiki/wiki/runbooks/decompose-task-to-backlog.md.meta',
-    'dentistry-cow-wiki/wiki/sources/scenario-graph-execplans.md': 'kbpro-wiki/wiki/sources/scenario-graph-execplans.md',
-    'dentistry-cow-wiki/wiki/sources/scenario-graph-execplans.md.meta': 'kbpro-wiki/wiki/sources/scenario-graph-execplans.md.meta',
+    'dentistry-cow-wiki/wiki/runbooks/bitrix-task-import.md': 'davasko-wiki/wiki/runbooks/bitrix-task-import.md',
+    'dentistry-cow-wiki/wiki/runbooks/bitrix-task-import.md.meta': 'davasko-wiki/wiki/runbooks/bitrix-task-import.md.meta',
+    'dentistry-cow-wiki/wiki/runbooks/decompose-task-to-backlog.md': 'davasko-wiki/wiki/runbooks/decompose-task-to-backlog.md',
+    'dentistry-cow-wiki/wiki/runbooks/decompose-task-to-backlog.md.meta': 'davasko-wiki/wiki/runbooks/decompose-task-to-backlog.md.meta',
+    'dentistry-cow-wiki/wiki/sources/scenario-graph-execplans.md': 'davasko-wiki/wiki/sources/scenario-graph-execplans.md',
+    'dentistry-cow-wiki/wiki/sources/scenario-graph-execplans.md.meta': 'davasko-wiki/wiki/sources/scenario-graph-execplans.md.meta',
     'dentistry-cow-wiki/wiki/sources/automation-scripts-and-rules.md': 'llm-wiki/wiki/sources/llm-rules-and-skills.md',
     'dentistry-cow-wiki/wiki/sources/automation-scripts-and-rules.md.meta': 'llm-wiki/wiki/sources/llm-rules-and-skills.md.meta',
 
@@ -158,22 +158,22 @@ function main() {
     'dentistry-cow-wiki/raw/create_plombir_tasks.ps1.meta': 'plombir-buildings-wiki/raw/create_plombir_tasks.ps1.meta',
 
     // Stabilization / Exec Plans moved to root plans/ folder
-    'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md': 'plans/ExecPlan_ScenarioGraph_Stabilization.md',
-    'kbpro-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'plans/ExecPlan_ScenarioGraph_Stabilization.md.meta',
-    'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md': 'plans/ExecPlan_ModuleSystem_Stabilization.md',
-    'kbpro-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta': 'plans/ExecPlan_ModuleSystem_Stabilization.md.meta',
+    'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md': 'plans/ExecPlan_ScenarioGraph_Stabilization.md',
+    'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'plans/ExecPlan_ScenarioGraph_Stabilization.md.meta',
+    'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md': 'plans/ExecPlan_ModuleSystem_Stabilization.md',
+    'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md.meta': 'plans/ExecPlan_ModuleSystem_Stabilization.md.meta',
     'dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/ToothExtractionStage_Plan.md': 'plans/ToothExtractionStage_Plan.md',
     'dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/ToothExtractionStage_Plan.md.meta': 'plans/ToothExtractionStage_Plan.md.meta',
     'dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/dentistry_cow_import_plan.md': 'plans/dentistry_cow_import_plan.md',
     'dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/dentistry_cow_import_plan.md.meta': 'plans/dentistry_cow_import_plan.md.meta',
-    'kbpro-wiki/raw/Architecture/Skills/CodeReviewSkillCreatePlan.md': 'plans/CodeReviewSkillCreatePlan.md',
-    'kbpro-wiki/raw/Architecture/Skills/CodeReviewSkillCreatePlan.md.meta': 'plans/CodeReviewSkillCreatePlan.meta',
+    'davasko-wiki/raw/Architecture/Skills/CodeReviewSkillCreatePlan.md': 'plans/CodeReviewSkillCreatePlan.md',
+    'davasko-wiki/raw/Architecture/Skills/CodeReviewSkillCreatePlan.md.meta': 'plans/CodeReviewSkillCreatePlan.meta',
     'system/AI-Docs-Refactoring_plan.md': 'plans/AI-Docs-Refactoring_plan.md',
     'system/AI-Docs-Refactoring_plan.md.meta': 'plans/AI-Docs-Refactoring_plan.md.meta'
   };
 
   // 1a. Dynamically scan target layers for skills to map from dentistry-cow-wiki
-  const skillLayers = ['llm-wiki', 'kbpro-wiki', 'unity-wiki'];
+  const skillLayers = ['llm-wiki', 'davasko-wiki', 'unity-wiki'];
   skillLayers.forEach(layer => {
     const skillsDir = path.join(submoduleRoot, layer, 'raw/ai-skills~');
     if (fs.existsSync(skillsDir)) {
@@ -190,7 +190,7 @@ function main() {
   const dynamicMappings = {};
 
   // Layers to scan for dynamic wiki page mappings
-  const layers = ['llm-wiki', 'unity-wiki', 'kbpro-wiki', 'dentistry-cow-wiki', 'plombir-buildings-wiki', 'railway-wiki'];
+  const layers = ['llm-wiki', 'unity-wiki', 'davasko-wiki', 'dentistry-cow-wiki', 'plombir-buildings-wiki', 'railway-wiki'];
   
   layers.forEach(layer => {
     const wikiPath = path.join(submoduleRoot, layer, 'wiki');
@@ -280,8 +280,8 @@ function main() {
     // Apply replacements
     for (const [oldPath, newPath] of Object.entries(allMappings)) {
       // 1. Match full path format with boundary checks to prevent substring issues
-      const oldFullPath1 = `Assets/KBPro/kbpro-ai-docs/${oldPath}`;
-      const newFullPath1 = `Assets/KBPro/kbpro-ai-docs/${newPath}`;
+      const oldFullPath1 = `Assets/DavASko/davasko-ai-docs/${oldPath}`;
+      const newFullPath1 = `Assets/DavASko/davasko-ai-docs/${newPath}`;
       const regexFull = new RegExp('(?<![\\w-\\/])' + escapeRegExp(oldFullPath1) + '(?!\\w)', 'g');
 
       if (regexFull.test(content)) {
@@ -311,10 +311,10 @@ function main() {
       changed = true;
     }
 
-    // Match general references to raw/project-docs/ for KBPro webhook
-    const kbproWebhookPattern = /raw\/project-docs\/test_bitrix_webhook/g;
-    if (kbproWebhookPattern.test(content)) {
-      content = content.replace(kbproWebhookPattern, 'kbpro-wiki/raw/test_bitrix_webhook');
+    // Match general references to raw/project-docs/ for DavASko webhook
+    const davaskoWebhookPattern = /raw\/project-docs\/test_bitrix_webhook/g;
+    if (davaskoWebhookPattern.test(content)) {
+      content = content.replace(davaskoWebhookPattern, 'davasko-wiki/raw/test_bitrix_webhook');
       changed = true;
     }
 
@@ -325,10 +325,10 @@ function main() {
       changed = true;
     }
 
-    // Match dentistry-cow-wiki paths for stabilization plans that moved to kbpro-wiki
+    // Match dentistry-cow-wiki paths for stabilization plans that moved to davasko-wiki
     const generalCowStabilizationPattern = /dentistry-cow-wiki\/raw\/(ExecPlan_ModuleSystem_Stabilization|ExecPlan_ScenarioGraph_Stabilization|test_bitrix_webhook)/g;
     if (generalCowStabilizationPattern.test(content)) {
-      content = content.replace(generalCowStabilizationPattern, 'kbpro-wiki/raw/$1');
+      content = content.replace(generalCowStabilizationPattern, 'davasko-wiki/raw/$1');
       changed = true;
     }
 
@@ -340,13 +340,13 @@ function main() {
 
     const codeStylePattern = /raw\/project-docs\/code_style.md/g;
     if (codeStylePattern.test(content)) {
-      content = content.replace(codeStylePattern, 'kbpro-wiki/raw/code_style.md');
+      content = content.replace(codeStylePattern, 'davasko-wiki/raw/code_style.md');
       changed = true;
     }
 
     const generalRawPattern = /raw\/project-docs\//g;
     if (generalRawPattern.test(content)) {
-      content = content.replace(generalRawPattern, 'kbpro-wiki/raw/');
+      content = content.replace(generalRawPattern, 'davasko-wiki/raw/');
       changed = true;
     }
 
@@ -359,8 +359,8 @@ function main() {
       content = content.split('llm-wiki/raw/ai-skills').join('llm-wiki/raw/ai-skills~');
       changed = true;
     }
-    if (content.includes('kbpro-wiki/raw/ai-skills') && !content.includes('kbpro-wiki/raw/ai-skills~')) {
-      content = content.split('kbpro-wiki/raw/ai-skills').join('kbpro-wiki/raw/ai-skills~');
+    if (content.includes('davasko-wiki/raw/ai-skills') && !content.includes('davasko-wiki/raw/ai-skills~')) {
+      content = content.split('davasko-wiki/raw/ai-skills').join('davasko-wiki/raw/ai-skills~');
       changed = true;
     }
     if (content.includes('unity-wiki/raw/ai-skills') && !content.includes('unity-wiki/raw/ai-skills~')) {

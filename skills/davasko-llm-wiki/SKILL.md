@@ -1,4 +1,4 @@
-﻿---
+﻿﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework from scratch in any new workspace. It manages layer directories, manifests, data standards, linting scripts, and IDE synchronization scripts.
 status: draft
@@ -88,4 +88,4 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 
 ## Document Versioning and Stale Links Policy
 
-- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[kbpro-wiki](../kbpro-wiki)`.
+- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[davasko-wiki](../davasko-wiki)`.

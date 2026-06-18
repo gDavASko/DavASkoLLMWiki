@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const submoduleRoot = path.resolve(__dirname, '..');
@@ -585,7 +585,7 @@ layers.forEach(layer => {
 });
 
 // Output results
-console.log('=== KBPro LLM Wiki Lint ===');
+console.log('=== DavASko LLM Wiki Lint ===');
 console.log(`Layers parsed: ${layers.join(', ')}`);
 
 // Print Metrics
