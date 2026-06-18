@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including document versioning, stale links tracking, and search gaps policies), linting scripts, and IDE rule synchronization scripts.
 status: draft
@@ -13,6 +13,7 @@ required_reading:
   - references/data-standards.md
   - references/scripts-templates.md
   - references/sync-integration.md
+  - references/stale-documents-workflow.md
   - examples/setup-new-wiki.md
 known_risks:
   - Breaking dependency chains in wiki.json leading to recursive link parsing issues.
@@ -44,6 +45,7 @@ Structure layers, directory structures, and layer-to-layer dependencies:
 ### 2. Knowledge Base Data Standards
 Strict requirements for encoding (UTF-8 with BOM), markdown frontmatter, required fields, and wiki links:
 - [Data Standards Reference](references/data-standards.md)
+- [Stale Documents Registry & Verification Workflow](references/stale-documents-workflow.md)
 
 ### 3. Maintenance and Automation Scripts
 Clean, portable Javascript templates of the primary utility scripts:
