@@ -1,4 +1,4 @@
-﻿﻿# DavASko LLM Wiki
+﻿﻿﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -51,7 +51,26 @@ If a page, rule, or concept exists in multiple layers (e.g. both `engine-wiki` a
 
 ---
 
-## 3. Directory Layout and Plans Isolation
+## 3. Document Versioning & Stale Links Policy
+
+To prevent knowledge obsolescence and track link validity across layers:
+- **YAML Metadata**: Every wiki page frontmatter must contain a `version: X.Y.Z` field. Any time a page is updated, its version must be bumped (minor/patch) and the `last_updated: YYYY-MM-DD HH:MM` field updated with the current local time.
+- **Expected Versions in Links**: All wiki links (`[[page-name]]`) must explicitly declare the expected version of the target document, e.g., `[[page-name]] (vX.Y.Z)`.
+- **Stale Document Detection**: If a target document's version is updated to a value higher than expected by a referencing link, the referencing page is marked as **stale**.
+- **Stale Markings**: Stale pages must change their status to `status: stale`, list outdated links in a `stale_links: []` frontmatter array, and be added to the registry note `wiki/stale-documents.md` of the corresponding layer.
+
+---
+
+## 4. Full-Text Search Gaps Policy
+
+To continuously improve the quality and coverage of the knowledge base:
+- **Search Gap Definition**: If an AI assistant performs a full-text search (using grep, ripgrep, custom script searches, etc.) because a topic, convention, or code pattern was not directly found in the wiki maps or concepts, this indicates a search gap.
+- **Mandatory Documentation**: The AI assistant MUST document its findings before completing the task. This involves adding the description, links, and code symbols to the knowledge base (under the appropriate layer, e.g. `davasko-wiki` or `project-wiki`).
+- **Linking Updates**: If the topic already exists but lacked the specific links/details that forced the search, it must be updated with the missing references so future searches can be done directly via the wiki query system.
+
+---
+
+## 5. Directory Layout and Plans Isolation
 
 The system separates planning documentation (ExecPlans, checklists) from the durable knowledge base:
 
@@ -91,7 +110,7 @@ Each individual layer directory must conform to the following directory layout:
 
 ---
 
-## 4. Ingestion Workflow & System Scripts
+## 6. Ingestion Workflow & System Scripts
 
 The framework includes automation tools in the `system/` directory:
 
@@ -121,7 +140,7 @@ sequenceDiagram
 
 ---
 
-## 5. How to Deploy the LLM Wiki in a New Workspace
+## 7. How to Deploy the LLM Wiki in a New Workspace
 
 Follow these steps to initialize the DavASko LLM Wiki in any project:
 
