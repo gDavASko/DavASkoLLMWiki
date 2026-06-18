@@ -85,3 +85,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 ## Full-Text Search Gaps Policy
 
 - **Policy**: If you search or query the codebase, plugins, or skills using grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods because a topic, convention, or code pattern was not directly found in the knowledge base maps or concepts (a search gap), you MUST document your findings. Add the description, links, and code symbols/examples to the knowledge base (under either `framework-wiki` or `project-a-wiki`, depending on the domain) before completing the task. If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic code searches.
+
+## Document Versioning and Stale Links Policy
+
+- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[kbpro-wiki](file:///path/to/kbpro-wiki)`.
