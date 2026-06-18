@@ -1,4 +1,4 @@
-# Architecture Setup Guide
+﻿# Architecture Setup Guide
 
 The **DavASko LLM Wiki** is a multi-layered, Obsidian-compatible knowledge base designed to cleanly separate general AI rules, engine-specific rules, framework-specific details, and project-specific documentation.
 
@@ -27,7 +27,7 @@ graph TD
 
 ## 2. Layer Manifest: `wiki.json`
 
-Every layer directory MUST contain a `wiki.json` file in its root. This manifest defines the layer name and its explicit dependencies. In the layer description indexes and LLM-WIKI guides, dependency references must include clickable local paths to their folders, e.g. `[kbpro-wiki](file:///path/to/kbpro-wiki)`.
+Every layer directory MUST contain a `wiki.json` file in its root. This manifest defines the layer name and its explicit dependencies. In the layer description indexes and LLM-WIKI guides, dependency references must include clickable local paths to their folders, e.g. `[kbpro-wiki](../kbpro-wiki)`.
 
 ### Configuration Format
 ```json

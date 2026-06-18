@@ -58,11 +58,11 @@ Runs a suite of regression test queries against the search engine to verify that
 
 The full source codes for these scripts are provided in the repository's `templates/system-scripts/` directory:
 
-1. **`lint-wiki.js`**: [lint-wiki.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/lint-wiki.js)
-2. **`validate-links.js`**: [validate-links.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/validate-links.js)
-3. **`query-wiki.js`**: [query-wiki.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/query-wiki.js)
-4. **`ingest-newdata.js`**: [ingest-newdata.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/ingest-newdata.js)
-5. **`update-links.js`**: [update-links.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/update-links.js)
-6. **`run-evals.js`**: [run-evals.js template](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/2c3f39e3-f5bd-4521-aa0c-4de26b3677d9/scratch/DavASkoLLMWiki/templates/system-scripts/run-evals.js)
+1. **`lint-wiki.js`**: [lint-wiki.js template](../../templates/system-scripts/lint-wiki.js)
+2. **`validate-links.js`**: [validate-links.js template](../../templates/system-scripts/validate-links.js)
+3. **`query-wiki.js`**: [query-wiki.js template](../../templates/system-scripts/query-wiki.js)
+4. **`ingest-newdata.js`**: [ingest-newdata.js template](../../templates/system-scripts/ingest-newdata.js)
+5. **`update-links.js`**: [update-links.js template](../../templates/system-scripts/update-links.js)
+6. **`run-evals.js`**: [run-evals.js template](../../templates/system-scripts/run-evals.js)
 
 When deploying to a new workspace, copy these templates into your `system/` directory.

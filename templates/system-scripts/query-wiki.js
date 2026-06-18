@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -262,7 +262,7 @@ TextScriptImporter:
     let rootLogContent = readUtf8(rootLogPath);
     const rootHeader = `## [${dateStr}]`;
     const rangeSuffix = localLogLines.length === 2 ? `#L${localLogLines[0]}-L${localLogLines[1]}` : '';
-    const rootEntry = `- Добавлены изменения в [${targetLayer}/wiki/log.md](file:///${submoduleRoot.replace(/\\/g, '/')}/${targetLayer}/wiki/log.md${rangeSuffix})`;
+    const rootEntry = `- Добавлены изменения в [${targetLayer}/wiki/log.md](${targetLayer}/wiki/log.md${rangeSuffix})`;
     
     let updatedRoot = '';
     if (rootLogContent.includes(rootHeader)) {

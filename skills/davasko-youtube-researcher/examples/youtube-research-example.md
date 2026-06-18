@@ -31,7 +31,7 @@ The agent drafts the `implementation_plan.md` in the artifacts folder (written i
 ## Proposed Changes
 
 ### База знаний (Слой `engine-wiki`)
-#### [NEW] [pragmatic-ai-coding.md](file:///path/to/workspace/Assets/DavASko/davasko-ai-docs/engine-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
+#### [NEW] [pragmatic-ai-coding.md](Assets/DavASko/davasko-ai-docs/engine-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
 
 ## Verification Plan
 - Запуск `ingest-newdata.js`

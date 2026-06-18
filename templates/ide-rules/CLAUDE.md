@@ -16,13 +16,13 @@
 | `fetch` | Browser fetching capabilities (via Puppeteer). | When retrieving live web documentation. |
 
 ## How to Work in This Project
-- **Read Before Coding:** Read [architecture.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/architecture.md), [code_style.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md), and [principals.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md) inside `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/`.
+- **Read Before Coding:** Read [architecture.md](Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/architecture.md), [code_style.md](Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md), and [principals.md](Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md) inside `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/`.
 - **Read Before AI Code Review:** Read `ai-generated-code-review.md` and `unity-ai-code-review-checklist.md` under `Assets/KBPro/kbpro-ai-docs/wiki/runbooks/` and `wiki/concepts/`.
 - **Tool Guidance:** Prioritize reading files before editing. Use Grep/Glob patterns to target queries. Use specialized local skills (like `kbpro-code-navigator`) before starting changes.
 - **Do Not Touch:** `Library/`, `Temp/`, `Logs/`, `obj/`, generated `.csproj` files, or Unity `.meta` files (unless adding/deleting project files).
 
 ## ExecPlans
-- For complex changes, refactoring, or migrations, follow [PLANS.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/llm-wiki/raw/PLANS.md).
+- For complex changes, refactoring, or migrations, follow [PLANS.md](Assets/KBPro/kbpro-ai-docs/llm-wiki/raw/PLANS.md).
 - Create a self-contained ExecPlan and store it under `Assets/KBPro/kbpro-ai-docs/`.
 
 ## KBPro Architecture Rules
@@ -71,7 +71,7 @@
   - Layers: `unity-wiki`, `kbpro-wiki`, `dentistry-cow-wiki`.
 - **Decomposition**: If an imported document contains details belonging to multiple layers (e.g. Unity patterns + KBPro APIs + project details), you MUST propose a split schema to the user. Do not ingest monolith files into a single layer without user approval.
 - **Stub Handling**: When referring to pages in higher layers or missing docs, add stubs to `dentistry-cow-wiki/wiki/stubs.md` to prevent lint errors. When ingesting a file that closes a stub, ensure the stub is automatically or manually removed from `stubs.md`.
-- **Change Logging**: Log detailed changes into the layer's local `dentistry-cow-wiki/wiki/log.md` (UTF-8 with BOM). Then, append a fact reference in the root `log.md` with a link pointing directly to the new lines in the local log (e.g. `[layer/dentistry-cow-wiki/wiki/log.md#L45-L52](file:///path/to/log.md#L45-L52)`).
+- **Change Logging**: Log detailed changes into the layer's local `dentistry-cow-wiki/wiki/log.md` (UTF-8 with BOM). Then, append a fact reference in the root `log.md` with a link pointing directly to the new lines in the local log (e.g. `[layer/dentistry-cow-wiki/wiki/log.md#L45-L52](../dentistry-cow-wiki/wiki/log.md#L45-L52)`).
 - **Validation**: After any knowledge base change, always validate using:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1`
 

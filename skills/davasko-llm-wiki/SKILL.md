@@ -1,4 +1,4 @@
----
+﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework from scratch in any new workspace. It manages layer directories, manifests, data standards, linting scripts, and IDE synchronization scripts.
 status: draft
@@ -39,23 +39,23 @@ Always refer to the local reference documents inside the skill package before wr
 
 ### 1. Multi-Layered Wiki Architecture
 Structure layers, directory structures, and layer-to-layer dependencies:
-- [Architecture Setup Guide](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/references/architecture-setup.md)
+- [Architecture Setup Guide](references/architecture-setup.md)
 
 ### 2. Knowledge Base Data Standards
 Strict requirements for encoding (UTF-8 with BOM), markdown frontmatter, required fields, and wiki links:
-- [Data Standards Reference](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/references/data-standards.md)
+- [Data Standards Reference](references/data-standards.md)
 
 ### 3. Maintenance and Automation Scripts
 Clean, portable Javascript templates of the primary utility scripts:
-- [Scripts Templates Reference](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/references/scripts-templates.md)
+- [Scripts Templates Reference](references/scripts-templates.md)
 
 ### 4. Rules & Skill Synchronizer Script
 How to configure and synchronize IDE agent rule files and local portable skills:
-- [Sync Integration Guide](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/references/sync-integration.md)
+- [Sync Integration Guide](references/sync-integration.md)
 
 ### 5. Setup Walkthrough Example
 A complete example showing how to initialize a multi-project wiki from scratch:
-- [Setup New Wiki Example](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/examples/setup-new-wiki.md)
+- [Setup New Wiki Example](examples/setup-new-wiki.md)
 
 ## High-Level Workflow
 
@@ -69,7 +69,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
    - Create a `plans/` directory in the workspace root for task checklists, implementation plans, and walkthroughs, ensuring they do not clutter raw layers.
 4. **Deploy System Automation**:
    - Create a `system/` directory in the wiki root.
-   - Write the scripts `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, and `run-evals.js` using templates from [scripts-templates.md](file:///C:/Users/DavASko/.gemini/config/skills/davasko-llm-wiki/references/scripts-templates.md).
+   - Write the scripts `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, and `run-evals.js` using templates from [scripts-templates.md](references/scripts-templates.md).
 5. **Deploy Master IDE Rules & Sync Script**:
    - Place master rule files (`.cursorrules`, `GEMINI.md`, etc.) in `llm-wiki/raw/ide-rules/`.
    - Place `sync-ai-rules.ps1` in the project root to copy rule files and compile rules/skills adapters for agents.
@@ -88,4 +88,4 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 
 ## Document Versioning and Stale Links Policy
 
-- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[kbpro-wiki](file:///path/to/kbpro-wiki)`.
+- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[kbpro-wiki](../kbpro-wiki)`.
