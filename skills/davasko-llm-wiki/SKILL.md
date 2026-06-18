@@ -1,4 +1,4 @@
-﻿﻿﻿---
+﻿﻿﻿﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including document versioning, stale links tracking, and search gaps policies), linting scripts, and IDE rule synchronization scripts.
 status: draft
@@ -70,8 +70,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 4. **Deploy System Automation**:
    - Create a `system/` directory in the wiki root.
    - Write the scripts `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, and `run-evals.js` using templates from [scripts-templates.md](references/scripts-templates.md).
-5. **Deploy Master IDE Rules & Sync Script**:
-   - Place master rule files (`.cursorrules`, `GEMINI.md`, etc.) in `llm-wiki/raw/ide-rules/`.
+5. **Deploy Synchronizer Script**:
    - Place `sync-ai-rules.ps1` in the project root to copy rule files and compile rules/skills adapters for agents.
 6. **Establish Inbound Ingestion**:
    - Ensure a `NewData/` folder is present at the wiki root to receive new external sources, with subfolders for each layer.

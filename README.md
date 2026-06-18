@@ -1,4 +1,4 @@
-﻿﻿﻿# DavASko LLM Wiki
+﻿﻿﻿﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -159,11 +159,7 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
    - `wiki/log.md`
    - `wiki/contradictions.md`
 
-### Step 3: Copy Master IDE Rules
-1. Copy the rules templates from `templates/ide-rules/` into your core layer `llm-wiki/raw/ide-rules/`.
-2. Configure agent instructions in `AGENTS.md` and `GEMINI.md` to point to the newly created layers.
-
-### Step 4: Install AI Skills
+### Step 3: Install AI Skills
 You can install the portable skills from this repository either project-locally or globally:
 
 #### Option A: Project-Local Installation (Recommended)
@@ -182,7 +178,7 @@ Copy the skill folders from the `skills/` directory into your system's global AI
 
 This makes the skill globally available to all projects on this machine.
 
-### Step 5: Verify the Setup
+### Step 4: Verify the Setup
 Validate the database setup and run regression tests:
 ```powershell
 node davasko-ai-docs/system/lint-wiki.js
