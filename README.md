@@ -1,4 +1,4 @@
-﻿﻿﻿﻿# DavASko LLM Wiki
+﻿﻿﻿﻿﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -96,6 +96,7 @@ Each individual layer directory must conform to the following directory layout:
 │   ├── log.md                  # Local append-only operations log
 │   ├── contradictions.md       # Open conflicts and questions register
 │   ├── stubs.md                # Declared stubs to resolve out-of-boundary references
+│   ├── stale-documents.md      # Registry of stale documents requiring version updates
 │   ├── concepts/               # Reusable patterns, guidelines, and rules
 │   ├── entities/               # Service definitions, scenes, classes, packages
 │   ├── runbooks/               # Step-by-step developer checklists and guides
@@ -156,6 +157,7 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
 4. In each layer, create the basic folder structures and write initial placeholder lists:
    - `wiki/index.md`
    - `wiki/stubs.md`
+   - `wiki/stale-documents.md`
    - `wiki/log.md`
    - `wiki/contradictions.md`
 
