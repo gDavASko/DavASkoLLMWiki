@@ -1,4 +1,4 @@
-﻿﻿# CLAUDE.md — dentistry-cow
+﻿﻿﻿# CLAUDE.md — dentistry-cow
 
 ## Project
 - **Unity Version:** 6000.0.67f1 (from ProjectSettings/ProjectVersion.txt)
@@ -9,7 +9,6 @@
 ## MCP Servers (.mcp.json)
 | Server Name | Purpose | When to Use |
 |---|---|---|
-| `b24-dev-mcp` | Bitrix24 REST documentation, methods, and task fields. | When working with Bitrix24 task management or automation. |
 | `context7` | Up-to-date documentation for libraries like UniTask, DOTween, Addressables. | When NewData/researching external package APIs or best practices. |
 | `sequential-thinking` | Structured sequential thinking planning for complex coding tasks. | When designing or breaking down complex features. |
 | `memory` | Session-based local MCP memory server. | When maintaining context/state across multiple prompts. |
