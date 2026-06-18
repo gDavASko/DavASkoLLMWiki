@@ -1,4 +1,4 @@
-﻿# Knowledge Base Data Standards
+# Knowledge Base Data Standards
 
 To maintain compatibility with Obsidian, Unity, Windows, and multiple AI tooling agents, all files within the **DavASko LLM Wiki** must adhere to strict formatting and encoding standards.
 
@@ -96,7 +96,9 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 - **Source Citations**: Any factual claim made in `wiki/` pages MUST be supported by a citation pointing to an immutable raw file in `raw/` or a file in the project repository using this exact format: `(source: layer-name/raw/docs/source-doc.md)`.
 - **Plans Isolation & Linking**: All execution plans, stabilization plans, task lists (`task.md`), and walkthroughs (`walkthrough.md`) must be placed in the root-level `plans/` directory of the workspace, completely isolated from individual layer repositories. Links to these plan files must use standard Markdown links with absolute or relative `file:///` URIs (e.g., `[task.md](file:///path/to/plans/task.md)`) and must never wrap the link text in backticks.
 - **File Links**: When linking to actual source code or configuration files, use markdown links with absolute or relative `file:///` URIs, e.g., `[MyClass](file:///path/to/MyClass.cs)`. Never surround the file link text with backticks.
-- **C# Code Style Location**: The C# code style guidelines (`code_style.md`) must reside inside the framework layer: `kbpro-wiki/raw/code_style.md` (NOT in `unity-wiki/raw/code_style.md`), since coding style conventions are a property of the core KBPro framework. All references to code style must link to this path.
+- **C# Code Style Location**: The C# code style guidelines (`code_style.md`) must reside inside the framework layer: `framework-wiki/raw/code_style.md` (NOT in `engine-wiki/raw/code_style.md`), since coding style conventions are a property of the core Framework framework. All references to code style must link to this path.
+- **Full-Text Search Gaps Policy**: If the AI assistant has to perform grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods across the codebase due to missing information, maps, or undocumented patterns in the knowledge base, the assistant must document these findings. The new code symbols, directories, and logic patterns must be described and added to the most appropriate layer of the knowledge base. This ensures that future searches are performed directly via the wiki query system, eliminating redundant low-level code searches.
+- **Aesthetic Independence & Generalization**: All documentation, code rules, and instructions stored in the knowledge base must be kept in a generic, project-agnostic format. Avoid hardcoding proprietary framework names or third-party project identifiers (such as project submodules or specific client directories) in general-purpose rules. Keep files portable and transferable to any target workspace.
 
 ---
 

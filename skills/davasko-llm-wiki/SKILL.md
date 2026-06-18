@@ -1,4 +1,4 @@
-﻿---
+---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework from scratch in any new workspace. It manages layer directories, manifests, data standards, linting scripts, and IDE synchronization scripts.
 status: draft
@@ -63,7 +63,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 
 1. **Understand Workspace Context**: Inspect the target project directory (Unity project, web app, or standalone codebase) to determine the number and scope of needed knowledge layers. Support separating multiple independent projects into separate parallel project layers.
 2. **Define Layers & Dependency Graph**:
-   - Create directories for each layer (e.g. `llm-wiki`, `unity-wiki`, `kbpro-wiki`, and project-specific layers like `dentistry-cow-wiki`, `plombir-buildings-wiki`, etc.).
+   - Create directories for each layer (e.g. `llm-wiki`, `engine-wiki`, `framework-wiki`, and project-specific layers like `project-a-wiki`, `project-b-wiki`, etc.).
    - Write `wiki.json` manifests defining the dependency hierarchy.
 3. **Deploy Plans Directory**:
    - Create a `plans/` directory in the workspace root for task checklists, implementation plans, and walkthroughs, ensuring they do not clutter raw layers.
@@ -81,3 +81,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
    - Run the link validator: `node system/validate-links.js`.
    - Run regression tests: `node system/run-evals.js`.
    - Ensure `validate_errors.json` has 0 errors.
+
+## Full-Text Search Gaps Policy
+
+- **Policy**: If you search or query the codebase, plugins, or skills using grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods because a topic, convention, or code pattern was not directly found in the knowledge base maps or concepts (a search gap), you MUST document your findings. Add the description, links, and code symbols/examples to the knowledge base (under either `framework-wiki` or `project-a-wiki`, depending on the domain) before completing the task. If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic code searches.

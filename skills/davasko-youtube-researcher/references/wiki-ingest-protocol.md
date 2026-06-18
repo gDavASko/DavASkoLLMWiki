@@ -38,7 +38,7 @@ Concrete practical action items showing what and how we can apply in the Unity /
 
 Before editing any files in the permanent layers, draft an `implementation_plan.md` in the artifacts folder (written in Russian). The plan must detail:
 - Which video files are being analyzed.
-- Which layers (`unity-wiki`, `davasko-wiki`, `dentistry-cow-wiki`) and directories the new files will be imported to.
+- Which layers (`engine-wiki`, `davasko-wiki`, `project-a-wiki`) and directories the new files will be imported to.
 - Wait for explicit user review and approval in the chat via: **«Реализуем план»**.
 
 ---
@@ -50,7 +50,7 @@ The ingestion script reads this folder structure to automatically route files:
 
 ```
 NewData/
-  ├── unity-wiki/
+  ├── engine-wiki/
   │     └── transcripts/
   │           └── ai-vibe-code-review/
   │                 └── my-video-summary.md   <-- summary file
@@ -59,7 +59,7 @@ NewData/
   │     └── Architecture/
   │           └── my-architecture-summary.md  <-- summary file
   │
-  └── dentistry-cow-wiki/
+  └── project-a-wiki/
         └── gameplay/
               └── my-gameplay-summary.md      <-- summary file
 ```

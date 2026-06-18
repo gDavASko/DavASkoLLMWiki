@@ -1,4 +1,4 @@
-# DavASko LLM Wiki
+﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -13,23 +13,23 @@ Dependencies flow strictly **downward**. A higher-level layer can depend on and 
 
 ```mermaid
 graph TD
-    Project1[Project 1 Layer: dentistry-cow-wiki] --> Framework[Framework Layer: kbpro-wiki]
-    Project2[Project 2 Layer: plombir-buildings-wiki] --> Framework
-    Project3[Project 3 Layer: railway-wiki] --> Framework
-    Framework --> Engine[Engine Layer: unity-wiki]
+    Project1[Project 1 Layer: project-a-wiki] --> Framework[Framework Layer: framework-wiki]
+    Project2[Project 2 Layer: project-b-wiki] --> Framework
+    Project3[Project 3 Layer: project-c-wiki] --> Framework
+    Framework --> Engine[Engine Layer: engine-wiki]
     Engine --> Root[Core LLM Layer: llm-wiki]
 ```
 
 - **`llm-wiki`** (Core Layer): Contains universal AI rules, developer guidelines, video transcripts, and general helper scripts.
-- **`unity-wiki`** (Engine Layer): Contains game engine details, naming styles, physics guidelines, and assembly rules.
-- **`kbpro-wiki`** (Framework Layer): Contains core framework packages, architectural principles, C# code styles, and custom libraries definitions.
-- **`dentistry-cow-wiki`, `plombir-buildings-wiki`, `railway-wiki`** (Project Layers): Contain GDDs, scene lists, gameplay logic, and module definitions for their respective projects. Each project is fully isolated from others.
+- **`engine-wiki`** (Engine Layer): Contains game engine details, naming styles, physics guidelines, and assembly rules.
+- **`framework-wiki`** (Framework Layer): Contains core framework packages, architectural principles, C# code styles, and custom libraries definitions.
+- **`project-a-wiki`, `project-b-wiki`, `project-c-wiki`** (Project Layers): Contain GDDs, scene lists, gameplay logic, and module definitions for their respective projects. Each project is fully isolated from others.
 
 Each layer contains a manifest file `wiki.json` specifying its dependencies:
 ```json
 {
   "name": "davasko-wiki",
-  "dependencies": ["unity-wiki", "llm-wiki"]
+  "dependencies": ["engine-wiki", "llm-wiki"]
 }
 ```
 
@@ -42,10 +42,12 @@ Knowledge has different weights depending on its "proximity to the project":
 $$\text{Project Layer} > \text{Framework Layer} > \text{Engine Layer} > \text{Core LLM Layer}$$
 
 ### The Priority Override Rules
-If a page, rule, or concept exists in multiple layers (e.g. both `unity-wiki` and `llm-wiki` contain a rule with conflicting conventions):
+If a page, rule, or concept exists in multiple layers (e.g. both `engine-wiki` and `llm-wiki` contain a rule with conflicting conventions):
 1. **Default Option**: The version in the most specific (project-level) layer is chosen and followed by default.
 2. **Warn User**: The AI assistant must print a warning message notifying the user about the duplicate rules.
 3. **Offer Choice**: The AI assistant must prompt the user to choose between using the default (project-level) rule or overriding it with the general base rule.
+4. **Grep Search Gaps**: If the AI assistant searches the codebase using low-level search tools (grep, ripgrep) because of undocumented patterns or missing references, it MUST document the findings in the most appropriate layer of the knowledge base.
+5. **Aesthetic Independence**: Rules, schemas, and instructions MUST NOT contain proprietary names or paths (such as client-specific folders or proprietary framework names like KBPro) in general-purpose layers. Keep all conventions abstract, generalized, and portable.
 
 ---
 
@@ -60,9 +62,9 @@ The system separates planning documentation (ExecPlans, checklists) from the dur
 ├── system/                     # Maintenance scripts (lint-wiki.js, etc.)
 ├── NewData/                    # Buffer folder for manual document ingestion
 ├── llm-wiki/                   # Core LLM Layer (contains rules, scripts, transcripts)
-├── unity-wiki/                 # Engine Layer (Unity specific)
-├── kbpro-wiki/                 # Framework Layer (framework conventions, C# code styles)
-└── <project-wiki>/             # Isolated project-specific layers (e.g. dentistry-cow-wiki)
+├── engine-wiki/                 # Engine Layer (Unity specific)
+├── framework-wiki/                 # Framework Layer (framework conventions, C# code styles)
+└── <project-wiki>/             # Isolated project-specific layers (e.g. project-a-wiki)
 ```
 
 ### Folder Structure of a Single Layer
@@ -129,7 +131,7 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
 3. Copy the script `templates/sync-ai-rules.ps1` to the project root directory.
 
 ### Step 2: Initialize Layers and Plans
-1. Create directories for your layers (e.g. `llm-wiki/`, `unity-wiki/`, `kbpro-wiki/`, and project-specific layers).
+1. Create directories for your layers (e.g. `llm-wiki/`, `engine-wiki/`, `framework-wiki/`, and project-specific layers).
 2. Create a `plans/` directory in the workspace root.
 3. Add a `wiki.json` manifest to each layer to define its dependency chain.
 4. In each layer, create the basic folder structures and write initial placeholder lists:

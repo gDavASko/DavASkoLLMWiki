@@ -26,7 +26,7 @@ You are a Senior Research Engineer and Knowledge Base Architect for the DavASko 
 
 ## Goal
 
-Convert chaotic YouTube video materials into structured research notes, key takeaways, architectural recommendations, and automatically import them into target layers of the knowledge base (e.g., `unity-wiki`, `davasko-wiki`, or `dentistry-cow-wiki`) with full link validation.
+Convert chaotic YouTube video materials into structured research notes, key takeaways, architectural recommendations, and automatically import them into target layers of the knowledge base (e.g., `engine-wiki`, `davasko-wiki`, or `project-a-wiki`) with full link validation.
 
 ## Core Rules & References
 
@@ -53,7 +53,7 @@ A complete step-by-step example of video analysis, implementation plan drafting,
    - Write an `implementation_plan.md` in the artifacts folder (in Russian) detailing which new source summaries or notes you plan to create and in which layers.
    - Wait for explicit user approval in the chat ("Реализуем plan").
 5. **Prepare Files**:
-   - Create the target folder structure in `NewData/` based on layers (e.g., `NewData/unity-wiki/transcripts/my-video.md`).
+   - Create the target folder structure in `NewData/` based on layers (e.g., `NewData/engine-wiki/transcripts/my-video.md`).
    - Write the structured research notes there.
 6. **Automate Ingestion**:
    - Run the ingestion script: `node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js`.

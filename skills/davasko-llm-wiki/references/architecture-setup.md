@@ -11,17 +11,17 @@ Instead of a monolith knowledge base, the wiki uses distinct, hierarchical folde
 ### Conceptual Hierarchy
 ```mermaid
 graph TD
-    ProjectLayer1[Project 1 Wiki: dentistry-cow-wiki] --> FrameworkLayer[Framework Wiki: kbpro-wiki]
-    ProjectLayer2[Project 2 Wiki: plombir-buildings-wiki] --> FrameworkLayer
-    ProjectLayer3[Project 3 Wiki: railway-wiki] --> FrameworkLayer
-    FrameworkLayer --> EngineLayer[Engine Wiki: unity-wiki]
+    ProjectLayer1[Project 1 Wiki: project-a-wiki] --> FrameworkLayer[Framework Wiki: framework-wiki]
+    ProjectLayer2[Project 2 Wiki: project-b-wiki] --> FrameworkLayer
+    ProjectLayer3[Project 3 Wiki: project-c-wiki] --> FrameworkLayer
+    FrameworkLayer --> EngineLayer[Engine Wiki: engine-wiki]
     EngineLayer --> RootLayer[Core LLM Wiki: llm-wiki]
 ```
 
 - **Core LLM Layer (`llm-wiki`)**: Completely independent. Contains general rules for writing code with AI, managing plans, video transcripts, and general helper scripts.
-- **Engine Layer (`unity-wiki`)**: Knows about the development platform (e.g. Unity, Unreal, Next.js). Inherits from the LLM Layer.
-- **Framework Layer (`kbpro-wiki`)**: Knows about the target core libraries, custom packages, C# code styles, and architecture protocols. Inherits from the Engine Layer.
-- **Project Layers (`dentistry-cow-wiki`, `plombir-buildings-wiki`, `railway-wiki`, etc.)**: Each contains independent business logic, game design documents (GDD), and gameplay module definitions for that specific project. All projects inherit from the same common Framework Layer, but remain completely isolated from each other.
+- **Engine Layer (`engine-wiki`)**: Knows about the development platform (e.g. Unity, Unreal, Next.js). Inherits from the LLM Layer.
+- **Framework Layer (`framework-wiki`)**: Knows about the target core libraries, custom packages, code styles, and architecture protocols. Inherits from the Engine Layer.
+- **Project Layers (`project-a-wiki`, `project-b-wiki`, etc.)**: Each contains independent business logic, specifications/game design documents, and feature definitions for that specific project. All projects inherit from the same common Framework Layer, but remain completely isolated from each other.
 
 ---
 
@@ -52,37 +52,37 @@ The overall workspace directory layout consists of root-level folders and multi-
 ### Workspace Root Layout
 ```
 <workspace-root>/
-â”œâ”€â”€ plans/                      â† Task checklists, implementation plans, walkthroughs (centralized)
-â”œâ”€â”€ system/                     â† Maintenance scripts (lint-wiki.js, query-wiki.js, etc.)
-â”œâ”€â”€ NewData/                    â† Incoming buffer folder for manual ingestion
-â”œâ”€â”€ llm-wiki/                   â† Core LLM Layer (contains general rules, scripts, transcripts)
-â”œâ”€â”€ unity-wiki/                 â† Engine Layer (Unity/platform specific)
-â”œâ”€â”€ kbpro-wiki/                 â† Framework Layer (contains kbpro framework details, code style)
-â”œâ”€â”€ dentistry-cow-wiki/         â† Project-specific Layer (Dentistry project)
-â”œâ”€â”€ plombir-buildings-wiki/     â† Project-specific Layer (Plombir project)
-â””â”€â”€ railway-wiki/               â† Project-specific Layer (Railway project)
+├── plans/                      ← Task checklists, implementation plans, walkthroughs (centralized)
+├── system/                     ← Maintenance scripts (lint-wiki.js, query-wiki.js, etc.)
+├── NewData/                    ← Incoming buffer folder for manual ingestion
+├── llm-wiki/                   ← Core LLM Layer (contains general rules, scripts, transcripts)
+├── engine-wiki/                ← Engine Layer (Engine/platform specific)
+├── framework-wiki/             ← Framework Layer (contains framework details, code style)
+├── project-a-wiki/             ← Project-specific Layer (Project A)
+├── project-b-wiki/             ← Project-specific Layer (Project B)
+└── project-c-wiki/             ← Project-specific Layer (Project C)
 ```
 
 ### Folder Structure of a Single Layer
 Each individual layer directory must have the following structure:
 ```
 <layer-directory>/
-â”œâ”€â”€ wiki.json                   â† Manifest file defining dependencies
-â”œâ”€â”€ wiki/                       â† Compiled, AI-maintained knowledge (durable)
-â”‚   â”œâ”€â”€ index.md                â† Required layer table of contents
-â”‚   â”œâ”€â”€ log.md                  â† Append-only local changelog
-â”‚   â”œâ”€â”€ contradictions.md       â† Log of conflicting claims and open questions
-â”‚   â”œâ”€â”€ stubs.md                â† Placeholder/stub links for cyclic dependencies
-â”‚   â”œâ”€â”€ concepts/               â† Reusable ideas and rules
-â”‚   â”œâ”€â”€ entities/               â† Classes, packages, tools, scenes
-â”‚   â”œâ”€â”€ runbooks/               â† Step-by-step procedures
-â”‚   â”œâ”€â”€ sources/                â† AI-generated summaries of raw materials
-â”‚   â”œâ”€â”€ syntheses/              â† Comparative analyses
-â”‚   â””â”€â”€ decisions/              â† Architectural decisions (ADRs)
-â””â”€â”€ raw/                        â† Immutable source materials (read-only)
-    â”œâ”€â”€ docs/                   â† Copied source docs
-    â”œâ”€â”€ transcripts/            â† Meeting or review notes (llm-wiki/raw/transcripts/ only)
-    â””â”€â”€ ai-skills~/             â† Portable AI skills package folders
+├── wiki.json                   ← Manifest file defining dependencies
+├── wiki/                       ← Compiled, AI-maintained knowledge (durable)
+│   ├── index.md                ← Required layer table of contents
+│   ├── log.md                  ← Append-only local changelog
+│   ├── contradictions.md       ← Log of conflicting claims and open questions
+│   ├── stubs.md                ← Placeholder/stub links for cyclic dependencies
+│   ├── concepts/               ← Reusable ideas and rules
+│   ├── entities/               ← Classes, packages, tools, scenes
+│   ├── runbooks/               ← Step-by-step procedures
+│   ├── sources/                ← AI-generated summaries of raw materials
+│   ├── syntheses/              ← Comparative analyses
+│   └── decisions/              ← Architectural decisions (ADRs)
+└── raw/                        ← Immutable source materials (read-only)
+    ├── docs/                   ← Copied source docs
+    ├── transcripts/            ← Meeting or review notes (llm-wiki/raw/transcripts/ only)
+    └── ai-skills~/             ← Portable AI skills package folders
 ```
 
 ---
@@ -91,7 +91,7 @@ Each individual layer directory must have the following structure:
 
 Dependencies flow **downward** (e.g., Project Layer can reference Engine Layer, but Engine Layer cannot reference Project Layer). 
 
-If a lower-level page (e.g., `unity-wiki/wiki/runbooks/unity-shader-ai-guidelines.md`) needs to mention a page belonging to a higher layer (e.g., `dentistry-cow-wiki`), it cannot use a direct link because that would cause a validation error (out-of-bounds dependency).
+If a lower-level page (e.g., a page in the Engine Layer) needs to mention a page belonging to a higher layer (e.g., a Project Layer), it cannot use a direct link because that would cause a validation error (out-of-bounds dependency).
 
 ### Solution: `stubs.md`
 To reference a page that is outside or above the layer's dependency chain, register a link to that page inside the layer's `wiki/stubs.md` file:

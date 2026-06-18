@@ -26,12 +26,12 @@ The agent drafts the `implementation_plan.md` in the artifacts folder (written i
 ```markdown
 # План импорта исследования "Pragmatic AI Coding"
 
-Внедрение конспекта видео "How to use AI pragmatically" в слой `unity-wiki` базы знаний.
+Внедрение конспекта видео "How to use AI pragmatically" в слой `engine-wiki` базы знаний.
 
 ## Proposed Changes
 
-### База знаний (Слой `unity-wiki`)
-#### [NEW] [pragmatic-ai-coding.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/DavASko/davasko-ai-docs/unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
+### База знаний (Слой `engine-wiki`)
+#### [NEW] [pragmatic-ai-coding.md](file:///path/to/workspace/Assets/DavASko/davasko-ai-docs/engine-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md)
 
 ## Verification Plan
 - Запуск `ingest-newdata.js`
@@ -43,7 +43,7 @@ The user approves the plan by writing in chat: **«Реализуем план»
 ---
 
 ## Step 3. Place Files in the `NewData` Ingest Buffer
-The agent writes the research notes to `NewData/unity-wiki/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md`:
+The agent writes the research notes to `NewData/engine-wiki/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md`:
 
 ```markdown
 # Pragmatic AI Coding Practices
@@ -75,8 +75,8 @@ node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js
 ```
 
 The script automatically:
-1. Moves the file to `unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md`.
-2. Generates the source summary in `unity-wiki/wiki/sources/pragmatic-ai-coding.md`.
+1. Moves the file to `engine-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md`.
+2. Generates the source summary in `engine-wiki/wiki/sources/pragmatic-ai-coding.md`.
 3. Appends links to local index lists and logs.
 4. Leaves the `NewData/` folder completely clean.
 5. Runs validation.
