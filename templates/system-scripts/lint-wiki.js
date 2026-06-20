@@ -240,8 +240,8 @@ layers.forEach(layer => {
     
     wikiPagesMap[rel] = f;
 
-    // Check duplicate page names across all layers (excluding indexes/logs/stubs/contradictions)
-    if (pageName !== 'index' && pageName !== 'log' && pageName !== 'stubs' && pageName !== 'contradictions') {
+    // Check duplicate page names across all layers (excluding indexes/stubs/contradictions)
+    if (pageName !== 'index' && pageName !== 'stubs' && pageName !== 'contradictions') {
       if (globalPagesRegistry[pageName]) {
         addIssue(`[Duplicate Page Name] Page name "${pageName}" is defined in multiple files: ${globalPagesRegistry[pageName]} and ${rel}`);
       } else {
@@ -335,8 +335,8 @@ layers.forEach(layer => {
       }
     }
 
-    // 3. Required frontmatter check (excluding log.md, stubs.md, contradictions.md, index.md)
-    if (filename !== 'log.md' && filename !== 'stubs.md' && filename !== 'contradictions.md' && filename !== 'index.md') {
+    // 3. Required frontmatter check (excluding stubs.md, contradictions.md, index.md)
+    if (filename !== 'stubs.md' && filename !== 'contradictions.md' && filename !== 'index.md') {
       const front = parseFrontmatter(text);
       
       // Update metrics: statuses count
@@ -459,7 +459,7 @@ layers.forEach(layer => {
   const mdFiles = getFilesRecursively(wikiDir, ['.md']);
   mdFiles.forEach(f => {
     const name = path.parse(f).name;
-    if (name === 'index' || name === 'log' || name === 'stubs' || name === 'contradictions') return;
+    if (name === 'index' || name === 'stubs' || name === 'contradictions') return;
     
     let hasInboundLink = false;
     const escapedName = name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');

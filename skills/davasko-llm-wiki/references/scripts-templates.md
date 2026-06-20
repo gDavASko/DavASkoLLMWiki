@@ -26,14 +26,14 @@ Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE
 Handles CLI-based searching of wiki pages and single-file manual ingestion.
 - **Key Enhancements**:
   - Search matches return snippets with line numbers and ANSI-highlighted text.
-  - Looks up core files (`log.md`, `index.md`, `contradictions.md`) directly in the root of the layer's `wiki/` directory.
+  - Looks up core files (`index.md`, `contradictions.md`) directly in the root of the layer's `wiki/` directory.
   - Auto-detects the layer context based on current working directory (CWD).
   - New subcommands: `--list-layers` (lists the dependency graph) and `--info` (shows metrics and path configs).
 
 ---
 
 ## 4. Ingestion Buffer Pipeline: `system/ingest-newdata.js`
-Monitors the `NewData/` folder. When raw source files are placed under layer-specific folders inside it, running this script automatically sanitizes filenames, moves them to the appropriate `raw/docs/` layer folder, generates a summary template in `wiki/sources/`, appends changes to `log.md`, and runs the linter.
+Monitors the `NewData/` folder. When raw source files are placed under layer-specific folders inside it, running this script automatically sanitizes filenames, moves them to the appropriate `raw/docs/` layer folder, generates a summary template in `wiki/sources/`, and runs the linter.
 
 ---
 

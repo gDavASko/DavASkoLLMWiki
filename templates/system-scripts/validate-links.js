@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const submoduleRoot = path.resolve(__dirname, '..');
@@ -326,7 +326,12 @@ function validateLinks() {
     warnings: warnings.map(w => ({ file: path.relative(projectRoot, w.file), line: w.line, msg: w.msg })),
     errors: errors.map(e => ({ file: path.relative(projectRoot, e.file), line: e.line, msg: e.msg }))
   };
-  fs.writeFileSync(path.join(submoduleRoot, 'system/validate_errors.json'), JSON.stringify(jsonOutput, null, 2), 'utf8');
+  const errorsPath = path.join(submoduleRoot, 'system/validate_errors.json');
+  const dir = path.dirname(errorsPath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(errorsPath, JSON.stringify(jsonOutput, null, 2), 'utf8');
 
   // Display results
   console.log('\n=== Link Validation Summary ===');

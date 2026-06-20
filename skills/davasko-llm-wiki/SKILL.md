@@ -1,6 +1,6 @@
-﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿---
 name: davasko-llm-wiki
-description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including document versioning, stale links tracking, and search gaps policies), linting scripts, and IDE rule synchronization scripts.
+description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including search gaps policies), linting scripts, and IDE rule synchronization scripts.
 status: draft
 owner: DavASko
 license: MIT
@@ -13,7 +13,6 @@ required_reading:
   - references/data-standards.md
   - references/scripts-templates.md
   - references/sync-integration.md
-  - references/stale-documents-workflow.md
   - examples/setup-new-wiki.md
 known_risks:
   - Breaking dependency chains in wiki.json leading to recursive link parsing issues.
@@ -45,7 +44,6 @@ Structure layers, directory structures, and layer-to-layer dependencies:
 ### 2. Knowledge Base Data Standards
 Strict requirements for encoding (UTF-8 with BOM), markdown frontmatter, required fields, and wiki links:
 - [Data Standards Reference](references/data-standards.md)
-- [Stale Documents Registry & Verification Workflow](references/stale-documents-workflow.md)
 
 ### 3. Maintenance and Automation Scripts
 Clean, portable Javascript templates of the primary utility scripts:
@@ -86,7 +84,3 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 ## Full-Text Search Gaps Policy
 
 - **Policy**: If you search or query the codebase, plugins, or skills using grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods because a topic, convention, or code pattern was not directly found in the knowledge base maps or concepts (a search gap), you MUST document your findings. Add the description, links, and code symbols/examples to the knowledge base (under either `framework-wiki` or `project-a-wiki`, depending on the domain) before completing the task. If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic code searches.
-
-## Document Versioning and Stale Links Policy
-
-- **Policy**: Every wiki page must have a version field (`version: X.Y.Z`). Increment the version (minor/patch) and set `last_updated: YYYY-MM-DD HH:MM` on edit. All references to other pages must specify expected target version, e.g., `[[page-name]] (vX.Y.Z)`. If target version increases, referencing page must change status to `status: stale`, list in `stale_links` and be registered in `stale-documents.md`. Layer dependencies description must include clickable absolute/relative paths to the target dependency folder, e.g. `[davasko-wiki](../davasko-wiki)`.

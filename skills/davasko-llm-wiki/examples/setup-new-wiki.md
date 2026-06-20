@@ -46,7 +46,7 @@ We create the folders and manifests:
 
 ## 2. Setting Up Baseline Files
 
-We create the mandatory index, stub, and log files in each layer, and create a root plans folder.
+We create the mandatory index and stub files in each layer, and create a root plans folder.
 
 ### Root Plans Folder `plans/`
 - `plans/implementation_plan.md` (Design plans)
@@ -110,8 +110,7 @@ node system/ingest-newdata.js
 2. The transcript is moved to `llm-wiki/raw/transcripts/review-transcript.md` and converted to UTF-8 with BOM.
 3. A source-summary is generated at `web-app-wiki/wiki/sources/app-readme.md`.
 4. The index `web-app-wiki/wiki/index.md` is updated with `[[app-readme]]` in the Sources section.
-5. Logs are updated in local log files and the global `log.md`.
-6. The linter runs automatically.
+5. The linter runs automatically.
 
 ---
 

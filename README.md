@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿# DavASko LLM Wiki
+﻿﻿﻿﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -51,17 +51,7 @@ If a page, rule, or concept exists in multiple layers (e.g. both `engine-wiki` a
 
 ---
 
-## 3. Document Versioning & Stale Links Policy
-
-To prevent knowledge obsolescence and track link validity across layers:
-- **YAML Metadata**: Every wiki page frontmatter must contain a `version: X.Y.Z` field. Any time a page is updated, its version must be bumped (minor/patch) and the `last_updated: YYYY-MM-DD HH:MM` field updated with the current local time.
-- **Expected Versions in Links**: All wiki links (`[[page-name]]`) must explicitly declare the expected version of the target document, e.g., `[[page-name]] (vX.Y.Z)`.
-- **Stale Document Detection**: If a target document's version is updated to a value higher than expected by a referencing link, the referencing page is marked as **stale**.
-- **Stale Markings**: Stale pages must change their status to `status: stale`, list outdated links in a `stale_links: []` frontmatter array, and be added to the registry note `wiki/stale-documents.md` of the corresponding layer.
-
----
-
-## 4. Full-Text Search Gaps Policy
+## 3. Full-Text Search Gaps Policy
 
 To continuously improve the quality and coverage of the knowledge base:
 - **Search Gap Definition**: If an AI assistant performs a full-text search (using grep, ripgrep, custom script searches, etc.) because a topic, convention, or code pattern was not directly found in the wiki maps or concepts, this indicates a search gap.
@@ -70,7 +60,7 @@ To continuously improve the quality and coverage of the knowledge base:
 
 ---
 
-## 5. Directory Layout and Plans Isolation
+## 4. Directory Layout and Plans Isolation
 
 The system separates planning documentation (ExecPlans, checklists) from the durable knowledge base:
 
@@ -93,10 +83,8 @@ Each individual layer directory must conform to the following directory layout:
 ├── wiki.json                   # Manifest file specifying dependencies
 ├── wiki/                       # Compiled, AI-maintained knowledge base
 │   ├── index.md                # Layer-specific catalog of pages (Table of Contents)
-│   ├── log.md                  # Local append-only operations log
 │   ├── contradictions.md       # Open conflicts and questions register
 │   ├── stubs.md                # Declared stubs to resolve out-of-boundary references
-│   ├── stale-documents.md      # Registry of stale documents requiring version updates
 │   ├── concepts/               # Reusable patterns, guidelines, and rules
 │   ├── entities/               # Service definitions, scenes, classes, packages
 │   ├── runbooks/               # Step-by-step developer checklists and guides
@@ -111,7 +99,7 @@ Each individual layer directory must conform to the following directory layout:
 
 ---
 
-## 6. Ingestion Workflow & System Scripts
+## 5. Ingestion Workflow & System Scripts
 
 The framework includes automation tools in the `system/` directory:
 
@@ -122,13 +110,13 @@ sequenceDiagram
     participant Script as Ingest Script (ingest-newdata.js)
     participant Raw as Immutable Layer (raw/)
     participant Wiki as Derived Wiki Page (wiki/)
-    participant Index as index.md / log.md
+    participant Index as index.md
     
     User->>NewData: Drop raw documentation file
     User->>Script: Run node system/ingest-newdata.js
     Script->>Raw: Move file, convert to UTF-8 BOM, create .meta
     Script->>Wiki: Generate source summary in wiki/sources/
-    Script->>Index: Update local index.md and changelogs (log.md)
+    Script->>Index: Update local index.md
     Script->>Script: Run system/lint-wiki.js validator
 ```
 
@@ -141,7 +129,7 @@ sequenceDiagram
 
 ---
 
-## 7. How to Deploy the LLM Wiki in a New Workspace
+## 6. How to Deploy the LLM Wiki in a New Workspace
 
 Follow these steps to initialize the DavASko LLM Wiki in any project:
 
@@ -155,11 +143,9 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
 2. Create a `plans/` directory in the workspace root.
 3. Add a `wiki.json` manifest to each layer to define its dependency chain.
 4. In each layer, create the basic folder structures and write initial placeholder lists:
-   - `wiki/index.md`
-   - `wiki/stubs.md`
-   - `wiki/stale-documents.md`
-   - `wiki/log.md`
-   - `wiki/contradictions.md`
+   - wiki/index.md
+   - wiki/stubs.md
+   - wiki/contradictions.md
 
 ### Step 3: Install AI Skills
 You can install the portable skills from this repository either project-locally or globally:

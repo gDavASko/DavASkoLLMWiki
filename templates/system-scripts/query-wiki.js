@@ -228,53 +228,8 @@ TextScriptImporter:
     }
   }
 
-  // 4. Update local log.md
-  const logPath = path.join(layerDir, 'wiki', 'log.md');
-  const localLogLines = [];
-  if (fs.existsSync(logPath)) {
-    let logContent = readUtf8(logPath);
-    const logHeader = `## [${dateStr}]`;
-    const logEntry = `- Imported new source: [[${nameWithoutExt}]] (source: raw/${destSubfolder}/${filename})`;
-    
-    let updatedLogContent = '';
-    if (logContent.includes(logHeader)) {
-      updatedLogContent = logContent.replace(logHeader, `${logHeader}\n${logEntry}`);
-    } else {
-      updatedLogContent = `${logHeader}\n${logEntry}\n\n` + logContent;
-    }
-    
-    // Calculate added lines for root log reference
-    const originalLines = logContent.split('\n');
-    writeUtf8Bom(logPath, updatedLogContent);
-    const newLines = updatedLogContent.split('\n');
-    
-    // Find the range of changes
-    const diffCount = newLines.length - originalLines.length;
-    const endLine = 1 + diffCount + 1; // approximate header + entries
-    localLogLines.push(1, endLine);
-    
-    console.log(`[INGEST] Logged changes in ${targetLayer}/wiki/log.md`);
-  }
 
-  // 5. Update root log.md with link to line range of local log
-  const rootLogPath = path.join(submoduleRoot, 'log.md');
-  if (fs.existsSync(rootLogPath)) {
-    let rootLogContent = readUtf8(rootLogPath);
-    const rootHeader = `## [${dateStr}]`;
-    const rangeSuffix = localLogLines.length === 2 ? `#L${localLogLines[0]}-L${localLogLines[1]}` : '';
-    const rootEntry = `- Добавлены изменения в [${targetLayer}/wiki/log.md](${targetLayer}/wiki/log.md${rangeSuffix})`;
-    
-    let updatedRoot = '';
-    if (rootLogContent.includes(rootHeader)) {
-      updatedRoot = rootLogContent.replace(rootHeader, `${rootHeader}\n${rootEntry}`);
-    } else {
-      updatedRoot = `${rootHeader}\n${rootEntry}\n\n` + rootLogContent;
-    }
-    writeUtf8Bom(rootLogPath, updatedRoot);
-    console.log(`[INGEST] Logged activity pointer in root log.md`);
-  }
-
-  // 6. Check and resolve stubs.md
+  // 4. Check and resolve stubs.md
   const stubsPath = path.join(layerDir, 'wiki', 'stubs.md');
   if (fs.existsSync(stubsPath)) {
     let stubsContent = readUtf8(stubsPath);
@@ -293,7 +248,7 @@ TextScriptImporter:
     }
   }
 
-  // 7. Validate
+  // 5. Validate
   if (noValidate) {
     console.log('[INGEST] Skipping validation check as requested.');
     return;

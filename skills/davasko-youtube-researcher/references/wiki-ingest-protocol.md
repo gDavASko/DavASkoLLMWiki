@@ -79,6 +79,6 @@ The script automatically performs the following tasks:
 1. Moves the `.md` files to `Assets/DavASko/davasko-ai-docs/<layer-name>/raw/<subfolder-path>/` and converts them to UTF-8 with BOM.
 2. Moves `.meta` files (if present) or generates a new GUID for wiki pages.
 3. Generates source summaries in `<layer-name>/wiki/sources/`.
-4. Appends links to local index lists `index.md`, local changelogs `log.md`, and the root `log.md` file.
+4. Appends links to local index lists `index.md`.
 5. Deletes the imported files from the temporary buffer `NewData/` (leaving it clean).
 6. Runs `system/lint-wiki.js` to ensure graph health.
