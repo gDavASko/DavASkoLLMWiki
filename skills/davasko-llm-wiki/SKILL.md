@@ -1,9 +1,9 @@
-﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including search gaps policies), linting scripts, and IDE rule synchronization scripts.
 status: draft
 owner: DavASko
-license: MIT
+license: Proprietary
 allowed_tools:
   - filesystem-write
   - run-command
