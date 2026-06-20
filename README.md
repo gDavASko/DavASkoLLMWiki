@@ -1,4 +1,4 @@
-﻿﻿﻿﻿# DavASko LLM Wiki
+﻿# DavASko LLM Wiki
 
 A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
 
@@ -99,7 +99,83 @@ Each individual layer directory must conform to the following directory layout:
 
 ---
 
-## 5. Ingestion Workflow & System Scripts
+## 5. RAG Vector Search Engine (v3.x)
+
+The framework includes a built-in **Retrieval-Augmented Generation (RAG)** engine powered by [Jina v3 embeddings](https://huggingface.co/jinaai/jina-embeddings-v3) for semantic search across the entire knowledge base.
+
+### Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph Indexing ["build-index.js (offline)"]
+        A["Scan layers<br/>(wiki.json)"] --> B["Chunk text<br/>(1200 words)"]
+        B --> C["Embed chunks<br/>(passage: prefix)"]
+        C --> D["Assign to cluster<br/>(nearest centroid)"]
+        D --> E["Write shards<br/>(sorted by score)"]
+    end
+
+    subgraph Query ["query-wiki.js (runtime)"]
+        F["Parse query"] --> G["Stream A: Symbol match<br/>(instant)"]
+        F --> H["Stream B: Semantic search<br/>(query: prefix)"]
+        G --> I["Merge + Graph Lift"]
+        H --> I
+        I --> J["Write .cursor-context-dump.md"]
+    end
+```
+
+### Search Algorithm
+
+**Hybrid search** combines two parallel streams:
+
+| Stream | Method | Speed | Use Case |
+|---|---|---|---|
+| **A — Symbolic** | Exact match on `id`, `symbols`, `tags`, `wikilinks` | Instant | C# classes, interfaces, enums |
+| **B — Semantic** | Cosine similarity with Jina v3 vectors | 1–2s | Natural language queries (RU/EN) |
+
+**Cosine similarity threshold**: `cos(q, d) ≥ 0.78`
+
+$$\text{similarity}(q, d) = \frac{\vec{q} \cdot \vec{d}}{||\vec{q}|| \cdot ||\vec{d}||} \geq 0.78$$
+
+**Graph Lift** (+1 step): For exact matches, the engine also returns:
+- Parent document via `extends` field
+- Referenced documents via `[[WikiLinks]]` in the body
+
+### Jina v3 Asymmetric Prefixes
+
+The model uses **asymmetric prefixing** for optimal retrieval:
+- **Indexing**: `passage: <chunk text>` — used when embedding document chunks
+- **Querying**: `query: <search phrase>` — used when embedding the search query
+
+### Model & Vector Specs
+
+| Parameter | Value |
+|---|---|
+| Model | `jinaai/jina-embeddings-v3` |
+| Precision | FP16 |
+| Vector dimensions | 1024 |
+| Chunk size | 1200 words |
+| Chunk overlap | 200 words |
+| Storage | JSON shards in `system/index-shards/` |
+
+### Core Context Protocol (CCP)
+
+AI agents should follow this protocol before answering questions:
+
+```bash
+# 1. Search the knowledge base
+node system/query-wiki.js --query "CowController, blend tree optimization"
+
+# 2. Read the context dump
+cat .cursor-context-dump.md
+
+# 3. Use retrieved documents as grounded context
+```
+
+The context dump file (`.cursor-context-dump.md`) is limited to **120KB** and only a short status line is sent to stdout to prevent IDE buffer overflow.
+
+---
+
+## 6. System Scripts & Commands
 
 The framework includes automation tools in the `system/` directory:
 
@@ -111,34 +187,60 @@ sequenceDiagram
     participant Raw as Immutable Layer (raw/)
     participant Wiki as Derived Wiki Page (wiki/)
     participant Index as index.md
-    
+
     User->>NewData: Drop raw documentation file
-    User->>Script: Run node system/ingest-newdata.js
+    User->>Script: Run node system/scripts/ingest-newdata.js
     Script->>Raw: Move file, convert to UTF-8 BOM, create .meta
     Script->>Wiki: Generate source summary in wiki/sources/
     Script->>Index: Update local index.md
-    Script->>Script: Run system/lint-wiki.js validator
+    Script->>Script: Run system/scripts/lint-wiki.js validator
 ```
 
-- **`lint-wiki.js`**: Checks that all links resolve correctly, pages have the correct frontmatter/headers, UTF-8 BOM is present, and no secrets or Bitrix webhooks are committed.
-- **`validate-links.js`**: Scans the entire project workspace (including rules files) to identify broken wiki and markdown file links.
-- **`query-wiki.js`**: Provides CLI page searching and handles the single-file ingestion process. If a page exists in multiple layers, it prints a priority conflict warning and defaults to the most specific layer.
-- **`ingest-newdata.js`**: Automatically processes the `NewData/` incoming folder, routes files to layers, generates summaries, updates indexes/logs, and runs checks.
-- **`update-links.js`**: Safe path migration script using path-boundary regular expressions to prevent substring corruption.
-- **`run-evals.js`**: Automated regression test runner to verify LLM Q&A performance on key topics.
+### RAG Engine Scripts
+
+| Command | Description |
+|---|---|
+| `node system/build-index.js` | Build/update vector index (incremental, MD5 cache) |
+| `node system/build-index.js --force` | Full index rebuild (ignores MD5 cache) |
+| `node system/query-wiki.js --query "..."` | Hybrid search → `.cursor-context-dump.md` |
+| `node system/scripts/setup-model.js` | Download Jina v3 model to `system/models-cache/` |
+| `node system/scripts/pack-deps.js` | Pack all npm dependencies into `system/vendor/` |
+
+### Maintenance Scripts
+
+| Command | Description |
+|---|---|
+| `node system/sync-ai-rules.js` | Sync IDE rules and compile skill adapters |
+| `node system/scripts/lint-wiki.js` | Validate wiki pages (frontmatter, links, BOM) |
+| `node system/scripts/validate-links.js` | Check all wiki and markdown links |
+| `node system/scripts/query-wiki.js` | Legacy page lookup and single-file ingestion |
+| `node system/scripts/ingest-newdata.js` | Process `NewData/` incoming folder |
+| `node system/scripts/update-links.js` | Safe path migration (DEPRECATED) |
+| `node system/scripts/run-evals.js` | Regression test runner |
 
 ---
 
-## 6. How to Deploy the LLM Wiki in a New Workspace
+## 7. How to Deploy the LLM Wiki in a New Workspace
 
 Follow these steps to initialize the DavASko LLM Wiki in any project:
 
-### Step 1: Clone Rules and Scripts
-1. Create a submodule or folder named `davasko-ai-docs` in your repository.
-2. Copy the contents of the `templates/system-scripts/` directory into `davasko-ai-docs/system/`.
-3. Copy the script `templates/sync-ai-rules.ps1` to the project root directory.
+### Step 1: Clone Submodule
+1. Add this repository as a submodule named `davasko-ai-docs` in your project repository:
+   ```bash
+   git submodule add <repo-url> Assets/DavASko/davasko-ai-docs
+   ```
 
-### Step 2: Initialize Layers and Plans
+### Step 2: Install Dependencies
+1. Install Node.js dependencies (uses offline `.tgz` from `system/vendor/`):
+   ```bash
+   npm install
+   ```
+2. Download the Jina v3 embedding model (one-time, requires internet):
+   ```bash
+   node system/scripts/setup-model.js
+   ```
+
+### Step 3: Initialize Layers and Plans
 1. Create directories for your layers (e.g. `llm-wiki/`, `engine-wiki/`, `framework-wiki/`, and project-specific layers).
 2. Create a `plans/` directory in the workspace root.
 3. Add a `wiki.json` manifest to each layer to define its dependency chain.
@@ -147,31 +249,48 @@ Follow these steps to initialize the DavASko LLM Wiki in any project:
    - wiki/stubs.md
    - wiki/contradictions.md
 
-### Step 3: Install AI Skills
+### Step 4: Build the Search Index
+Build the vector index for semantic search:
+```bash
+node system/build-index.js
+```
+
+### Step 5: Install AI Skills
 You can install the portable skills from this repository either project-locally or globally:
 
 #### Option A: Project-Local Installation (Recommended)
 Copy the skills you want to use from the `skills/` directory of this repository into your layer's `raw/ai-skills~/` folder:
 - `llm-wiki/raw/ai-skills~/davasko-llm-wiki/`
+- `llm-wiki/raw/ai-skills~/davasko-wiki-search/`
+- `llm-wiki/raw/ai-skills~/davasko-wiki-ingest/`
 - `llm-wiki/raw/ai-skills~/davasko-youtube-researcher/`
 
 Run the synchronizer to deploy rules and compile skill adapters for your IDE:
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\sync-ai-rules.ps1
+```bash
+node system/sync-ai-rules.js
 ```
 
 #### Option B: Global Installation
-Copy the skill folders from the `skills/` directory into your system's global AI configurations directory:
-- Path: `C:\Users\<YourUsername>\.gemini\config\skills\` (e.g. copy the folder `skills/davasko-youtube-researcher/` there).
+You can synchronize the skills globally to your system's global AI configurations directory (`~/.gemini/config/skills/`) by running the synchronizer with the `--global` flag:
+```bash
+node system/sync-ai-rules.js --global
+```
 
 This makes the skill globally available to all projects on this machine.
 
-### Step 4: Verify the Setup
+### Step 6: Verify the Setup
 Validate the database setup and run regression tests:
-```powershell
-node davasko-ai-docs/system/lint-wiki.js
-node davasko-ai-docs/system/validate-links.js
-node davasko-ai-docs/system/run-evals.js
+```bash
+node system/scripts/lint-wiki.js
+node system/scripts/validate-links.js
+node system/scripts/run-evals.js
+```
+
+Test the search engine:
+```bash
+node system/query-wiki.js --query "test query"
+cat .cursor-context-dump.md
 ```
 
 If the validation passes with **0 errors**, your workspace is fully prepared for structured AI collaboration!
+

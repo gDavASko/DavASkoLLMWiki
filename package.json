@@ -1,0 +1,24 @@
+{
+  "name": "davasko-llm-wiki",
+  "version": "3.0.0",
+  "description": "DavASko LLM Wiki — Hierarchical RAG Knowledge Base with Jina v3 Vector Search",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build-index": "node system/build-index.js",
+    "build-index:force": "node system/build-index.js --force",
+    "query": "node system/query-wiki.js --query",
+    "lint": "node system/scripts/lint-wiki.js",
+    "validate": "node system/scripts/validate-links.js",
+    "evals": "node system/scripts/run-evals.js",
+    "sync-rules": "node system/sync-ai-rules.js",
+    "setup-model": "node system/scripts/setup-model.js",
+    "pack-deps": "node system/scripts/pack-deps.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "file:./system/vendor/huggingface-transformers.tgz"
+  }
+}

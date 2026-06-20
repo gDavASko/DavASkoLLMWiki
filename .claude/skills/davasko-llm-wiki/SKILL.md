@@ -9,11 +9,11 @@ allowed_tools:
   - run-command
   - docs-read
 required_reading:
-  - ../../system/docs/architecture-setup.md
-  - ../../system/docs/data-standards.md
-  - ../../system/docs/scripts-templates.md
-  - ../../system/docs/sync-integration.md
-  - ../../system/docs/setup-new-wiki.md
+  - references/architecture-setup.md
+  - references/data-standards.md
+  - references/scripts-templates.md
+  - references/sync-integration.md
+  - examples/setup-new-wiki.md
 known_risks:
   - Breaking dependency chains in wiki.json leading to recursive link parsing issues.
   - Creating new markdown pages without UTF-8 with BOM encoding, breaking Cyrillic character support on Windows and Unity.
@@ -39,23 +39,23 @@ Always refer to the local reference documents inside the skill package before wr
 
 ### 1. Multi-Layered Wiki Architecture
 Structure layers, directory structures, and layer-to-layer dependencies:
-- [Architecture Setup Guide](../../system/docs/architecture-setup.md)
+- [Architecture Setup Guide](references/architecture-setup.md)
 
 ### 2. Knowledge Base Data Standards
 Strict requirements for encoding (UTF-8 with BOM), markdown frontmatter, required fields, and wiki links:
-- [Data Standards Reference](../../system/docs/data-standards.md)
+- [Data Standards Reference](references/data-standards.md)
 
 ### 3. Maintenance and Automation Scripts
 Clean, portable Javascript templates of the primary utility scripts:
-- [Scripts Templates Reference](../../system/docs/scripts-templates.md)
+- [Scripts Templates Reference](references/scripts-templates.md)
 
 ### 4. Rules & Skill Synchronizer Script
 How to configure and synchronize IDE agent rule files and local portable skills:
-- [Sync Integration Guide](../../system/docs/sync-integration.md)
+- [Sync Integration Guide](references/sync-integration.md)
 
 ### 5. Setup Walkthrough Example
 A complete example showing how to initialize a multi-project wiki from scratch:
-- [Setup New Wiki Example](../../system/docs/setup-new-wiki.md)
+- [Setup New Wiki Example](examples/setup-new-wiki.md)
 
 ## High-Level Workflow
 

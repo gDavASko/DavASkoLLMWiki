@@ -1,0 +1,18 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Git LFS — DavASkoLLMWiki v3.x
+# ═══════════════════════════════════════════════════════════════════════
+# Тяжёлые бинарные артефакты: модели ONNX, упакованные npm-зависимости,
+# и векторные шарды хранятся через Git LFS, чтобы не раздувать
+# основной git-репозиторий.
+
+# ─── ONNX-модели (Jina v3 и др.) ─────────────────────────────────────
+system/models-cache/**/*.onnx filter=lfs diff=lfs merge=lfs -text
+system/models-cache/**/*.onnx_data filter=lfs diff=lfs merge=lfs -text
+system/models-cache/**/*.bin filter=lfs diff=lfs merge=lfs -text
+system/models-cache/**/*.safetensors filter=lfs diff=lfs merge=lfs -text
+
+# ─── Упакованные npm-зависимости (.tgz) ──────────────────────────────
+system/vendor/*.tgz filter=lfs diff=lfs merge=lfs -text
+
+# ─── Векторные шарды (JSON с эмбеддингами — могут быть большими) ──────
+system/index-shards/*.json filter=lfs diff=lfs merge=lfs -text

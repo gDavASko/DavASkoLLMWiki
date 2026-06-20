@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿# DavASko LLM Wiki
+﻿﻿﻿﻿﻿﻿# DavASko LLM Wiki
 
 Многоуровневая, самовалидируемая база знаний, совместимая с Obsidian и оптимизированная для организации совместной работы разработчиков и ИИ-ассистентов (таких как Claude 3.5 Sonnet, Gemini 1.5 Pro и GPT-4o) в рабочей области проекта.
 
@@ -113,19 +113,20 @@ sequenceDiagram
     participant Index as index.md
     
     User->>NewData: Копирует новый файл-первоисточник
-    User->>Script: Запускает node system/ingest-newdata.js
+    User->>Script: Запускает node davasko-ai-docs/system/scripts/ingest-newdata.js
     Script->>Raw: Переносит файл, сохраняет в UTF-8 BOM, делает .meta
     Script->>Wiki: Генерирует карточку-резюме в wiki/sources/
     Script->>Index: Добавляет ссылку в оглавление
-    Script->>Script: Запускает валидацию через system/lint-wiki.js
+    Script->>Script: Запускает валидацию через system/scripts/lint-wiki.js
 ```
 
-- **`lint-wiki.js`**: Проверяет целостность ссылок, разметку страниц, наличие UTF-8 BOM, отсутствие секретов или вебхуков Битрикса.
-- **`validate-links.js`**: Глобальный валидатор, сканирующий все файлы проекта на наличие сломанных ссылок.
-- **`query-wiki.js`**: Консольный инструмент поиска и импорта. Если страница найдена в нескольких слоях, он сообщает о конфликте приоритетов и по умолчанию отдает проектную версию.
-- **`ingest-newdata.js`**: Скрипт автоматического переноса файлов из временного буфера `NewData/` в постоянные слои.
-- **`update-links.js`**: Скрипт безопасной миграции путей с регулярными выражениями границ путей и слов.
-- **`run-evals.js`**: Инструмент запуска регрессионных тестов Q&A.
+- **`system/sync-ai-rules.js`**: Кроссплатформенный скрипт на Node.js для копирования мастер-правил и компиляции активных навыков для IDE.
+- **`system/scripts/lint-wiki.js`**: Проверяет целостность ссылок, разметку страниц, наличие UTF-8 BOM, отсутствие секретов или вебхуков Битрикса.
+- **`system/scripts/validate-links.js`**: Глобальный валидатор, сканирующий все файлы проекта на наличие сломанных ссылок.
+- **`system/scripts/query-wiki.js`**: Консольный инструмент поиска и импорта. Если страница найдена в нескольких слоях, он сообщает о конфликте приоритетов и по умолчанию отдает проектную версию.
+- **`system/scripts/ingest-newdata.js`**: Скрипт автоматического переноса файлов из временного буфера `NewData/` в постоянные слои.
+- **`system/scripts/update-links.js`**: Скрипт безопасной миграции путей с регулярными выражениями границ путей и слов.
+- **`system/scripts/run-evals.js`**: Инструмент запуска регрессионных тестов Q&A.
 
 ---
 
@@ -133,10 +134,11 @@ sequenceDiagram
 
 Для разворачивания базы знаний выполните следующие шаги:
 
-### Шаг 1: Копирование скриптов и правил
-1. Создайте в корне проекта папку базы знаний (например, `davasko-ai-docs`).
-2. Скопируйте шаблоны скриптов из `templates/system-scripts/` в папку `davasko-ai-docs/system/`.
-3. Поместите скрипт `templates/sync-ai-rules.ps1` в корень проекта.
+### Шаг 1: Подключение субмодуля
+1. Добавьте этот репозиторий в свой проект как Git-субмодуль с именем `davasko-ai-docs`:
+   ```bash
+   git submodule add <repo-url> Assets/DavASko/davasko-ai-docs
+   ```
 
 ### Шаг 2: Инициализация слоев и планов
 1. Создайте папки слоев (например, `llm-wiki/`, `engine-wiki/`, `framework-wiki/`, и проектные слои).
@@ -147,31 +149,30 @@ sequenceDiagram
    - `wiki/stubs.md`
    - `wiki/contradictions.md`
 
-### Шаг 3: Установка ИИ-навыков
-Вы можете установить переносимые навыки из этого репозитория локально в проект или глобально в систему:
-
-#### Вариант А: Локально в проект (Рекомендуется)
+### Шаг 3: Установка и синхронизация ИИ-навыков
 Скопируйте папки нужных навыков из каталога `skills/` этого репозитория в папку `raw/ai-skills~/` соответствующего слоя вашей базы знаний:
 - `llm-wiki/raw/ai-skills~/davasko-llm-wiki/`
 - `llm-wiki/raw/ai-skills~/davasko-youtube-researcher/`
 
-Запустите скрипт синхронизации из корня проекта для развертывания правил в IDE:
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\sync-ai-rules.ps1
+Запустите кроссплатформенный скрипт синхронизации через Node.js:
+```bash
+node Assets/DavASko/davasko-ai-docs/system/sync-ai-rules.js
 ```
 
-#### Вариант Б: Глобально на машине разработчика
-Поместите папки навыков из каталога `skills/` в глобальную директорию конфигурации ИИ:
-- Путь: `C:\Users\<ИмяПользователя>\.gemini\config\skills\` (например, скопируйте туда папку `skills/davasko-youtube-researcher/`).
+#### Вариант Б: Глобальная установка навыков
+Вы можете синхронизировать навыки глобально в каталог конфигурации пользователя на машине (`~/.gemini/config/skills/`), запустив скрипт с флагом `--global`:
+```bash
+node Assets/DavASko/davasko-ai-docs/system/sync-ai-rules.js --global
+```
 
 Это сделает навыки доступными для всех сессий ИИ на данной машине.
 
 ### Шаг 4: Проверка готовности
 Запустите проверку базы знаний и регрессионное тестирование:
-```powershell
-node davasko-ai-docs/system/lint-wiki.js
-node davasko-ai-docs/system/validate-links.js
-node davasko-ai-docs/system/run-evals.js
+```bash
+node Assets/DavASko/davasko-ai-docs/system/scripts/lint-wiki.js
+node Assets/DavASko/davasko-ai-docs/system/scripts/validate-links.js
+node Assets/DavASko/davasko-ai-docs/system/scripts/run-evals.js
 ```
 
 Если валидация завершилась с **0 ошибок**, ваша база знаний полностью готова к работе с ИИ-ассистентами!

@@ -1,0 +1,90 @@
+{
+  "warnings": [],
+  "errors": [
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\architecture-setup.md",
+      "line": 30,
+      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\system\\davasko-wiki)"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\architecture-setup.md",
+      "line": 101,
+      "msg": "Global reference to missing wiki page [[my-project-specific-module]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 44,
+      "msg": "Global reference to missing wiki page [[related-page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 80,
+      "msg": "Global reference to missing wiki page [[page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 88,
+      "msg": "Global reference to missing wiki page [[related-page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 95,
+      "msg": "Global reference to missing wiki page [[page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 95,
+      "msg": "Global reference to missing wiki page [[module-lifecycle]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 97,
+      "msg": "Broken file link: \"../../plans/task.md\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\plans\\task.md)"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
+      "line": 101,
+      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\system\\davasko-wiki)"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\scripts-templates.md",
+      "line": 21,
+      "msg": "Doubled system directory path detected in line: \"Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE rule files like `.cursorrules`, `.clinerules`, etc.) for broken links, old directory mappings, and doubled system paths (`system/system/`).\""
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "line": 66,
+      "msg": "Global reference to missing wiki page [[auth-workflow]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "line": 69,
+      "msg": "Global reference to missing wiki page [[readme-synthesis]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "line": 72,
+      "msg": "Global reference to missing wiki page [[llm-wiki/wiki/index]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "line": 106,
+      "msg": "Global reference to missing wiki page [[app-readme]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\AGENTS.md",
+      "line": 34,
+      "msg": "Global reference to missing wiki page [[page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\CLAUDE.md",
+      "line": 34,
+      "msg": "Global reference to missing wiki page [[page-name]]"
+    },
+    {
+      "file": "Projects\\DavASkoLLMWiki\\README.md",
+      "line": 141,
+      "msg": "Global reference to missing wiki page [[WikiLinks]]"
+    }
+  ]
+}
