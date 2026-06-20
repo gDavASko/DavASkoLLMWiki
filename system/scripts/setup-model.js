@@ -47,8 +47,6 @@ const MODEL_FILES = [
   'tokenizer.json',
   'tokenizer_config.json',
   'special_tokens_map.json',
-  'onnx/model.onnx',
-  'onnx/model.onnx_data',
   'onnx/model_fp16.onnx',
 ];
 

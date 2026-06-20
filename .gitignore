@@ -8,7 +8,6 @@ package-lock.json
 
 # ─── Рантайм-артефакты RAG-поиска ────────────────────────────────────
 .cursor-context-dump.md
-system/models-cache/
 
 # ─── Мета-индекс (пересобирается через build-index.js) ───────────────
 system/wiki-index.json
