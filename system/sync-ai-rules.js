@@ -24,9 +24,16 @@ while (projectRoot) {
   projectRoot = parent;
 }
 
+// Dev mode: running inside the framework's own repository (submodule root == project
+// root). Here skills/ is already the live source the IDE loads, so writing compiled
+// copies into .claude/skills, .agents/skills, etc. would double-register every skill.
+const isDevRepo = path.resolve(submoduleRoot) === path.resolve(projectRoot);
+
 console.log('=== sync-ai-rules ===');
 console.log(`Submodule Root: ${submoduleRoot}`);
-console.log(`Project Root:   ${projectRoot}\n`);
+console.log(`Project Root:   ${projectRoot}`);
+if (isDevRepo) console.log('Mode:           DEV (framework repo) — local IDE skill copies skipped');
+console.log('');
 
 // 2. Locate Rules Directory
 let rulesDir = '';
@@ -44,14 +51,20 @@ for (const c of rulesCandidates) {
 
 const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
 
-// Helper to write UTF-8 with BOM
-function writeTextUtf8Bom(filePath, content) {
+// Encoding policy (Data Standards \u00A71): BOM only for .md; everything else no BOM.
+function shouldHaveBom(filePath) {
+  return path.extname(filePath).toLowerCase() === '.md';
+}
+
+// Helper to write UTF-8 text honoring the BOM-only-for-.md policy.
+function writeText(filePath, content) {
   const contentBuf = Buffer.from(content, 'utf8');
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  fs.writeFileSync(filePath, Buffer.concat([bom, contentBuf]));
+  const out = shouldHaveBom(filePath) ? Buffer.concat([bom, contentBuf]) : contentBuf;
+  fs.writeFileSync(filePath, out);
 }
 
 // Helper to read UTF-8 (stripping BOM if present)
@@ -63,15 +76,15 @@ function readText(filePath) {
   return content;
 }
 
-// Helper to copy text file ensuring UTF-8 with BOM
-function copyTextFileUtf8Bom(src, dest) {
+// Helper to copy a text file, re-emitting with the correct BOM policy.
+function copyTextFile(src, dest) {
   if (!fs.existsSync(src)) return;
   const content = readText(src);
-  writeTextUtf8Bom(dest, content);
+  writeText(dest, content);
 }
 
-// Helper to copy directory recursively ensuring UTF-8 with BOM for text files
-function copyDirectoryUtf8Bom(srcDir, destDir) {
+// Helper to copy a directory recursively, applying the BOM policy to text files.
+function copyDirectory(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return;
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -83,17 +96,57 @@ function copyDirectoryUtf8Bom(srcDir, destDir) {
     const destPath = path.join(destDir, item);
     const stat = fs.statSync(srcPath);
     if (stat.isDirectory()) {
-      copyDirectoryUtf8Bom(srcPath, destPath);
+      copyDirectory(srcPath, destPath);
     } else {
       const ext = path.extname(item).toLowerCase();
       const textExtensions = ['.md', '.txt', '.json', '.ps1', '.js', '.mdc', '.yml', '.yaml', '.clinerules', '.cursorrules', '.windsurfrules'];
       if (textExtensions.includes(ext) || item === 'AGENTS.md' || item === 'CLAUDE.md' || item === 'GEMINI.md') {
-        copyTextFileUtf8Bom(srcPath, destPath);
+        copyTextFile(srcPath, destPath);
       } else {
         fs.copyFileSync(srcPath, destPath);
       }
     }
   });
+}
+
+// Bundle any ../../system/docs|scripts files a skill references into the skill
+// itself (references/, examples/, scripts/) and rewrite the paths, so the synced
+// SKILL.md is self-contained in every IDE destination. Generic for all skills.
+function bundleSkillSystemRefs(dest) {
+  const destSkillMd = path.join(dest, 'SKILL.md');
+  if (!fs.existsSync(destSkillMd)) return;
+  let content = readText(destSkillMd);
+
+  const systemDocsDir = path.join(submoduleRoot, 'system', 'docs');
+  const systemScriptsDir = path.join(submoduleRoot, 'system', 'scripts');
+
+  const collect = (re) => {
+    const names = new Set();
+    let m;
+    while ((m = re.exec(content)) !== null) names.add(m[1]);
+    return names;
+  };
+
+  // Docs: setup-new-wiki.md \u2192 examples/, the rest \u2192 references/
+  collect(/\.\.\/\.\.\/system\/docs\/([A-Za-z0-9._-]+)/g).forEach(file => {
+    const sub = (file === 'setup-new-wiki.md') ? 'examples' : 'references';
+    copyTextFile(path.join(systemDocsDir, file), path.join(dest, sub, file));
+  });
+  // Scripts \u2192 scripts/
+  collect(/\.\.\/\.\.\/system\/scripts\/([A-Za-z0-9._-]+)/g).forEach(file => {
+    copyTextFile(path.join(systemScriptsDir, file), path.join(dest, 'scripts', file));
+  });
+
+  content = rewriteSystemRefs(content);
+  writeText(destSkillMd, content);
+}
+
+// Rewrite ../../system/... references to the bundled, self-contained locations.
+function rewriteSystemRefs(content) {
+  return content
+    .replace(/\.\.\/\.\.\/system\/docs\/setup-new-wiki\.md/g, 'examples/setup-new-wiki.md')
+    .replace(/\.\.\/\.\.\/system\/docs\//g, 'references/')
+    .replace(/\.\.\/\.\.\/system\/scripts\//g, 'scripts/');
 }
 
 // Helper to delete directory recursively
@@ -128,7 +181,7 @@ if (rulesDir) {
     const srcPath = path.join(rulesDir, t.src);
     const dstPath = path.join(projectRoot, t.dst);
     if (fs.existsSync(srcPath)) {
-      copyTextFileUtf8Bom(srcPath, dstPath);
+      copyTextFile(srcPath, dstPath);
       console.log(`  [OK] Rule: ${t.src}  ->  ${t.dst}`);
     } else {
       console.log(`  [SKIP] Rule ${t.src} not found in rules directory.`);
@@ -147,7 +200,7 @@ if (fs.existsSync(claudeCmdsSource)) {
   }
   fs.readdirSync(claudeCmdsSource).forEach(file => {
     if (file.endsWith('.md')) {
-      copyTextFileUtf8Bom(path.join(claudeCmdsSource, file), path.join(claudeCmdsDest, file));
+      copyTextFile(path.join(claudeCmdsSource, file), path.join(claudeCmdsDest, file));
       console.log(`  [OK] Claude command: ${file}  ->  .claude/commands/${file}`);
     }
   });
@@ -274,15 +327,16 @@ activeSkills.forEach(skill => {
   const skillSourceDir = skill.path;
   const skillMdPath = path.join(skillSourceDir, 'SKILL.md');
 
-  // Define local IDE folder destinations
-  const dirDestinations = [
+  // Define local IDE folder destinations. In dev mode these are skipped so the
+  // framework repo does not double-register its own skills.
+  const dirDestinations = isDevRepo ? [] : [
     path.join(projectRoot, '.agents', 'skills', skillName),
     path.join(projectRoot, '.codex', 'skills', skillName),
     path.join(projectRoot, '.claude', 'skills', skillName),
     path.join(projectRoot, '.gemini', 'skills', skillName)
   ];
 
-  // If --global flag is set, add global .gemini config folder
+  // If --global flag is set, add global .gemini config folder (allowed even in dev mode)
   if (isGlobal) {
     const homeDir = process.env.USERPROFILE || process.env.HOME || process.env.HOMEPATH;
     if (homeDir) {
@@ -292,64 +346,18 @@ activeSkills.forEach(skill => {
     }
   }
 
-  // Sync skill directory recursively to all target folders
+  // Sync skill directory recursively to all target folders, then bundle any
+  // ../../system/docs|scripts the SKILL.md references so it is self-contained.
   dirDestinations.forEach(dest => {
-    copyDirectoryUtf8Bom(skillSourceDir, dest);
-
-    // Apply compilation/dynamic assembly for davasko-llm-wiki
-    if (skillName === 'davasko-llm-wiki') {
-      // 1. Copy required system/docs and system/scripts into target
-      const systemDocsDir = path.join(submoduleRoot, 'system', 'docs');
-      const systemScriptsDir = path.join(submoduleRoot, 'system', 'scripts');
-
-      if (fs.existsSync(systemDocsDir)) {
-        fs.readdirSync(systemDocsDir).forEach(file => {
-          const src = path.join(systemDocsDir, file);
-          let destPath = '';
-          if (file === 'setup-new-wiki.md') {
-            destPath = path.join(dest, 'examples', file);
-          } else {
-            destPath = path.join(dest, 'references', file);
-          }
-          copyTextFileUtf8Bom(src, destPath);
-        });
-      }
-
-      if (fs.existsSync(systemScriptsDir)) {
-        fs.readdirSync(systemScriptsDir).forEach(file => {
-          const src = path.join(systemScriptsDir, file);
-          const destPath = path.join(dest, 'scripts', file);
-          copyTextFileUtf8Bom(src, destPath);
-        });
-      }
-
-      // 2. Read, translate and overwrite SKILL.md in the destination
-      const destSkillMd = path.join(dest, 'SKILL.md');
-      if (fs.existsSync(destSkillMd)) {
-        let content = readText(destSkillMd);
-
-        // Path Translation Regexes
-        content = content.replace(/\.\.\/\.\.\/system\/docs\/setup-new-wiki\.md/g, 'examples/setup-new-wiki.md');
-        content = content.replace(/\.\.\/\.\.\/system\/docs\//g, 'references/');
-        content = content.replace(/\.\.\/\.\.\/system\/scripts\//g, 'scripts/');
-
-        writeTextUtf8Bom(destSkillMd, content);
-      }
-    }
+    copyDirectory(skillSourceDir, dest);
+    bundleSkillSystemRefs(dest);
   });
 
-  // Compile and sync SKILL.md to single rule file destinations
+  // Compile and sync SKILL.md to single rule file destinations (same path rewrite).
   const originalSkillMdContent = readText(skillMdPath);
-  let compiledSkillMdContent = originalSkillMdContent;
+  const compiledSkillMdContent = rewriteSystemRefs(originalSkillMdContent);
 
-  if (skillName === 'davasko-llm-wiki') {
-    // Translate paths for single files as well
-    compiledSkillMdContent = compiledSkillMdContent.replace(/\.\.\/\.\.\/system\/docs\/setup-new-wiki\.md/g, 'examples/setup-new-wiki.md');
-    compiledSkillMdContent = compiledSkillMdContent.replace(/\.\.\/\.\.\/system\/docs\//g, 'references/');
-    compiledSkillMdContent = compiledSkillMdContent.replace(/\.\.\/\.\.\/system\/scripts\//g, 'scripts/');
-  }
-
-  const singleTargets = [
+  const singleTargets = isDevRepo ? [] : [
     { path: path.join(projectRoot, '.claude', 'commands', `${skillName}.md`) },
     { path: path.join(projectRoot, '.cursor', 'rules', `${skillName}.mdc`) },
     { path: path.join(projectRoot, '.windsurf', 'rules', `${skillName}.md`) },
@@ -359,10 +367,10 @@ activeSkills.forEach(skill => {
   ];
 
   singleTargets.forEach(t => {
-    writeTextUtf8Bom(t.path, compiledSkillMdContent);
+    writeText(t.path, compiledSkillMdContent);
   });
 
-  console.log(`  [OK] Skill '${skillName}' synced and compiled.`);
+  console.log(`  [OK] Skill '${skillName}' ${isDevRepo ? 'compiled (dev mode: local IDE copies skipped)' : 'synced and compiled'}.`);
 });
 
 console.log('\nDone! All files and skills synced.\n');

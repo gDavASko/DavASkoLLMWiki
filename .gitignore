@@ -12,6 +12,22 @@ package-lock.json
 # ─── Мета-индекс (пересобирается через build-index.js) ───────────────
 system/wiki-index.json
 
+# ─── Отчёт детектора устаревания (пересобирается check-staleness.js) ──
+system/staleness-report.json
+
+# ─── Сгенерированные адаптеры скилов (создаёт sync-ai-rules.js) ──────
+# Источник истины — каталог skills/. Скомпилированные копии для IDE —
+# build-артефакты: не версионируются, чтобы не плодить двойную регистрацию.
+.agents/skills/
+.codex/skills/
+.claude/skills/
+.claude/commands/
+.cursor/rules/
+.windsurf/rules/
+.cline/rules/
+.roo/rules/
+.github/instructions/
+
 # ─── OS / IDE мусор ──────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
