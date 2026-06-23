@@ -113,7 +113,7 @@ node davasko-ai-docs/system/scripts/ingest-newdata.js
 We verify the integrity and regression performance of the whole vault:
 ```bash
 node davasko-ai-docs/system/scripts/validate-links.js
-node davasko-ai-docs/system/scripts/run-evals.js
+node davasko-ai-docs/system/scripts/check-sources.js
 ```
 
 If the link validation reports:
@@ -125,7 +125,7 @@ Errors: 0
 Validation passed successfully!
 ```
 
-And `run-evals.js` reports:
+And `check-sources.js` reports:
 ```
 === Regression Evals Summary ===
 Total tests: 5

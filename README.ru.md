@@ -126,7 +126,8 @@ sequenceDiagram
 - **`system/scripts/query-wiki.js`**: Консольный инструмент поиска и импорта. Если страница найдена в нескольких слоях, он сообщает о конфликте приоритетов и по умолчанию отдает проектную версию.
 - **`system/scripts/ingest-newdata.js`**: Скрипт автоматического переноса файлов из временного буфера `NewData/` в постоянные слои.
 - **`system/scripts/update-links.js`**: Скрипт безопасной миграции путей с регулярными выражениями границ путей и слов.
-- **`system/scripts/run-evals.js`**: Инструмент запуска регрессионных тестов Q&A.
+- **`system/scripts/check-sources.js`**: Проверка целостности цитат Q&A-набора (файлы-источники существуют) — НЕ метрика качества.
+- **`system/scripts/eval-retrieval.js`**: Измерение качества поиска (recall@k / MRR / nDCG, базлайны, калибровка порога).
 
 ---
 
@@ -172,7 +173,7 @@ node Assets/DavASko/davasko-ai-docs/system/sync-ai-rules.js --global
 ```bash
 node Assets/DavASko/davasko-ai-docs/system/scripts/lint-wiki.js
 node Assets/DavASko/davasko-ai-docs/system/scripts/validate-links.js
-node Assets/DavASko/davasko-ai-docs/system/scripts/run-evals.js
+node Assets/DavASko/davasko-ai-docs/system/scripts/check-sources.js
 ```
 
 Если валидация завершилась с **0 ошибок**, ваша база знаний полностью готова к работе с ИИ-ассистентами!

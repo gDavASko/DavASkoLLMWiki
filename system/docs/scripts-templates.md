@@ -42,11 +42,12 @@ Safely migrates paths, files, and wiki links across all workspace files using pa
 
 ---
 
-## 6. Regression Q&A Runner: `system/scripts/run-evals.js`
-Runs a suite of regression test queries against the search engine to verify that the AI can answer key architectural questions accurately.
+## 6. Source Citation Check: `system/scripts/check-sources.js`
+A **citation sanity check**, not a quality measure. Verifies that the source files cited by the Q&A set in `system/evals/questions.md` exist and are non-empty.
 - **Features**:
   - Consumes Q&A pairs from `system/evals/questions.md`.
-  - Simulates agent queries via `query-wiki.js` and evaluates the presence of key terms in the output.
+  - For each question, checks that every `required source` file is present.
+- For real retrieval-quality measurement (recall@k / MRR / nDCG, baselines, threshold calibration) use `system/scripts/eval-retrieval.js`.
 
 ---
 
@@ -64,5 +65,6 @@ The active source code of these scripts is located inside the submodule:
 3. **`query-wiki.js`**: [query-wiki.js](../scripts/query-wiki.js)
 4. **`ingest-newdata.js`**: [ingest-newdata.js](../scripts/ingest-newdata.js)
 5. **`update-links.js`**: [update-links.js](../scripts/update-links.js)
-6. **`run-evals.js`**: [run-evals.js](../scripts/run-evals.js)
-7. **`sync-ai-rules.js`**: [sync-ai-rules.js](../sync-ai-rules.js)
+6. **`check-sources.js`**: [check-sources.js](../scripts/check-sources.js)
+7. **`eval-retrieval.js`**: [eval-retrieval.js](../scripts/eval-retrieval.js)
+8. **`sync-ai-rules.js`**: [sync-ai-rules.js](../sync-ai-rules.js)

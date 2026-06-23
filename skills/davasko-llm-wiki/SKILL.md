@@ -34,7 +34,7 @@ You are a Senior Knowledge Base Architect and DevOps Specialist. You are an expe
 
 ## Goal
 
-Initialize, configure, or maintain a multi-layered **DavASko LLM Wiki** structure in a new target workspace. You will copy/generate the baseline directory hierarchy (including parallel project layers and a centralized plans/ directory), layer manifests (`wiki.json`), maintenance scripts (`lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `run-evals.js`), and synchronizers (`sync-ai-rules.js`) to ensure the wiki behaves reliably according to the system rules.
+Initialize, configure, or maintain a multi-layered **DavASko LLM Wiki** structure in a new target workspace. You will copy/generate the baseline directory hierarchy (including parallel project layers and a centralized plans/ directory), layer manifests (`wiki.json`), maintenance scripts (`lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `check-sources.js`), and synchronizers (`sync-ai-rules.js`) to ensure the wiki behaves reliably according to the system rules.
 
 ## Core Rules & References
 
@@ -71,7 +71,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 3. **Deploy Plans Directory**:
    - Create a `plans/` directory in the workspace root for task checklists, implementation plans, and walkthroughs, ensuring they do not clutter raw layers.
 4. **Deploy System Automation**:
-   - System scripts reside inside the submodule under `davasko-ai-docs/system/scripts/` (e.g. `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `run-evals.js`).
+   - System scripts reside inside the submodule under `davasko-ai-docs/system/scripts/` (e.g. `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `check-sources.js`).
 5. **Deploy Synchronizer Script**:
    - Run the synchronizer from the submodule folder: `node davasko-ai-docs/system/sync-ai-rules.js` to copy rule files and compile rules/skills adapters.
 6. **Establish Inbound Ingestion**:
@@ -80,7 +80,7 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 7. **Validate the Installation**:
    - Run the wiki linter: `node davasko-ai-docs/system/scripts/lint-wiki.js`.
    - Run the link validator: `node davasko-ai-docs/system/scripts/validate-links.js`.
-   - Run regression tests: `node davasko-ai-docs/system/scripts/run-evals.js`.
+   - Verify cited sources exist: `node davasko-ai-docs/system/scripts/check-sources.js`.
    - Ensure `validate_errors.json` has 0 errors.
 
 ## Full-Text Search Gaps Policy

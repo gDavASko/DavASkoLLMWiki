@@ -1,3 +1,15 @@
+// ═══════════════════════════════════════════════════════════════════════
+//  check-sources.js — проверка целостности цитат Q&A-набора
+// ───────────────────────────────────────────────────────────────────────
+//  ВНИМАНИЕ: это НЕ измерение качества поиска/ответов. Скрипт лишь проверяет,
+//  что файлы-источники, указанные в system/evals/questions.md, существуют и
+//  непусты (санити-чек цитат). Раньше назывался run-evals.js и вводил в
+//  заблуждение словом «regression tests».
+//
+//  Реальные метрики качества поиска (recall@k / MRR / nDCG, базлайны,
+//  калибровка) — в system/scripts/eval-retrieval.js.
+// ═══════════════════════════════════════════════════════════════════════
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -139,7 +151,7 @@ function runEvals() {
     process.exit(1);
   }
 
-  console.log('=== Running DavASko LLM Wiki Regression Evals ===');
+  console.log('=== DavASko Wiki — Source Citation Check (not a quality metric) ===');
   const questions = parseQuestions(questionsFile);
   console.log(`Loaded ${questions.length} regression questions.\n`);
 
