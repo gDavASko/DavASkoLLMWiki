@@ -1,6 +1,8 @@
 ﻿# DavASko LLM Wiki
 
-A multi-layered, self-validating, and Obsidian-compatible knowledge base framework designed specifically to organize AI agent work with high-performance LLMs (such as Claude 3.5 Sonnet, Gemini 1.5 Pro, and GPT-4o) in developer workspaces.
+A multi-layered, self-validating, Obsidian-compatible knowledge base framework with a built-in hybrid (symbolic + semantic) retrieval engine, designed to organize AI-agent work with modern LLMs (Claude, Gemini, GPT) in developer workspaces. It runs **fully offline** (vendored model + dependencies).
+
+> **Validated on a real corpus.** On a deployed 162-document knowledge base (KBPro) with 15 labeled questions, the semantic retriever reaches **recall@5 = 0.633 / MRR = 0.718**, versus a lexical (grep) baseline of **0.333 / 0.435** — i.e. the retrieval layer roughly **doubles recall** and **+65 % MRR** over "just grep the files". Two data-driven fixes raised the hybrid ranker's MRR from 0.641 to 0.718 (+12 %), and structure-aware chunking beat fixed-window by +7.8 % MRR. Full methodology, tables and charts: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html). See §6 below.
 
 ---
 
@@ -184,7 +186,45 @@ The context dump file (`.cursor-context-dump.md`) is limited to **120KB** and on
 
 ---
 
-## 6. System Scripts & Commands
+## 6. Evaluation & Results (measured, not assumed)
+
+Retrieval quality is **measured**, not asserted. `system/scripts/eval-retrieval.js` runs a labeled query set through several retrievers and reports **recall@k / MRR / nDCG@k**, including a `lexical` (grep-like) baseline that answers the only question that matters: *does the RAG layer beat just reading the files?*
+
+**Result on a real deployed corpus** (KBPro, 162 docs across 2 layers, 15 labeled questions, top-k = 5):
+
+| Retriever | recall@5 | MRR | nDCG@5 |
+|---|---|---|---|
+| **semantic (this engine)** | **0.633** | **0.718** | **0.626** |
+| hybrid (symbols + semantic) | 0.633 | 0.718 | 0.626 |
+| lexical (grep baseline) | 0.333 | 0.435 | 0.303 |
+
+The retrieval layer roughly **doubles recall** and improves first-hit ranking by **+65 % MRR** over a lexical baseline — empirical justification for the engine's existence.
+
+**Data-driven refinements** (each measured before/after on the same corpus):
+
+| Change | hybrid MRR |
+|---|---|
+| baseline (strict "symbols first" merge) | 0.641 |
+| → unified score-based ranking | 0.685 |
+| → drop generic acronyms (JSON/API) from symbol matching | **0.718** |
+
+**Chunking A/B** (structure-aware vs fixed word-window, same corpus): MRR **0.718 vs 0.666 (+7.8 %)**, nDCG +7 %, equal recall — structure-aware chunking wins.
+
+**Reproduce it:**
+```bash
+node system/build-index.js --force                 # build the index (offline)
+node system/scripts/eval-retrieval.js              # recall@k / MRR / nDCG + baselines
+node system/scripts/eval-retrieval.js --sweep      # calibrate the threshold on data
+npm test                                           # 32 unit tests of the retrieval core
+```
+
+Full write-up — method, dataset, all tables, charts, threat-to-validity — is the bundled scientific report: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html).
+
+> Honest caveats: n = 15 questions (small); indexing a 570M-param model on CPU is the speed bottleneck (batching adds only ~11 %); cluster routing is layer-coarse. These are documented, not hidden — see the report's *Limitations* section.
+
+---
+
+## 7. System Scripts & Commands
 
 The framework includes automation tools in the `system/` directory:
 
@@ -231,7 +271,7 @@ sequenceDiagram
 
 ---
 
-## 7. How to Deploy the LLM Wiki in a New Workspace
+## 8. How to Deploy the LLM Wiki in a New Workspace
 
 Follow these steps to initialize the DavASko LLM Wiki in any project:
 
