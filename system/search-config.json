@@ -8,6 +8,8 @@
   "top_k_documents": 5,
   "nprobe": 8,
   "ground_truth_boost": 0.05,
+  "stream_a_limit": 10,
+  "graph_lift_semantic": 2,
   "_fields": {
     "threshold_mode": "'relative' (рекомендуется) — адаптивный порог tau=max(junk_floor, relative_alpha*top_score) на каждый запрос; 'absolute' — фиксированный similarity_threshold (+ fallback).",
     "relative_alpha": "Для relative-режима: насколько хуже лучшего результата ещё допустимо (0..1). Меньше => шире выдача.",
@@ -16,6 +18,8 @@
     "similarity_fallback": "Для absolute-режима: повтор с этим порогом, если при threshold 0 результатов.",
     "top_k_documents": "Сколько документов возвращать.",
     "nprobe": "Сколько ближайших кластеров сканировать (IVF multi-probe). nprobe>=число_кластеров или <=0 => исчерпывающий поиск.",
-    "ground_truth_boost": "Бонус к score для raw/код (ground truth) над wiki-саммари при ранжировании (#2)."
+    "ground_truth_boost": "Бонус к score для raw/код (ground truth) над wiki-саммари при ранжировании (#2).",
+    "stream_a_limit": "Максимум символьных совпадений (Stream A), чтобы частый символ не затоплял выдачу. 0 — без лимита.",
+    "graph_lift_semantic": "Сколько топ-семантических результатов расширять по графу (extends/[[ссылки]]). 0 — только точные совпадения."
   }
 }

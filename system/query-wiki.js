@@ -31,7 +31,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cosineSimilarity, selectProbeClusters, applyThreshold, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
+import { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +59,8 @@ const SEARCH_DEFAULTS = {
   top_k_documents:      5,
   nprobe:               8,
   ground_truth_boost:   0.05,
+  stream_a_limit:       10,   // кап символьных совпадений (чтобы частый символ не затоплял)
+  graph_lift_semantic:  2,    // граф-lift от топ-N семантических результатов
 };
 function loadSearchConfig() {
   try {
@@ -73,6 +75,8 @@ const CFG = loadSearchConfig();
 const TOP_K_DOCUMENTS      = CFG.top_k_documents;
 const NPROBE               = CFG.nprobe;
 const GROUND_TRUTH_BOOST   = CFG.ground_truth_boost;
+const STREAM_A_LIMIT       = CFG.stream_a_limit;
+const GRAPH_LIFT_SEMANTIC  = CFG.graph_lift_semantic;
 const MAX_CONTEXT_BYTES    = 120_000; // ~120KB safety limit
 const MODEL_ID             = 'jinaai/jina-embeddings-v3';
 const MODEL_REVISION       = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
@@ -224,73 +228,17 @@ function embed(extractor, text) {
 // ═══════════════════════════════════════════════════════════════════════
 
 /**
- * Мгновенный поиск по symbols, tags, id, wikilinks.
- * Возвращает Map<fileId, { source: 'streamA', score: 1.0 }>
+ * Мгновенный символьный поиск (id/symbols/tags/wikilinks/подстрока-в-id).
+ * Ранжирование и mini-IDF — в общем ядре scoreSymbolMatches (тестируется).
+ * Возвращает Map<fileId, { source: 'streamA', score }>.
  */
 function runStreamA(symbols, index) {
-  /** @type {Map<string, {source: string, score: number}>} */
   const results = new Map();
   if (symbols.length === 0) return results;
-
-  const docs = index.documents || {};
-  const symbolsLower = symbols.map(s => s.toLowerCase());
-
-  for (const [docId, doc] of Object.entries(docs)) {
-    let matched = false;
-
-    // Совпадение по id
-    if (symbolsLower.includes(docId.toLowerCase())) {
-      matched = true;
-    }
-
-    // Совпадение по symbols
-    if (!matched && Array.isArray(doc.symbols)) {
-      for (const sym of doc.symbols) {
-        if (symbolsLower.includes(sym.toLowerCase())) {
-          matched = true;
-          break;
-        }
-      }
-    }
-
-    // Совпадение по tags
-    if (!matched && Array.isArray(doc.tags)) {
-      for (const tag of doc.tags) {
-        if (symbolsLower.includes(tag.toLowerCase())) {
-          matched = true;
-          break;
-        }
-      }
-    }
-
-    // Совпадение по wikilinks (если документ ссылается на искомый символ)
-    if (!matched && Array.isArray(doc.wikilinks)) {
-      for (const wl of doc.wikilinks) {
-        if (symbolsLower.includes(wl.toLowerCase())) {
-          matched = true;
-          break;
-        }
-      }
-    }
-
-    // Fallback: содержится ли символ в самом docId (raw-layer-Basename).
-    // Нужно для raw-документов: 'EventBus' в 'raw-kbpro-wiki-EventBus' → true.
-    // Защита: проверяем только символы длиной >= 4 чтобы избежать ложных срабатываний.
-    if (!matched) {
-      const docIdLower = docId.toLowerCase();
-      for (const sym of symbolsLower) {
-        if (sym.length >= 4 && docIdLower.includes(sym)) {
-          matched = true;
-          break;
-        }
-      }
-    }
-
-    if (matched) {
-      results.set(docId, { source: 'streamA', score: 1.0 });
-    }
+  const scored = scoreSymbolMatches(symbols, index.documents, { limit: STREAM_A_LIMIT });
+  for (const [docId, score] of scored) {
+    results.set(docId, { source: 'streamA', score });
   }
-
   return results;
 }
 
@@ -369,34 +317,42 @@ async function runStreamB(semanticQuery, index, extractor) {
 // ═══════════════════════════════════════════════════════════════════════
 
 /**
- * Для точных совпадений (Stream A) подгружаем:
- *   - extends → родительский документ (+1)
- *   - [[WikiLinks]] в теле → связанные документы (+1)
- * Для Stream B (semantic) граф не расширяется.
+ * Граф-lift (+1 шаг): подгружаем родителя (`extends`) и соседей (`[[WikiLinks]]`).
+ * Применяется и к точным совпадениям (Stream A), и к топ-N семантических
+ * результатов (Stream B) — раньше семантика граф не расширяла, и полезный
+ * контекст терялся именно там, где он нужнее всего.
  */
-function applyGraphLift(mergedResults, index) {
+function applyGraphLift(mergedResults, index, semanticLiftCount = 0) {
   const docs = index.documents || {};
   const additions = new Map();
 
-  for (const [fileId, info] of mergedResults.entries()) {
-    if (info.source !== 'streamA') continue;
-
+  const liftFrom = (fileId, baseScore) => {
     const doc = docs[fileId];
-    if (!doc) continue;
-
-    // extends → +1
-    if (doc.extends && docs[doc.extends] && !mergedResults.has(doc.extends)) {
-      additions.set(doc.extends, { source: 'graphLift', score: 0.9 });
+    if (!doc) return;
+    if (doc.extends && docs[doc.extends] && !mergedResults.has(doc.extends) && !additions.has(doc.extends)) {
+      additions.set(doc.extends, { source: 'graphLift', score: baseScore });
     }
-
-    // wikilinks → +1
     if (Array.isArray(doc.wikilinks)) {
       for (const wl of doc.wikilinks) {
         if (docs[wl] && !mergedResults.has(wl) && !additions.has(wl)) {
-          additions.set(wl, { source: 'graphLift', score: 0.85 });
+          additions.set(wl, { source: 'graphLift', score: baseScore - 0.05 });
         }
       }
     }
+  };
+
+  // 1. От точных совпадений (Stream A)
+  for (const [fileId, info] of mergedResults.entries()) {
+    if (info.source === 'streamA') liftFrom(fileId, 0.9);
+  }
+
+  // 2. От топ-N семантических (Stream B) — симметрия графа, с меньшим весом
+  if (semanticLiftCount > 0) {
+    const semantic = [...mergedResults.entries()]
+      .filter(([, i]) => i.source === 'streamB')
+      .sort((a, b) => b[1].score - a[1].score)
+      .slice(0, semanticLiftCount);
+    for (const [fileId] of semantic) liftFrom(fileId, 0.7);
   }
 
   // Объединение
@@ -564,7 +520,7 @@ async function main() {
 
   // 7. Графовый лифт (+1 step для точных совпадений)
   const liftedBefore = merged.size;
-  applyGraphLift(merged, index);
+  applyGraphLift(merged, index, GRAPH_LIFT_SEMANTIC);
   const liftedCount = merged.size - liftedBefore;
   if (liftedCount > 0) {
     console.error(`${C.cyan}[G]${C.reset} Графовый лифт: +${liftedCount} документов`);

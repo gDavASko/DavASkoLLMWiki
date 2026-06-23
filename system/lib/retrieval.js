@@ -83,6 +83,63 @@ export function applyThreshold(allScores, cfg = {}) {
 }
 
 /**
+ * Символьный поиск (Stream A) с ранжированием по типу совпадения и mini-IDF.
+ * Раньше любое совпадение давало score 1.0 — частый символ (Update, Manager)
+ * затоплял выдачу. Теперь:
+ *   - вес по типу: id > symbols > tags > wikilinks > подстрока-в-id;
+ *   - mini-IDF: символ, совпавший во многих документах, весит меньше (1/sqrt(df));
+ *   - результат капится top-`limit` по score, чтобы не затоплять контекст.
+ * Чистая функция (без модели) → покрыта юнит-тестами.
+ * @returns {Map<string, number>} docId → score (по убыванию)
+ */
+export function scoreSymbolMatches(symbols, documents, { weights, limit } = {}) {
+  const out = new Map();
+  if (!symbols || symbols.length === 0) return out;
+  const W = weights || { id: 1.0, symbols: 0.9, tags: 0.7, wikilinks: 0.6, idsub: 0.5 };
+  const syms = symbols.map(s => String(s).toLowerCase());
+  const lower = (arr) => (Array.isArray(arr) ? arr.map(x => String(x).toLowerCase()) : []);
+
+  const matches = new Map(); // docId -> { base, matchedSyms:Set }
+  const df = new Map();      // symbol -> число документов, где он совпал
+  for (const [docId, doc] of Object.entries(documents || {})) {
+    const idLower = docId.toLowerCase();
+    const symL = lower(doc.symbols);
+    const tagL = lower(doc.tags);
+    const wlL  = lower(doc.wikilinks);
+
+    let base = 0;
+    const matchedSyms = new Set();
+    for (const s of syms) {
+      let w = 0;
+      if (idLower === s) w = W.id;
+      else if (symL.includes(s)) w = W.symbols;
+      else if (tagL.includes(s)) w = W.tags;
+      else if (wlL.includes(s)) w = W.wikilinks;
+      else if (s.length >= 4 && idLower.includes(s)) w = W.idsub;
+      if (w > 0) { matchedSyms.add(s); if (w > base) base = w; }
+    }
+    if (matchedSyms.size > 0) {
+      matches.set(docId, { base, matchedSyms });
+      for (const s of matchedSyms) df.set(s, (df.get(s) || 0) + 1);
+    }
+  }
+
+  const scored = [];
+  for (const [docId, { base, matchedSyms }] of matches) {
+    let bestIdf = 0;
+    for (const s of matchedSyms) {
+      const idf = 1 / Math.sqrt(df.get(s) || 1); // df=1→1, df=4→0.5, df=9→0.33
+      if (idf > bestIdf) bestIdf = idf;
+    }
+    scored.push([docId, base * bestIdf]);
+  }
+  scored.sort((a, b) => b[1] - a[1]);
+  const capped = (limit && limit > 0) ? scored.slice(0, limit) : scored;
+  for (const [docId, score] of capped) out.set(docId, score);
+  return out;
+}
+
+/**
  * Загрузка feature-extraction пайплайна Jina v3 (строго оффлайн).
  * Логирование намеренно отсутствует — оборачивайте на стороне вызова.
  */
@@ -153,4 +210,4 @@ export async function embed(extractor, text, vectorDim = 1024) {
   return [...normalized, ...new Array(vectorDim - normalized.length).fill(0)];
 }
 
-export default { cosineSimilarity, selectProbeClusters, applyThreshold, initModel, embed };
+export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed };
