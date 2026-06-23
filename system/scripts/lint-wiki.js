@@ -63,33 +63,11 @@ function checkRawSourceStatus(filePath) {
     return { deprecated: true, reason: 'explicitly deprecated via frontmatter', validated: false };
   }
 
-  // 3. Age check (> 365 days)
-  try {
-    const stats = fs.statSync(filePath);
-    const mtimeMs = stats.mtimeMs;
-    const ageDays = (Date.now() - mtimeMs) / (1000 * 60 * 60 * 24);
-    
-    if (ageDays > 365) {
-      let validated = false;
-      const validatedFile = filePath + '.validated';
-      if (fs.existsSync(validatedFile)) {
-        validated = true;
-      } else if (frontmatter.last_validated) {
-        const valDate = new Date(frontmatter.last_validated);
-        if (!isNaN(valDate.getTime())) {
-          const valAgeDays = (Date.now() - valDate.getTime()) / (1000 * 60 * 60 * 24);
-          if (valAgeDays <= 365) {
-            validated = true;
-          }
-        }
-      }
-      
-      if (!validated) {
-        return { deprecated: true, reason: `implicit deprecation by age (${Math.floor(ageDays)} days without validation)`, validated: false };
-      }
-    }
-  } catch (e) {}
-
+  // Прежняя «неявная deprecation по возрасту» (mtime > 365 дней) удалена:
+  // mtime сбрасывается при git clone/checkout/копировании и не отражает возраст
+  // контента. Достоверное устаревание определяется по provenance-хэшам через
+  // system/scripts/check-staleness.js (изменился ли источник по содержимому),
+  // а не по времени модификации файла.
   return { deprecated: false, validated: false };
 }
 
