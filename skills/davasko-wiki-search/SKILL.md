@@ -13,7 +13,7 @@ required_reading:
 known_risks:
   - Running query-wiki.js without a built index (wiki-index.json) will fail. Always run build-index.js first.
   - The semantic search model loads into RAM (~500MB). On low-memory machines the script may crash.
-  - The .cursor-context-dump.md file is overwritten on every query. Do not rely on its persistence.
+  - The default .cursor-context-dump.md file is overwritten on every query. For parallel queries (multiple agents/sessions) pass `--out <path>` to write to a per-session file, or `--stdout` to stream the dump instead of touching the shared file.
 ---
 
 # DavASko Wiki Search (Hybrid RAG Query Skill)

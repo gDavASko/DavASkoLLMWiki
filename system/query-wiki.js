@@ -115,11 +115,15 @@ function writeTextBom(filePath, content) {
  */
 function parseArgs() {
   const args = process.argv.slice(2);
-  const queryIdx = args.indexOf('--query');
-  if (queryIdx === -1 || queryIdx + 1 >= args.length) {
-    return null;
-  }
-  return args[queryIdx + 1];
+  const get = (flag) => {
+    const i = args.indexOf(flag);
+    return i !== -1 && i + 1 < args.length ? args[i + 1] : null;
+  };
+  return {
+    query: get('--query'),       // обязательный
+    outPath: get('--out'),       // --out <path>: писать дамп сюда (вместо дефолта)
+    toStdout: args.includes('--stdout'), // --stdout: печатать дамп в stdout, файл не трогать
+  };
 }
 
 /**
@@ -493,11 +497,9 @@ function assembleAndDump(mergedResults, index, rawQuery) {
     totalBytes += sectionBytes;
   }
 
-  // Сборка полного дампа
+  // Сборка полного дампа (запись — на стороне main, чтобы выбрать адресата)
   const fullDump = header + sections.join('\n');
-  writeTextBom(DUMP_FILE, fullDump);
-
-  return sections.length;
+  return { count: sections.length, dump: fullDump };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -508,12 +510,18 @@ async function main() {
   const startTime = Date.now();
 
   // 1. Парсинг аргументов
-  const rawQuery = parseArgs();
+  const { query: rawQuery, outPath, toStdout } = parseArgs();
   if (!rawQuery) {
     console.error(`${C.red}[ERROR]${C.reset} Укажите запрос: --query "ваш запрос"`);
     console.error(`  Пример: node system/query-wiki.js --query "CowController, оптимизация"`);
+    console.error(`  Опции:  --out <path> (свой файл), --stdout (вывод в stdout)`);
     process.exit(1);
   }
+  // Адресат дампа: --stdout > --out <path> > дефолтный .cursor-context-dump.md.
+  // Дефолт сохранён для обратной совместимости с CCP; --out снимает гонку
+  // при параллельных запросах (каждый пишет в свой файл).
+  const destPath  = outPath ? path.resolve(outPath) : DUMP_FILE;
+  const destLabel = toStdout ? 'stdout' : (outPath ? path.relative(ROOT_DIR, destPath).replace(/\\/g, '/') : '.cursor-context-dump.md');
 
   // 2. Загрузка мета-индекса
   const index = loadIndex();
@@ -565,24 +573,29 @@ async function main() {
   // 8. Проверка на пустой результат
   if (merged.size === 0) {
     console.error(`${C.yellow}[WARN]${C.reset} Ничего не найдено по запросу "${rawQuery}".`);
-    // Пишем пустой дамп, чтобы старый не вводил в заблуждение
-    writeTextBom(DUMP_FILE, `# Wiki Context Dump\n\n> Query: \`${rawQuery}\`\n\n**Совпадений не найдено.**\n`);
-    // stdout — короткая строка для AI-агента
-    console.log(`WIKI_QUERY_RESULT: 0 documents found for "${rawQuery}"`);
+    const emptyDump = `# Wiki Context Dump\n\n> Query: \`${rawQuery}\`\n\n**Совпадений не найдено.**\n`;
+    if (toStdout) {
+      process.stdout.write(emptyDump);
+    } else {
+      writeTextBom(destPath, emptyDump);
+      console.log(`WIKI_QUERY_RESULT: 0 documents found for "${rawQuery}"`);
+    }
     process.exit(0);
   }
 
-  // 9. Сборка контекста и запись в файл
-  const loadedCount = assembleAndDump(merged, index, rawQuery);
+  // 9. Сборка контекста и вывод выбранному адресату
+  const { count: loadedCount, dump } = assembleAndDump(merged, index, rawQuery);
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
-  console.error(
-    `\n${C.green}[OK]${C.reset} ${loadedCount} документов → ${C.bold}.cursor-context-dump.md${C.reset} (${elapsed}s)`
-  );
-
-  // 10. stdout — единственный вывод для AI-агента
-  //     Короткая строка, не превышает буфер IDE
-  console.log(`WIKI_QUERY_RESULT: ${loadedCount} documents loaded in ${elapsed}s. Context: .cursor-context-dump.md`);
+  if (toStdout) {
+    process.stdout.write(dump);
+    console.error(`\n${C.green}[OK]${C.reset} ${loadedCount} документов → ${C.bold}stdout${C.reset} (${elapsed}s)`);
+  } else {
+    writeTextBom(destPath, dump);
+    console.error(`\n${C.green}[OK]${C.reset} ${loadedCount} документов → ${C.bold}${destLabel}${C.reset} (${elapsed}s)`);
+    // stdout — короткая строка для AI-агента (не превышает буфер IDE)
+    console.log(`WIKI_QUERY_RESULT: ${loadedCount} documents loaded in ${elapsed}s. Context: ${destLabel}`);
+  }
 }
 
 // ─── Entry Point ─────────────────────────────────────────────────────
