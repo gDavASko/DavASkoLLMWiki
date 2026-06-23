@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Слоевая самовалидируемая база знаний с гибридным поиском для LLM-агентов — метод и эмпирическая оценка</title>
+<style>
+  :root{
+    --ink:#1a1f2b; --muted:#5b6573; --line:#d9dee7; --bg:#ffffff; --soft:#f5f7fa;
+    --accent:#2456b8; --accent2:#0e7c6b; --warn:#9a5b00; --bad:#a23b3b;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--soft);color:var(--ink);
+    font:16px/1.62 Georgia,"Times New Roman",serif;-webkit-font-smoothing:antialiased}
+  .page{max-width:880px;margin:0 auto;background:var(--bg);padding:56px 64px 80px;
+    box-shadow:0 1px 0 var(--line)}
+  h1{font-size:26px;line-height:1.28;margin:0 0 6px;letter-spacing:-.2px}
+  h2{font-size:20px;margin:38px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h3{font-size:16.5px;margin:24px 0 6px;color:#222}
+  p{margin:10px 0}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .sub{color:var(--muted);font-size:14.5px}
+  .authors{margin:10px 0 2px;font-size:15px}
+  .meta{color:var(--muted);font-size:13.5px;margin-bottom:18px}
+  .abstract{background:var(--soft);border:1px solid var(--line);border-radius:8px;
+    padding:16px 20px;margin:18px 0 6px}
+  .abstract h3{margin:0 0 6px;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--accent);border:1px solid #cdd9f0;background:#f1f5fd;
+    padding:2px 9px;border-radius:999px}
+  code,kbd{font-family:var(--mono);font-size:13px;background:#eef1f6;padding:1px 5px;border-radius:4px}
+  pre{background:#0f1626;color:#e6edf7;border-radius:8px;padding:14px 16px;overflow:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .c{color:#7e8aa3}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-family:Helvetica,Arial,sans-serif;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left}
+  th{background:var(--soft);font-weight:700}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr.best td{background:#eefaf4}
+  .win{color:var(--accent2);font-weight:700}
+  .cap{color:var(--muted);font-size:13px;margin:6px 2px 22px;font-family:Helvetica,Arial,sans-serif}
+  .cap b{color:var(--ink)}
+  figure{margin:22px 0}
+  .fig{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px}
+  ol.refs{font-size:13.5px;line-height:1.5;font-family:Helvetica,Arial,sans-serif;padding-left:22px}
+  ol.refs li{margin:7px 0}
+  .toc{font-family:Helvetica,Arial,sans-serif;font-size:13.5px;background:var(--soft);
+    border:1px solid var(--line);border-radius:8px;padding:12px 18px 12px 34px;columns:2;margin:18px 0}
+  .toc li{margin:3px 0}
+  .note{border-left:3px solid var(--warn);background:#fff8ee;padding:10px 14px;border-radius:0 6px 6px 0;font-size:14px;margin:14px 0}
+  .keyresult{border-left:3px solid var(--accent2);background:#effaf6;padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0}
+  hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+  .small{font-size:13px;color:var(--muted)}
+  @media(max-width:720px){.page{padding:28px 18px}.toc{columns:1}}
+</style>
+</head>
+<body>
+<main class="page">
+
+  <span class="kicker">Технический отчёт · Эмпирическая оценка</span>
+  <h1>Слоевая самовалидируемая база знаний с гибридным поиском для LLM-агентов: метод и эмпирическая оценка на реальном корпусе</h1>
+  <div class="authors"><b>DavASko</b> &nbsp;·&nbsp; инженерия и анализ при поддержке Claude (Anthropic)</div>
+  <div class="meta">Фреймворк DavASko&nbsp;LLM&nbsp;Wiki · v3.x · Отчёт собран 23.06.2026 · Офлайн, воспроизводимо · <a href="davasko-llm-wiki.html">English version</a></div>
+
+  <div class="abstract">
+    <h3>Аннотация</h3>
+    <p>Мы представляем <b>DavASko&nbsp;LLM&nbsp;Wiki</b> — фреймворк многоуровневой, Obsidian-совместимой базы знаний со встроенным полностью офлайн гибридным поисковым движком (точное символьное совпадение + плотный семантический поиск по эмбеддингам Jina&nbsp;v3) для заземления (grounding) LLM-агентов в разработке. Центральный, обычно не проверяемый вопрос для таких систем: действительно ли курируемый слой поиска превосходит простую возможность агента грепнуть и прочитать исходники? Мы отвечаем эмпирически. На <b>реальной развёрнутой базе из 162 документов</b> (KBPro) с 15 размеченными вопросами семантический поиск достигает <b>recall@5&nbsp;=&nbsp;0.633</b> и <b>MRR&nbsp;=&nbsp;0.718</b> против лексического (grep) базлайна <b>0.333 / 0.435</b> — почти удваивая recall и улучшая ранжирование первого релевантного на 65%. Мы также приводим контролируемые ablation-эксперименты: доработка ранжирования, продиктованная измерениями, подняла MRR гибрида с 0.641 до 0.718 (+12%); структурный чанкинг превзошёл оконный на +7.8% MRR при равном recall; эмбеддинг на <b>GPU (DirectML) оказался в 8× быстрее CPU</b> при численной эквивалентности (cosine&nbsp;=&nbsp;0.999984), а батчинг доказанно идентичен одиночному эмбеддингу (cosine&nbsp;&ge;&nbsp;0.99999997). Мы публикуем измерительную установку, 32 юнит-теста и конфигурацию, так что каждое число воспроизводимо; ограничения метода описаны честно.</p>
+  </div>
+
+  <ul class="toc">
+    <li><a href="#intro">1. Введение</a></li>
+    <li><a href="#bg">2. Контекст и связанные работы</a></li>
+    <li><a href="#arch">3. Архитектура системы</a></li>
+    <li><a href="#method">4. Метод поиска</a></li>
+    <li><a href="#setup">5. Постановка эксперимента</a></li>
+    <li><a href="#results">6. Основные результаты</a></li>
+    <li><a href="#ablation">7. Ablation-исследования</a></li>
+    <li><a href="#disc">8. Обсуждение</a></li>
+    <li><a href="#limits">9. Ограничения и угрозы валидности</a></li>
+    <li><a href="#repro">10. Воспроизводимость</a></li>
+    <li><a href="#concl">11. Заключение</a></li>
+    <li><a href="#refs">Литература</a></li>
+  </ul>
+
+  <h2 id="intro">1. Введение</h2>
+  <p>LLM-агенты для разработки всё чаще работают с большим, изменяющимся знанием проекта: проектные документы, архитектурные заметки, runbook'и, исходный код. Распространённый паттерн — Retrieval-Augmented Generation (RAG) [<a href="#r1">1</a>]: извлечь релевантный контекст и затем обусловить им модель. Однако фундаментальный вопрос часто декларируется, а не проверяется: <i>превосходит ли курируемый индексированный слой знаний тривиальный базлайн — позволить агенту искать по файлам напрямую</i> (ripgrep + чтение)? Слой поиска, не бьющий grep, — это сложность с отрицательной ценностью: он добавляет нагрузку сопровождения и вторую, дрейфующую копию истины.</p>
+  <p>Этот отчёт описывает фреймворк <b>DavASko&nbsp;LLM&nbsp;Wiki</b> и, что важнее, подвергает его поисковый движок измерению на реальном корпусе с размеченным набором запросов, grep-базлайном и стандартными метриками информационного поиска. Наш вклад: (i) полностью офлайн гибридный дизайн поиска с рядом инженерных решений (IVF-подобный multi-probe, адаптивный порог на запрос, структурный чанкинг, ранжирование с приоритетом источника истины и provenance на контент-хешах для детекции дрейфа); (ii) измерительная установка, считающая recall@k / MRR / nDCG@k против flat-cosine и лексического базлайнов; (iii) эмпирическое исследование на развёрнутой базе KBPro, включая ablation-эксперименты, которые <i>изменили дизайн</i> на основе наблюдаемых данных.</p>
+
+  <h2 id="bg">2. Контекст и связанные работы</h2>
+  <p><b>Плотный поиск и RAG.</b> Dense passage retrieval отображает запросы и пассажи в общее векторное пространство и ранжирует по косинусной близости [<a href="#r2">2</a>]; RAG соединяет это с генератором [<a href="#r1">1</a>]. Мы используем Jina&nbsp;Embeddings&nbsp;v3 [<a href="#r3">3</a>] — мультиязычную модель с task-специфичными LoRA-адаптерами и асимметричными префиксами <code>query:</code>/<code>passage:</code>, запускаемую локально через ONNX&nbsp;Runtime в Transformers.js [<a href="#r4">4</a>].</p>
+  <p><b>Приближённый поиск ближайших соседей.</b> Inverted-file (IVF) индексы разбивают векторы на кластеры и сканируют <code>nprobe</code> ближайших на запросе, обменивая recall на скорость [<a href="#r5">5</a>]. Мы используем тот же параметр <code>nprobe</code>, но при малых корпусах по умолчанию ведём исчерпывающий поиск (раздел&nbsp;<a href="#method">4</a>).</p>
+  <p><b>Чанкинг.</b> Окно фиксированного размера — частый дефолт; структурные / рекурсивные сплиттеры режут по структуре документа (заголовки, абзацы) и, по многим сообщениям, улучшают связность [<a href="#r6">6</a>]. Мы сравниваем оба напрямую.</p>
+  <p><b>Метрики.</b> Используем recall@k, Mean Reciprocal Rank (MRR) и normalized Discounted Cumulative Gain (nDCG@k) — стандартные метрики ранжирования [<a href="#r7">7</a>,&nbsp;<a href="#r8">8</a>]. <b>Гибридный лексический+плотный</b> поиск — устоявшаяся практика [<a href="#r9">9</a>]; наш символьный поток — точный матчер идентификаторов, специализированный под код-символы.</p>
+
+  <h2 id="arch">3. Архитектура системы</h2>
+  <p>Знание организовано в независимые <b>слои</b> (например, <code>llm-wiki</code>, <code>framework-wiki</code>, проектные слои) со строго нисходящим графом зависимостей. Каждый слой разделяет иммутабельные снимки источников (<code>raw/</code>) и курируемые, поддерживаемые ИИ страницы (<code>wiki/</code>). Движок индексирует оба. Рисунок&nbsp;1 показывает офлайн-индексацию и онлайн-запрос.</p>
+
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 840 250" width="100%" role="img" aria-label="Пайплайн индексации и запроса">
+        <style>
+          .b{fill:#f1f5fd;stroke:#9db8e6}.b2{fill:#effaf6;stroke:#7fcab8}
+          .t{font:12px Helvetica,Arial,sans-serif;fill:#1a1f2b}.tl{font:11px Helvetica,Arial,sans-serif;fill:#5b6573}
+          .ar{stroke:#7a8aa0;stroke-width:1.4;marker-end:url(#a)}
+        </style>
+        <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#7a8aa0"/></marker></defs>
+        <text class="tl" x="14" y="18">Офлайн-индексация — build-index.js</text>
+        <rect class="b" x="14" y="28" width="120" height="44" rx="6"/><text class="t" x="30" y="47">Скан слоёв</text><text class="tl" x="30" y="62">wiki/ + raw/</text>
+        <rect class="b" x="158" y="28" width="138" height="44" rx="6"/><text class="t" x="172" y="47">Структурный</text><text class="tl" x="172" y="62">чанкинг (§4.4)</text>
+        <rect class="b" x="320" y="28" width="138" height="44" rx="6"/><text class="t" x="334" y="47">Батч-эмбеддинг</text><text class="tl" x="334" y="62">Jina v3, GPU/CPU</text>
+        <rect class="b" x="482" y="28" width="150" height="44" rx="6"/><text class="t" x="496" y="47">Шард на слой</text><text class="tl" x="496" y="62">центроид = среднее</text>
+        <rect class="b" x="656" y="28" width="170" height="44" rx="6"/><text class="t" x="670" y="47">wiki-index.json</text><text class="tl" x="670" y="62">+ шарды векторов</text>
+        <line class="ar" x1="134" y1="50" x2="156" y2="50"/><line class="ar" x1="296" y1="50" x2="318" y2="50"/>
+        <line class="ar" x1="458" y1="50" x2="480" y2="50"/><line class="ar" x1="632" y1="50" x2="654" y2="50"/>
+
+        <text class="tl" x="14" y="120">Онлайн-запрос — query-wiki.js</text>
+        <rect class="b2" x="14" y="130" width="120" height="44" rx="6"/><text class="t" x="30" y="149">Разбор запроса</text><text class="tl" x="30" y="164">символы + фраза</text>
+        <rect class="b2" x="158" y="112" width="150" height="38" rx="6"/><text class="t" x="172" y="135">Поток A: символьный</text>
+        <rect class="b2" x="158" y="158" width="150" height="38" rx="6"/><text class="t" x="172" y="181">Поток B: семантика</text>
+        <rect class="b2" x="334" y="130" width="160" height="44" rx="6"/><text class="t" x="348" y="149">Единое ранж.</text><text class="tl" x="348" y="164">+ граф-lift, метки</text>
+        <rect class="b2" x="520" y="130" width="170" height="44" rx="6"/><text class="t" x="534" y="149">Контекст-дамп</text><text class="tl" x="534" y="164">SOURCE / SUMMARY</text>
+        <line class="ar" x1="134" y1="150" x2="156" y2="135"/><line class="ar" x1="134" y1="152" x2="156" y2="177"/>
+        <line class="ar" x1="308" y1="131" x2="332" y2="148"/><line class="ar" x1="308" y1="177" x2="332" y2="156"/>
+        <line class="ar" x1="494" y1="152" x2="518" y2="152"/>
+      </svg>
+    </div>
+    <div class="cap"><b>Рисунок 1.</b> Пайплайны индексации (сверху) и запроса (снизу). Индексация строго офлайн на вендоренной модели; запрос сливает мгновенный поток точных символов с multi-probe плотным поиском, ранжирует по единому score и помечает каждый результат как первичный <i>source</i> или производное <i>summary</i>.</div>
+  </figure>
+
+  <h2 id="method">4. Метод поиска</h2>
+  <h3>4.1 Гибридный двухпоточный поиск</h3>
+  <p><b>Поток A (символьный)</b> сопоставляет строгие код-идентификаторы — PascalCase с &ge;2 «горбами», <code>I</code>-интерфейсы, <code>m_</code>-поля — с полями документа <code>id</code>, <code>symbols</code>, <code>tags</code> и wiki-ссылками. Совпадения взвешиваются по типу поля (<code>id</code>&nbsp;&gt;&nbsp;<code>symbols</code>&nbsp;&gt;&nbsp;<code>tags</code>&nbsp;&gt;&nbsp;wiki-ссылки) и понижаются мини-IDF (<code>1/&radic;df</code>), чтобы частый идентификатор не затоплял top-k. <b>Поток B (семантический)</b> эмбеддит запрос с префиксом <code>query:</code> и ранжирует чанки по косинусу. Потоки сливаются по <b>единому эффективному score</b> (раздел&nbsp;<a href="#ablation">7.1</a>), а не жёстким тиром «символы первыми».</p>
+  <h3>4.2 Multi-probe маршрутизация</h3>
+  <p>Векторы хранятся по одному шарду на слой; центроид шарда — <b>среднее векторов его членов</b>. На запросе движок ранжирует шарды по близости к центроиду и сканирует <code>nprobe</code> ближайших (IVF multi-probe). Когда <code>nprobe&nbsp;&ge;</code> числа шардов — частый случай малого корпуса — поиск исчерпывающий и не теряет recall.</p>
+  <h3>4.3 Адаптивный порог</h3>
+  <p>Фиксированный косинус-порог хрупок: распределение score сдвигается с моделью, языком и длиной, поэтому универсального значения не существует. Режим по умолчанию <code>relative</code> задаёт порог на запрос <code>&tau;<sub>q</sub> = max(junk_floor, &alpha;·max<sub>d</sub> sim(q,d))</code> (по умолчанию <code>&alpha;=0.85</code>, <code>junk_floor=0.35</code>), адаптируясь к каждому запросу и отсекая шум. Режим <code>absolute</code> остаётся для откалиброванных развёртываний.</p>
+  <h3>4.4 Структурный чанкинг</h3>
+  <p>Индексатор токенизирует Markdown в заголовки, абзацы и <b>атомарные блоки кода</b>, пакует их до целевого размера в коридоре <code>[min,max]</code> слов, хард-сплитит только переразмерные блоки, сливает мелкие фрагменты и приписывает «хлебную крошку» заголовков (напр. <code>[Event Bus &gt; API]</code>), чтобы чанк нёс контекст секции. Это устраняет обрывы посреди предложения, разорванный код и эмбеддинги со смешанными темами, присущие фиксированному окну.</p>
+  <h3>4.5 Ранжирование по истине и provenance</h3>
+  <p>Код/<code>raw/</code> — источник истины; <code>wiki/</code>-страницы — производные саммари, которые могут отставать. При близких score движок ранжирует источник выше саммари и помечает результаты <code>SOURCE</code> vs <code>SUMMARY</code>. Каждая страница хранит контент-хеш <b>provenance</b> процитированных источников; валидатор помечает страницы, чьи источники изменились (детектируемый дрейф), запуская ИИ-актуализацию вместо молчаливого устаревания.</p>
+
+  <h2 id="setup">5. Постановка эксперимента</h2>
+  <table>
+    <tr><th>Параметр</th><th>Значение</th></tr>
+    <tr><td>Корпус (оценка)</td><td class="n">162 документа (kbpro-wiki + llm-wiki), 433 чанка, 2 слоя-шарда</td></tr>
+    <tr><td>Полный развёрнутый корпус</td><td class="n">6 слоёв, 343 индексируемых документа (475 Markdown; 2 крупных GDD пропущены)</td></tr>
+    <tr><td>Набор запросов</td><td class="n">15 размеченных вопросов с указанием требуемых источников (из регрессионного набора проекта)</td></tr>
+    <tr><td>Метки релевантности</td><td class="n">резолвятся по пути / basename / id против индекса</td></tr>
+    <tr><td>Модель</td><td class="n">jinaai/jina-embeddings-v3, fp16, 1024-d, рев. 815152c…</td></tr>
+    <tr><td>top-k</td><td class="n">5</td></tr>
+    <tr><td>Порог</td><td class="n">relative (&alpha;=0.85, junk_floor=0.35)</td></tr>
+    <tr><td>Железо</td><td class="n">ONNX Runtime (офлайн); GPU через DirectML с фолбэком на CPU (авто-выбор). CPU ~2.3 с/чанк; GPU ~8&times; быстрее (§7.3)</td></tr>
+  </table>
+  <p><b>Сравниваемые ретриверы.</b> <code>semantic</code> — только плотный multi-probe; <code>hybrid</code> — символы + семантика, единое ранжирование; <code>flat</code> — исчерпывающий плоский косинус (изолирует эффект кластеризации); <code>lexical</code> — grep-подобный базлайн на пересечении терминов по тем же файлам («агент читает файлы напрямую»).</p>
+  <p><b>Метрики.</b> recall@5 (доля релевантных в top-5), MRR (обратный ранг первого релевантного), nDCG@5 (качество ранжирования с дисконтом по позиции). Установка использует те же функции ядра, что и движок (эмбеддинг, косинус, порог, символьный скоринг), поэтому измеряет реальный движок, а не его копию.</p>
+
+  <h2 id="results">6. Основные результаты</h2>
+  <div class="keyresult"><b>Главное.</b> На реальном корпусе слой поиска примерно <b>удваивает recall</b> (0.633 против 0.333) и улучшает ранжирование первого релевантного на <b>+65% MRR</b> (0.718 против 0.435) над grep-базлайном. Курируемый слой поиска оправдывает свою сложность.</div>
+
+  <table>
+    <tr><th>Ретривер</th><th class="n">recall@5</th><th class="n">MRR</th><th class="n">nDCG@5</th></tr>
+    <tr class="best"><td><b>semantic</b> (этот движок)</td><td class="n win">0.633</td><td class="n win">0.718</td><td class="n win">0.626</td></tr>
+    <tr><td>hybrid (символы + семантика)</td><td class="n">0.633</td><td class="n">0.718</td><td class="n">0.626</td></tr>
+    <tr><td>flat (исчерпывающий косинус)</td><td class="n">0.633</td><td class="n">0.718</td><td class="n">0.626</td></tr>
+    <tr><td>lexical (grep-базлайн)</td><td class="n">0.333</td><td class="n">0.435</td><td class="n">0.303</td></tr>
+  </table>
+  <div class="cap"><b>Таблица 1.</b> Основные результаты (корпус 162 док, 15 запросов, top-k=5). <code>semantic = hybrid = flat</code>, потому что в корпусе всего 2 шарда, так что multi-probe (<code>nprobe=8</code>) уже исчерпывающий, а настроенный символьный поток на этих естественно-языковых вопросах не помогает и не вредит.</div>
+
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 760 300" width="100%" role="img" aria-label="RAG против grep">
+        <style>.ax{stroke:#c2c9d4}.gl{stroke:#eef1f6}.lbl{font:12px Helvetica,Arial;fill:#1a1f2b}
+          .vl{font:11px Helvetica,Arial;fill:#fff;font-weight:700}.cap2{font:11px Helvetica,Arial;fill:#5b6573}</style>
+        <line class="ax" x1="60" y1="20" x2="60" y2="240"/>
+        <line class="ax" x1="60" y1="240" x2="720" y2="240"/>
+        <g>
+          <line class="gl" x1="60" y1="240" x2="720" y2="240"/>
+          <line class="gl" x1="60" y1="185" x2="720" y2="185"/><text class="cap2" x="34" y="189">0.2</text>
+          <line class="gl" x1="60" y1="130" x2="720" y2="130"/><text class="cap2" x="34" y="134">0.4</text>
+          <line class="gl" x1="60" y1="75"  x2="720" y2="75"/><text class="cap2" x="34" y="79">0.6</text>
+          <line class="gl" x1="60" y1="20"  x2="720" y2="20"/><text class="cap2" x="34" y="24">0.8</text>
+          <text class="cap2" x="40" y="244">0</text>
+        </g>
+        <g>
+          <rect x="110" y="66"  width="46" height="174" fill="#2456b8"/><text class="vl" x="118" y="82">.633</text>
+          <rect x="160" y="148" width="46" height="92"  fill="#9bb4e0"/><text class="vl" x="168" y="164" fill="#1a1f2b">.333</text>
+          <text class="lbl" x="118" y="258">recall@5</text>
+        </g>
+        <g>
+          <rect x="320" y="43"  width="46" height="197" fill="#2456b8"/><text class="vl" x="328" y="59">.718</text>
+          <rect x="370" y="120" width="46" height="120" fill="#9bb4e0"/><text class="vl" x="378" y="136" fill="#1a1f2b">.435</text>
+          <text class="lbl" x="346" y="258">MRR</text>
+        </g>
+        <g>
+          <rect x="530" y="68"  width="46" height="172" fill="#2456b8"/><text class="vl" x="538" y="84">.626</text>
+          <rect x="580" y="157" width="46" height="83"  fill="#9bb4e0"/><text class="vl" x="588" y="173" fill="#1a1f2b">.303</text>
+          <text class="lbl" x="536" y="258">nDCG@5</text>
+        </g>
+        <rect x="480" y="276" width="14" height="12" fill="#2456b8"/><text class="cap2" x="498" y="286">semantic (RAG)</text>
+        <rect x="620" y="276" width="14" height="12" fill="#9bb4e0"/><text class="cap2" x="638" y="286">lexical (grep)</text>
+      </svg>
+    </div>
+    <div class="cap"><b>Рисунок 2.</b> Плотный поиск против grep-базлайна по всем трём метрикам. RAG-слой равномерно и существенно лучше.</div>
+  </figure>
+
+  <h2 id="ablation">7. Ablation-исследования</h2>
+
+  <h3>7.1 Починка гибридного ранжирования (по данным)</h3>
+  <p>Первый прогон на реальном корпусе вскрыл дефект: исходное слияние ставило <i>все</i> символьные совпадения выше семантических, поэтому тангенциальные точные совпадения выдавливали лучшие семантические хиты — гибрид ранжировал <i>хуже</i> чистой семантики (MRR 0.641 против 0.718). Два изменения, каждое измерено на том же индексе, закрыли разрыв:</p>
+  <table>
+    <tr><th>Конфигурация</th><th class="n">MRR гибрида</th><th class="n">nDCG@5 гибрида</th></tr>
+    <tr><td>baseline — жёсткие тиры «символы первыми»</td><td class="n">0.641</td><td class="n">0.577</td></tr>
+    <tr><td>+ единое ранжирование по score</td><td class="n">0.685</td><td class="n">0.610</td></tr>
+    <tr class="best"><td>+ строгие символы (убрать дженерик-аббревиатуры: JSON/API)</td><td class="n win">0.718</td><td class="n win">0.626</td></tr>
+  </table>
+  <div class="cap"><b>Таблица 2.</b> Ablation ранжирования. Диагноз свёлся к одному запросу, где аббревиатура «JSON» трактовалась как код-идентификатор и вытащила тангенциальный документ на 1-е место; ужесточение извлечения символов до строгого PascalCase убрало это. Итог: +12% MRR без изменения recall.</div>
+
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 700 250" width="100%" role="img" aria-label="Ablation ранжирования">
+        <style>.ax{stroke:#c2c9d4}.gl{stroke:#eef1f6}.lbl{font:11.5px Helvetica,Arial;fill:#1a1f2b}.vl{font:12px Helvetica,Arial;fill:#fff;font-weight:700}.cap2{font:11px Helvetica,Arial;fill:#5b6573}</style>
+        <line class="ax" x1="60" y1="20" x2="60" y2="200"/><line class="ax" x1="60" y1="200" x2="660" y2="200"/>
+        <line class="gl" x1="60" y1="150" x2="660" y2="150"/><text class="cap2" x="30" y="154">0.60</text>
+        <line class="gl" x1="60" y1="95" x2="660" y2="95"/><text class="cap2" x="30" y="99">0.68</text>
+        <line class="gl" x1="60" y1="40" x2="660" y2="40"/><text class="cap2" x="30" y="44">0.76</text>
+        <rect x="120" y="159" width="90" height="41" fill="#b9c4d6"/><text class="vl" x="135" y="178">0.641</text><text class="lbl" x="120" y="218">baseline</text>
+        <rect x="300" y="115" width="90" height="85" fill="#7f9ed0"/><text class="vl" x="315" y="134">0.685</text><text class="lbl" x="296" y="218">+ единое ранж.</text>
+        <rect x="480" y="82" width="90" height="118" fill="#2456b8"/><text class="vl" x="495" y="101">0.718</text><text class="lbl" x="484" y="218">+ строгие симв.</text>
+        <text class="cap2" x="290" y="14">MRR гибрида — последовательные починки</text>
+      </svg>
+    </div>
+    <div class="cap"><b>Рисунок 3.</b> Две починки ранжирования возвращают гибрид к паритету с чистым семантическим поиском.</div>
+  </figure>
+
+  <h3>7.2 Чанкинг: структурный vs фиксированное окно</h3>
+  <p>При прочих равных мы пересобрали индекс под каждую стратегию чанкинга и переоценили.</p>
+  <table>
+    <tr><th>Чанкинг</th><th class="n">recall@5</th><th class="n">MRR</th><th class="n">nDCG@5</th><th class="n">чанков</th></tr>
+    <tr class="best"><td><b>структурный</b></td><td class="n">0.633</td><td class="n win">0.718</td><td class="n win">0.626</td><td class="n">433</td></tr>
+    <tr><td>фиксированное окно</td><td class="n">0.633</td><td class="n">0.666</td><td class="n">0.585</td><td class="n">418</td></tr>
+  </table>
+  <div class="cap"><b>Таблица 3.</b> Структурный чанкинг улучшает ранжирование на <span class="win">+7.8% MRR</span> и +7% nDCG при равном recall — связные, ограниченные секциями чанки с атомарным кодом дают эмбеддинги, ранжирующие релевантный документ выше. Это подтверждает распространённое качественное утверждение количественно, на данном корпусе.</div>
+
+  <h3>7.3 Скорость индексации: GPU, батчинг и доказанный паритет</h3>
+  <p>Индексация эмбеддила по одному чанку за вызов на CPU. Скорость решали по двум фронтам, каждый — с предварительной проверкой корректности.</p>
+  <p><b>Батч-эмбеддинг.</b> Чанки документа пакуются в один вызов модели. Корректность <b>доказана до</b> замера скорости: на смешанных по длине образцах в одном батче батч- и одиночный эмбеддинги численно идентичны — минимальный cosine <b>0.99999997</b>, макс. абс. разница элемента <b>2.8&times;10<sup>-5</sup></b> (FP-шум). На CPU прирост скромный — <b>114&nbsp;с &rarr; 101&nbsp;с (~11%)</b> на 45 чанках — потому что forward-pass 570M-модели насыщает CPU; батч экономит лишь overhead вызова.</p>
+  <p><b>GPU-ускорение (реальный рычаг).</b> Вендоренный ONNX-рантайм содержит провайдер DirectML (любая DX12-видеокарта: NVIDIA/AMD/Intel). Движок авто-детектит GPU и откатывается на CPU, логируя устройство. Замер на 12 эмбеддингах: <b>CPU 9657&nbsp;мс vs GPU 1205&nbsp;мс — ускорение 8.0&times;</b>, при min cosine(CPU,&nbsp;GPU)&nbsp;=&nbsp;<b>0.999984</b> (численно эквивалентно для поиска). Индексация полного корпуса падает с ~30&nbsp;мин на CPU до нескольких минут на GPU. Это многократно больше батчинга и снимает узкое место индексации там, где есть GPU.</p>
+  <table>
+    <tr><th>Конфигурация</th><th class="n">время (12 эмб.)</th><th class="n">ускорение</th><th class="n">паритет vs CPU</th></tr>
+    <tr><td>CPU (базлайн)</td><td class="n">9657 мс</td><td class="n">1.0&times;</td><td class="n">—</td></tr>
+    <tr><td>CPU + батчинг (45 чанков)</td><td class="n">~11% быстрее</td><td class="n">~1.1&times;</td><td class="n">cos &ge; 0.99999997</td></tr>
+    <tr class="best"><td><b>GPU (DirectML, fp16)</b></td><td class="n win">1205 мс</td><td class="n win">8.0&times;</td><td class="n">cos = 0.999984</td></tr>
+  </table>
+  <div class="cap"><b>Таблица 4.</b> Меры по скорости индексации, каждая с проверкой корректности. GPU — доминирующий рычаг; батчинг — небольшой бесплатный выигрыш на CPU.</div>
+
+  <h2 id="disc">8. Обсуждение</h2>
+  <p><b>Вопрос ценности отвечён — на этом корпусе.</b> Плотный слой не декоративен: он почти удваивает recall и заметно улучшает ранжирование над grep. Для естественно-языковых вопросов семантика — рабочая лошадка; символьный поток здесь нейтрален, но спроектирован добавлять точность на запросах-идентификаторах (напр. <code>CowController</code>), которых в этом наборе нет.</p>
+  <p><b>Измерение изменило дизайн.</b> Каждое улучшение из раздела&nbsp;7 продиктовано данными, а не интуицией: дефект ранжирования был невидим до замера, а его корневая причина (одна аббревиатура) найдена по-запросным разбором. Это и есть задуманный режим — установка является частью инженерного цикла, а не разовой проверкой.</p>
+  <p><b>Кластеризация пока нерелевантна.</b> При двух шардах multi-probe равен исчерпывающему поиску; IVF-машинерия начинает играть только на многих слоях / больших корпусах, где <code>nprobe</code> нужно калибровать (установка это поддерживает).</p>
+
+  <h2 id="limits">9. Ограничения и угрозы валидности</h2>
+  <ul>
+    <li><b>Малый набор запросов (n=15).</b> Эффекты отдельных запросов двигают агрегаты; доверительные интервалы широки. Числа указывают направление, не точность. Расширение размеченного набора — приоритет №1 для более сильных утверждений.</li>
+    <li><b>Один корпус / домен.</b> Результаты с одной развёрнутой базы; обобщение на другие корпуса не проверено.</li>
+    <li><b>Прокси-метки.</b> Аннотации «требуемых источников» приближают релевантность; они писались для Q&amp;A-регрессии, а не как исчерпывающие суждения релевантности, поэтому recall может недо- или переоцениваться.</li>
+    <li><b>Частичный индекс в оценке.</b> Таблица индексирует 2 из 6 слоёв (покрывающих метки); меньше документов-дистракторов делает поиск оптически легче, чем при полном развёртывании.</li>
+    <li><b>Потолок recall.</b> recall@5 = 0.633 означает, что ~37% релевантного теряется в top-5; реранкер этого не исправит (он переупорядочивает), поэтому следующий рычаг — больший k, расширение запроса или изменение чанков/представления — решается измерением.</li>
+    <li><b>Скорость индексации.</b> На CPU медленно (~2.3 с/чанк); GPU (DirectML) снимает это (~8&times;) при наличии DX12-видеокарты и GPU-сборки ONNX-рантайма, иначе — фолбэк на CPU.</li>
+    <li><b>Дрейф остаётся процессом, не гарантией.</b> Provenance-хеши делают устаревание <i>детектируемым</i>; они не устраняют двойной источник истины между кодом и вики.</li>
+  </ul>
+
+  <h2 id="repro">10. Воспроизводимость</h2>
+  <p>Все артефакты офлайн и под версионным контролем. Ядро поиска покрыто 32 юнит-тестами; паритет-тест эмбеддинга — гейт батчинга. Чтобы воспроизвести таблицы:</p>
+<pre><span class="c"># сборка индекса (офлайн; модель и зависимости вендорены; GPU при наличии)</span>
+node system/build-index.js --force
+<span class="c"># основные результаты + базлайны (Таблица 1, Рисунок 2)</span>
+node system/scripts/eval-retrieval.js
+<span class="c"># калибровка порога/alpha</span>
+node system/scripts/eval-retrieval.js --sweep
+<span class="c"># A/B чанкинга (Таблица 3): переключить chunk_strategy в system/index-config.json, пересобрать, переоценить</span>
+<span class="c"># паритет батчинга (раздел 7.3)</span>
+node system/scripts/check-embed-parity.mjs
+<span class="c"># юнит-тесты ядра скоринга</span>
+npm test</pre>
+  <p class="small">Ключевая конфигурация (<code>system/search-config.json</code>, <code>system/index-config.json</code>): threshold_mode=relative, &alpha;=0.85, junk_floor=0.35, top_k=5, nprobe=8, ground_truth_boost=0.05; chunk_strategy=structural, цель 250 / min 80 / max 400 слов, index_code=true, embed_batch_size=16, device=auto.</p>
+
+  <h2 id="concl">11. Заключение</h2>
+  <p>Мы превратили часто декларируемое утверждение в измеренное: на реальной развёрнутой базе знаний слоевой гибридный поисковый движок существенно превосходит grep-базлайн (recall@5 0.633 против 0.333, MRR 0.718 против 0.435). Помимо главного результата, исследование демонстрирует дисциплинированный, продиктованный измерениями инженерный цикл — две починки ранжирования (+12% MRR) и выбор чанкинга (+7.8% MRR) приняты лишь после того, как данные их оправдали, а оптимизации скорости (GPU 8&times;, батчинг) отгружены только после доказанной численной эквивалентности. Оставшиеся пробелы (малый набор запросов, потолок recall) задокументированы, а не скрыты, и каждый отображается в конкретный, фальсифицируемый следующий эксперимент.</p>
+
+  <hr>
+  <h2 id="refs">Литература</h2>
+  <ol class="refs">
+    <li id="r1">P. Lewis et&nbsp;al. <i>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</i> NeurIPS 2020. arXiv:2005.11401.</li>
+    <li id="r2">V. Karpukhin et&nbsp;al. <i>Dense Passage Retrieval for Open-Domain Question Answering.</i> EMNLP 2020. arXiv:2004.04906.</li>
+    <li id="r3">S. Sturua et&nbsp;al. <i>jina-embeddings-v3: Multilingual Embeddings with Task LoRA.</i> 2024. arXiv:2409.10173. Модель: huggingface.co/jinaai/jina-embeddings-v3.</li>
+    <li id="r4">Hugging Face. <i>Transformers.js</i> — инференс на ONNX Runtime в JavaScript. github.com/huggingface/transformers.js.</li>
+    <li id="r5">J. Johnson, M. Douze, H. Jégou. <i>Billion-scale similarity search with GPUs (FAISS).</i> IEEE Big Data 2019. arXiv:1702.08734.</li>
+    <li id="r6">Chase, H. et&nbsp;al. <i>LangChain — RecursiveCharacterTextSplitter / структурный сплит текста.</i> Документация, 2023–.</li>
+    <li id="r7">C. D. Manning, P. Raghavan, H. Schütze. <i>Introduction to Information Retrieval.</i> Cambridge Univ. Press, 2008 (recall, MRR).</li>
+    <li id="r8">K. Järvelin, J. Kekäläinen. <i>Cumulated Gain-based Evaluation of IR Techniques (nDCG).</i> ACM TOIS 20(4), 2002.</li>
+    <li id="r9">Y. Gao et&nbsp;al. <i>Retrieval-Augmented Generation for Large Language Models: A Survey.</i> 2023. arXiv:2312.10997.</li>
+  </ol>
+
+  <p class="small" style="margin-top:26px">Данные приложения (точные значения) пишутся установкой в <code>system/evals/retrieval-report.json</code> при каждом прогоне. Отчёт самодостаточен и без зависимостей; графики — встроенный SVG. © DavASko. Метод и код: фреймворк DavASko&nbsp;LLM&nbsp;Wiki.</p>
+
+</main>
+</body>
+</html>
