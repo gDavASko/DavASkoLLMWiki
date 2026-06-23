@@ -61,6 +61,7 @@ const SEARCH_DEFAULTS = {
   ground_truth_boost:   0.05,
   stream_a_limit:       10,   // кап символьных совпадений (чтобы частый символ не затоплял)
   graph_lift_semantic:  2,    // граф-lift от топ-N семантических результатов
+  device:               'auto', // 'auto'(GPU→CPU) | 'dml' | 'cuda' | 'cpu'
 };
 function loadSearchConfig() {
   try {
@@ -209,7 +210,7 @@ async function initModel() {
   let extractor;
   try {
     extractor = await libInitModel({
-      modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE,
+      modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE, device: CFG.device,
     });
   } catch (err) {
     console.error(`${C.red}[FATAL]${C.reset} Модель не загружена: ${err.message}`);
@@ -217,7 +218,8 @@ async function initModel() {
     process.exit(1);
   }
   const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
-  console.error(`${C.green}[OK]${C.reset} Модель: ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d)`);
+  const dev = extractor.__device || 'cpu';
+  console.error(`${C.green}[OK]${C.reset} Модель: ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d, device=${dev}${dev !== 'cpu' ? ' ⚡' : ''})`);
   return extractor;
 }
 

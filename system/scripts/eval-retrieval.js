@@ -159,7 +159,7 @@ function lexicalRank(query, corpus) {
 async function runEval(index, queries, cfg, K) {
   const resolve = buildResolver(index);
   const corpus = buildCorpus(index);
-  const extractor = await initModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REV, dtype: 'fp16' });
+  const extractor = await initModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REV, dtype: 'fp16', device: cfg.device || 'auto' });
 
   const retrievers = ['hybrid', 'semantic', 'flat', 'lexical'];
   const agg = {};

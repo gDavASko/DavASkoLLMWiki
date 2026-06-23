@@ -143,12 +143,28 @@ export function scoreSymbolMatches(symbols, documents, { weights, limit } = {}) 
  * Загрузка feature-extraction пайплайна Jina v3 (строго оффлайн).
  * Логирование намеренно отсутствует — оборачивайте на стороне вызова.
  */
-export async function initModel({ modelsCache, modelId, revision, dtype = 'fp16' }) {
+export async function initModel({ modelsCache, modelId, revision, dtype = 'fp16', device = 'auto' }) {
   const { pipeline, env } = await import('@huggingface/transformers');
   env.allowRemoteModels = false;
   env.cacheDir = modelsCache;
   env.localModelPath = modelsCache;
-  return pipeline('feature-extraction', modelId, { revision, dtype });
+
+  // Порядок устройств: 'auto' пробует GPU (DirectML), затем CPU. Явное устройство
+  // (cuda/dml/webgpu/cpu) пробуется первым, cpu — всегда как надёжный фолбэк.
+  // GPU доступен только если в onnxruntime-node есть нужный EP (на Windows —
+  // DirectML.dll, работает на любой DX12-видеокарте: NVIDIA/AMD/Intel).
+  const order = device === 'auto' ? ['dml', 'cpu']
+    : (device === 'cpu' ? ['cpu'] : [device, 'cpu']);
+
+  let lastErr;
+  for (const dev of order) {
+    try {
+      const extractor = await pipeline('feature-extraction', modelId, { revision, dtype, device: dev });
+      extractor.__device = dev;
+      return extractor;
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr;
 }
 
 /**

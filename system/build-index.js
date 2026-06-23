@@ -83,6 +83,7 @@ const HEADING_BREADCRUMBS = ICFG.heading_breadcrumbs;
 const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
 const INDEX_CODE          = ICFG.index_code;
 const EMBED_BATCH_SIZE    = ICFG.embed_batch_size || 16;
+const DEVICE              = ICFG.device || 'auto';   // 'auto'(GPU→CPU) | 'dml' | 'cuda' | 'cpu'
 
 // ─── Folder Blacklist (не индексируются) ─────────────────────────────
 // ВАЖНО: 'raw' намеренно исключён — raw/-папки индексируются отдельным проходом.
@@ -294,7 +295,7 @@ async function initModel() {
   const startMs = Date.now();
   let extractor;
   try {
-    extractor = await libInitModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE });
+    extractor = await libInitModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE, device: DEVICE });
   } catch (err) {
     console.error(`\n${C.red}[FATAL]${C.reset} Не удалось загрузить модель из ${MODELS_CACHE}`);
     console.error(`  Убедитесь, что модель скачана: node system/scripts/setup-model.js`);
@@ -302,7 +303,8 @@ async function initModel() {
     process.exit(1);
   }
   const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
-  console.log(`${C.green}[OK]${C.reset} Модель загружена за ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d)\n`);
+  const dev = extractor.__device || 'cpu';
+  console.log(`${C.green}[OK]${C.reset} Модель загружена за ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d, device=${C.bold}${dev}${dev !== 'cpu' ? ' ⚡GPU' : ''}${C.reset})\n`);
   return extractor;
 }
 

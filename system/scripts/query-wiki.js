@@ -373,7 +373,24 @@ function detectContextLayer() {
     }
   }
 
-  return 'dentistry-cow-wiki';
+  // Fallback: detect the first directory containing wiki.json in submoduleRoot
+  try {
+    const entries = fs.readdirSync(submoduleRoot);
+    for (const file of entries) {
+      if (file === 'plans' || file === 'system') continue;
+      const fullPath = path.join(submoduleRoot, file);
+      if (fs.statSync(fullPath).isDirectory()) {
+        const manifestPath = path.join(fullPath, 'wiki.json');
+        if (fs.existsSync(manifestPath)) {
+          return file;
+        }
+      }
+    }
+  } catch (err) {
+    // Ignore errors and fallback to 'llm-wiki'
+  }
+
+  return 'llm-wiki';
 }
 
 function run() {

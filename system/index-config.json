@@ -1,6 +1,7 @@
 {
   "_README": "Параметры индексации build-index.js. Файл опционален: при отсутствии действуют дефолты из кода. Смена chunk_strategy/размеров требует пересборки: build-index.js --force.",
   "index_code": true,
+  "device": "auto",
   "embed_batch_size": 16,
   "chunk_strategy": "structural",
   "chunk_size_words": 250,
@@ -12,6 +13,8 @@
   "max_raw_file_bytes": 204800,
   "_fields": {
     "index_code": "true — код из ```блоков``` индексируется (текст сохраняется, убираются маркеры); false — блоки кода вырезаются. Для базы ПРО КОД рекомендуется true.",
+    "device": "'auto' — пробует GPU (DirectML), затем CPU; 'dml'/'cuda' — конкретный GPU EP; 'cpu' — только CPU. GPU даёт ~8x ускорение эмбеддинга, если onnxruntime-node содержит нужный провайдер.",
+    "embed_batch_size": "Размер батча эмбеддинга (один прогон модели на N чанков). Особенно полезен на GPU.",
     "chunk_strategy": "'structural' (рекомендуется) — резать по структуре Markdown (заголовки/абзацы), размер в коридоре [min,max], код атомарен; 'fixed' — старое окно слов с перекрытием.",
     "chunk_size_words": "Целевой размер чанка в словах.",
     "chunk_min_words": "structural: чанк мельче — сливается с соседом.",

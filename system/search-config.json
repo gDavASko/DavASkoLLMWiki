@@ -10,6 +10,7 @@
   "ground_truth_boost": 0.05,
   "stream_a_limit": 10,
   "graph_lift_semantic": 2,
+  "device": "auto",
   "_fields": {
     "threshold_mode": "'relative' (рекомендуется) — адаптивный порог tau=max(junk_floor, relative_alpha*top_score) на каждый запрос; 'absolute' — фиксированный similarity_threshold (+ fallback).",
     "relative_alpha": "Для relative-режима: насколько хуже лучшего результата ещё допустимо (0..1). Меньше => шире выдача.",
