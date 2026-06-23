@@ -113,10 +113,21 @@ the most information-dense content.
 
 This avoids collisions when a wiki page and a raw document share the same filename.
 
-### Similarity threshold
+### Similarity threshold (adaptive by default)
 
-The semantic search threshold is **0.70** (not 0.78). Short wiki pages produce diffuse embeddings;
-0.70 balances precision and recall across both wiki and raw content.
+Retrieval no longer uses a fixed cosine cutoff. The default `threshold_mode` is **relative**
+(`system/search-config.json`): per-query τ = `max(junk_floor, relative_alpha · top_score)`
+(defaults α = 0.85, floor = 0.35). This adapts to each query and removes the "magic 0.70".
+An `absolute` mode (fixed `similarity_threshold`) is still available. Calibrate on labeled data
+with `node system/scripts/eval-retrieval.js --sweep` — never hand-pick a number.
+
+### Tuning & quality tooling
+
+- **Search config**: `system/search-config.json` — threshold mode, α, floor, top_k, nprobe, ground-truth boost.
+- **Index config**: `system/index-config.json` — chunk strategy (default `structural`), sizes, `index_code`, `embed_batch_size`.
+- **Measure quality**: `node system/scripts/eval-retrieval.js` (recall@k / MRR / nDCG vs flat & grep baselines).
+- **Detect drift**: `node system/scripts/check-staleness.js` (provenance hashes); refresh with the **davasko-wiki-refresh** skill.
+- **Unit tests**: `npm test` (retrieval core, no model required).
 
 ### After adding new raw/ documents
 

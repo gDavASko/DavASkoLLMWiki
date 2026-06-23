@@ -106,6 +106,11 @@ node system/scripts/query-wiki.js --ingest "path/to/file.md" --layer llm-wiki --
 
 - [ ] New file placed in correct `<layer>/raw/<subfolder>/`
 - [ ] Lint passes without errors
-- [ ] Index rebuilt (`node system/build-index.js`)
+- [ ] Index rebuilt (`node system/build-index.js`). The indexer chunks Markdown
+      by structure (headings/paragraphs, atomic code blocks, heading breadcrumbs —
+      `chunk_strategy` in `system/index-config.json`) and embeds in batches.
 - [ ] New content findable via `query-wiki.js --query`
 - [ ] Wiki links (`[[page-name]]`) resolve correctly
+- [ ] If you authored derived `wiki/` pages citing this source, stamp provenance
+      so drift is detectable later: `node system/scripts/check-staleness.js --stamp <page>`
+      (the **davasko-wiki-refresh** skill re-actualizes pages when sources change).

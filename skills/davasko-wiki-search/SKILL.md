@@ -76,10 +76,13 @@ After the command completes, read the generated context file:
 This file contains:
 - Query metadata (timestamp, document count)
 - Each matched document with source tag (🎯 Exact / 🧠 Semantic / 🔗 Graph+1)
+- A **Kind** label per result: `📄 SOURCE (ground truth)` for raw/code vs `📝 SUMMARY (derived — may lag the source)` for wiki pages — prefer the SOURCE when they disagree
 - Cosine similarity scores
 - Full cleaned document body (frontmatter stripped)
 
-The file is limited to ~120KB to prevent IDE buffer overflow.
+The file is limited to ~120KB to prevent IDE buffer overflow. For parallel queries
+(multiple agents/sessions), pass `--out <path>` to write to a per-session file, or
+`--stdout` to stream the dump instead of touching the shared file.
 
 ### Step 4: Use the Context
 
@@ -89,7 +92,9 @@ Use the retrieved documents as grounded context for answering the user's questio
 
 - **stdout vs stderr**: The script outputs only a short status line to stdout (`WIKI_QUERY_RESULT: ...`). All diagnostic information goes to stderr. This prevents IDE buffer overflow.
 - **Symbol-only queries**: If the query contains only PascalCase symbols (no semantic phrase), the model is NOT loaded, making the search instant.
-- **PascalCase extraction**: PascalCase symbols embedded inside natural language phrases are automatically extracted for Stream A. E.g. `"как регистрировать EventBus"` → symbol `EventBus` + semantic phrase.
+- **PascalCase extraction**: only strict code identifiers (PascalCase with ≥2 humps, `I`-interfaces, `m_` fields) are extracted for Stream A. Generic capitalised words/acronyms (How, JSON, API) are NOT treated as symbols — they only added ranking noise. E.g. `"как регистрировать EventBus"` → symbol `EventBus` + semantic phrase.
+- **Ranking**: results are interleaved by score (symbol and semantic hits compete on a unified scale), not "symbols always first" — a strong semantic hit outranks a weak symbol match. Graph-lifted neighbours trail as context.
+- **Adaptive threshold**: by default the inclusion threshold adapts per query (`relative` mode in `system/search-config.json`); there is no fixed cosine cutoff.
 - **Incremental updates**: If wiki pages change, re-run `node system/build-index.js` to update the index. Unchanged files are skipped via MD5 cache.
 - **Full rebuild**: Use `node system/build-index.js --force` to rebuild the entire index from scratch.
 - **Raw documents**: Since v3.1, both `wiki/` pages and `raw/` source documents are indexed. Raw documents contain full code examples and API details; wiki pages are summaries. Both are searched simultaneously. IDs of raw documents are prefixed with `raw-<layer>-`.
