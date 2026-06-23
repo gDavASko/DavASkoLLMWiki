@@ -34,7 +34,7 @@ import path from 'path';
 import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { initModel, embed, cosineSimilarity, selectProbeClusters } from '../lib/retrieval.js';
+import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold } from '../lib/retrieval.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,7 +64,11 @@ function readText(p) {
   return c;
 }
 function loadConfig() {
-  const def = { similarity_threshold: 0.70, similarity_fallback: 0.65, top_k_documents: 5, nprobe: 8, ground_truth_boost: 0.05 };
+  const def = {
+    threshold_mode: 'relative', relative_alpha: 0.85, junk_floor: 0.35,
+    similarity_threshold: 0.70, similarity_fallback: 0.65,
+    top_k_documents: 5, nprobe: 8, ground_truth_boost: 0.05,
+  };
   try { return { ...def, ...JSON.parse(readText(CONFIG_FILE)) }; } catch { return def; }
 }
 function loadShard(clName) {
@@ -144,20 +148,12 @@ function semanticRank(queryVec, index, cfg, { exhaustive = false } = {}) {
   const nprobe = exhaustive ? Infinity : cfg.nprobe;
   const { clusters } = selectProbeClusters(queryVec, centroids, nprobe);
   const docs = index.documents || {};
-  const fileScores = new Map();
   const all = [];
   for (const cl of clusters) {
-    for (const e of loadShard(cl)) {
-      const s = cosineSimilarity(queryVec, e.embedding);
-      all.push([e.fileId, s]);
-      if (s >= cfg.similarity_threshold) {
-        if (s > (fileScores.get(e.fileId) || 0)) fileScores.set(e.fileId, s);
-      }
-    }
+    for (const e of loadShard(cl)) all.push([e.fileId, cosineSimilarity(queryVec, e.embedding)]);
   }
-  if (fileScores.size === 0) { // fallback
-    for (const [id, s] of all) if (s >= cfg.similarity_fallback && s > (fileScores.get(id) || 0)) fileScores.set(id, s);
-  }
+  // Единое ядро порога (relative/absolute) — то же, что в боевом query-wiki.
+  const { best: fileScores } = applyThreshold(all, cfg);
   const boost = (id) => (docs[id] && docs[id].sourceType === 'raw' ? cfg.ground_truth_boost : 0);
   return [...fileScores.entries()]
     .sort((a, b) => (b[1] + boost(b[0])) - (a[1] + boost(a[0])))
@@ -237,24 +233,38 @@ async function runEval(index, queries, cfg, K) {
 }
 
 // ─── калибровка порога ───────────────────────────────────────────────────
+// В relative-режиме перебираем relative_alpha; в absolute — similarity_threshold.
+// Кэшируем эмбеддинги запросов, чтобы не гонять модель на каждом шаге.
 async function sweepThreshold(index, queries, cfg, K, extractor) {
   const resolve = buildResolver(index);
+  const relative = (cfg.threshold_mode || 'absolute') === 'relative';
+  const knob = relative ? 'relative_alpha' : 'similarity_threshold';
+  const grid = relative
+    ? [0.70, 0.75, 0.80, 0.85, 0.88, 0.90, 0.92, 0.95]
+    : [0.50, 0.55, 0.60, 0.65, 0.70, 0.74, 0.78, 0.82, 0.86];
+
+  // Предрасчёт: эмбеддинг + relevant-множество на запрос
+  const prepared = [];
+  for (const q of queries) {
+    const relevant = new Set();
+    for (const label of (q.relevant || [])) { const id = resolve(label); if (id) relevant.add(id); }
+    if (relevant.size === 0) continue;
+    prepared.push({ vec: await embed(extractor, `query: ${q.query}`, VECTOR_DIM), relevant });
+  }
+
   const rows = [];
-  for (let tau = 0.50; tau <= 0.86; tau += 0.02) {
-    const c = { ...cfg, similarity_threshold: +tau.toFixed(2), similarity_fallback: +tau.toFixed(2) };
-    let recall = 0, n = 0;
-    for (const q of queries) {
-      const relevant = new Set();
-      for (const label of (q.relevant || [])) { const id = resolve(label); if (id) relevant.add(id); }
-      if (relevant.size === 0) continue;
-      const v = await embed(extractor, `query: ${q.query}`, VECTOR_DIM);
-      const ranked = semanticRank(v, index, c, { exhaustive: true });
-      recall += recallAtK(ranked, relevant, K); n++;
+  for (const val of grid) {
+    const c = { ...cfg, [knob]: val };
+    if (!relative) c.similarity_fallback = val;
+    let recall = 0;
+    for (const p of prepared) {
+      const ranked = semanticRank(p.vec, index, c, { exhaustive: true });
+      recall += recallAtK(ranked, p.relevant, K);
     }
-    rows.push({ threshold: +tau.toFixed(2), [`mean_recall@${K}`]: +(n ? recall / n : 0).toFixed(3) });
+    rows.push({ [knob]: val, [`mean_recall@${K}`]: +(prepared.length ? recall / prepared.length : 0).toFixed(3) });
   }
   const best = rows.reduce((b, r) => (r[`mean_recall@${K}`] > b[`mean_recall@${K}`] ? r : b), rows[0]);
-  return { rows, best };
+  return { rows, best, knob };
 }
 
 // ─── синтетический self-test (без реальных данных) ───────────────────────
@@ -334,8 +344,11 @@ async function main() {
   try {
     const { agg, perQuery, extractor } = await runEval(index, queries, cfg, K);
 
+    const thr = cfg.threshold_mode === 'relative'
+      ? `relative (α=${cfg.relative_alpha}, floor=${cfg.junk_floor})`
+      : `absolute (τ=${cfg.similarity_threshold})`;
     console.log('\n=== DavASko Retrieval Eval ===');
-    console.log(`Queries: ${queries.length} | top-k: ${K} | nprobe: ${cfg.nprobe} | threshold: ${cfg.similarity_threshold}`);
+    console.log(`Queries: ${queries.length} | top-k: ${K} | nprobe: ${cfg.nprobe} | threshold: ${thr}`);
     console.log(`\n${'Retriever'.padEnd(10)} ${('recall@' + K).padEnd(10)} ${'MRR'.padEnd(8)} ${('nDCG@' + K).padEnd(8)}`);
     console.log('-'.repeat(40));
     for (const r of ['hybrid', 'flat', 'lexical']) {
@@ -348,10 +361,10 @@ async function main() {
     const report = { generatedAt: new Date().toISOString(), k: K, config: cfg, aggregate: agg, perQuery };
 
     if (DO_SWEEP) {
-      console.log('\n=== Threshold sweep (калибровка) ===');
+      console.log(`\n=== Sweep (калибровка, режим: ${cfg.threshold_mode}) ===`);
       const sweep = await sweepThreshold(index, queries, cfg, K, extractor);
-      for (const row of sweep.rows) console.log(`  τ=${row.threshold}  mean_recall@${K}=${row[`mean_recall@${K}`]}`);
-      console.log(`\nРекомендуемый threshold: ${sweep.best.threshold} (mean_recall@${K}=${sweep.best[`mean_recall@${K}`]})`);
+      for (const row of sweep.rows) console.log(`  ${sweep.knob}=${row[sweep.knob]}  mean_recall@${K}=${row[`mean_recall@${K}`]}`);
+      console.log(`\nРекомендуемый ${sweep.knob}: ${sweep.best[sweep.knob]} (mean_recall@${K}=${sweep.best[`mean_recall@${K}`]})`);
       console.log('Запишите его в system/search-config.json при подтверждении на полном наборе.');
       report.sweep = sweep;
     }

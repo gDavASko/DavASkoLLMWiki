@@ -1,15 +1,21 @@
 {
   "_README": "Параметры гибридного поиска query-wiki.js. Калибруются скриптом eval-retrieval.js на размеченном наборе, а не подбираются на глаз.",
+  "threshold_mode": "relative",
+  "relative_alpha": 0.85,
+  "junk_floor": 0.35,
   "similarity_threshold": 0.70,
   "similarity_fallback": 0.65,
   "top_k_documents": 5,
   "nprobe": 8,
   "ground_truth_boost": 0.05,
   "_fields": {
-    "similarity_threshold": "Порог cosine для семантических совпадений (Stream B).",
-    "similarity_fallback": "Если при threshold 0 результатов — повторить с этим порогом.",
+    "threshold_mode": "'relative' (рекомендуется) — адаптивный порог tau=max(junk_floor, relative_alpha*top_score) на каждый запрос; 'absolute' — фиксированный similarity_threshold (+ fallback).",
+    "relative_alpha": "Для relative-режима: насколько хуже лучшего результата ещё допустимо (0..1). Меньше => шире выдача.",
+    "junk_floor": "Для relative-режима: аварийный нижний пол, чтобы при отсутствии совпадений не тащить шум.",
+    "similarity_threshold": "Для absolute-режима: порог cosine для Stream B.",
+    "similarity_fallback": "Для absolute-режима: повтор с этим порогом, если при threshold 0 результатов.",
     "top_k_documents": "Сколько документов возвращать.",
-    "nprobe": "Сколько ближайших кластеров сканировать (IVF multi-probe). nprobe>=число_кластеров или <=0 => исчерпывающий поиск по всем шардам.",
+    "nprobe": "Сколько ближайших кластеров сканировать (IVF multi-probe). nprobe>=число_кластеров или <=0 => исчерпывающий поиск.",
     "ground_truth_boost": "Бонус к score для raw/код (ground truth) над wiki-саммари при ранжировании (#2)."
   }
 }

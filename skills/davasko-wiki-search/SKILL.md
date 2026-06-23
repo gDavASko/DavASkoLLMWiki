@@ -62,7 +62,7 @@ node system/query-wiki.js --query "CowController, blend tree animation optimizat
 
 **What happens inside:**
 - **Stream A** (instant): Matches symbols against `id`, `symbols`, `tags`, `wikilinks` fields in the index
-- **Stream B** (1–2s): Vectorizes the semantic phrase with `query:` prefix, ranks clusters by centroid and scans the `nprobe` nearest shards (IVF multi-probe; exhaustive when `nprobe ≥ cluster count`), keeps chunks with cosine ≥ `similarity_threshold`, returns Top-`top_k_documents`. All thresholds come from `system/search-config.json` (defaults: threshold `0.70`, `top_k` `5`)
+- **Stream B** (1–2s): Vectorizes the semantic phrase with `query:` prefix, ranks clusters by centroid and scans the `nprobe` nearest shards (IVF multi-probe; exhaustive when `nprobe ≥ cluster count`), then filters by an **adaptive threshold** — default `relative` mode keeps chunks with cosine ≥ `max(junk_floor, relative_alpha · top_score)` (per-query), `absolute` mode uses a fixed `similarity_threshold`. Returns Top-`top_k_documents`. All knobs come from `system/search-config.json`
 - **Graph Lift**: For exact matches (Stream A), loads `extends` parent (+1) and `[[WikiLinks]]` references (+1)
 - **Context Dump**: Writes matched documents to `.cursor-context-dump.md` in the project root
 

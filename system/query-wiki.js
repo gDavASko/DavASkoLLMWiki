@@ -31,7 +31,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cosineSimilarity, selectProbeClusters, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
+import { cosineSimilarity, selectProbeClusters, applyThreshold, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -51,6 +51,9 @@ const CONFIG_FILE  = path.join(SYSTEM_DIR, 'search-config.json');
 // (eval-retrieval.js), а не править код. Файл может отсутствовать — тогда
 // действуют значения по умолчанию ниже.
 const SEARCH_DEFAULTS = {
+  threshold_mode:       'relative',
+  relative_alpha:       0.85,
+  junk_floor:           0.35,
   similarity_threshold: 0.70,
   similarity_fallback:  0.65,
   top_k_documents:      5,
@@ -67,8 +70,6 @@ function loadSearchConfig() {
   }
 }
 const CFG = loadSearchConfig();
-const SIMILARITY_THRESHOLD = CFG.similarity_threshold;
-const SIMILARITY_FALLBACK  = CFG.similarity_fallback;
 const TOP_K_DOCUMENTS      = CFG.top_k_documents;
 const NPROBE               = CFG.nprobe;
 const GROUND_TRUTH_BOOST   = CFG.ground_truth_boost;
@@ -298,7 +299,7 @@ function runStreamA(symbols, index) {
  *   1. Векторизация запроса с "query: " prefix
  *   2. Ранжирование кластеров по близости к их центроиду; скан top-NPROBE
  *   3. Диагностика: печатает top-5 score (score, fileId)
- *   4. Фильтр >= SIMILARITY_THRESHOLD; если 0 результатов — fallback до SIMILARITY_FALLBACK
+ *   4. Порог через applyThreshold: relative (адаптивный) или absolute (фиксированный)
  *   5. Top-K_DOCUMENTS документов
  *
  * Про nprobe:
@@ -322,47 +323,26 @@ async function runStreamB(semanticQuery, index, extractor) {
   const { clusters: probeClusters, exhaustive } = selectProbeClusters(queryVec, centroids, NPROBE);
   console.error(`${C.dim}  [B] Multi-probe: ${probeClusters.length}/${clusterNames.length} кластеров${exhaustive ? ' (исчерпывающий)' : ` (nprobe=${NPROBE})`}${C.reset}`);
 
-  /** fileId → лучший score среди всех чанков */
-  const fileScores = new Map();
-
-  /** Диагностика: все полученные score для top-N */
+  /** Все полученные score (для порога и диагностики) */
   const allScores = [];
-
   for (const clName of probeClusters) {
     const shardPath = path.join(SHARDS_DIR, `embeddings-${clName}.json`);
     if (!fs.existsSync(shardPath)) continue;
-
     const shard = JSON.parse(readText(shardPath));
     for (const entry of shard) {
-      const score = cosineSimilarity(queryVec, entry.embedding);
-      allScores.push({ fileId: entry.fileId, score });
-
-      if (score >= SIMILARITY_THRESHOLD) {
-        const existing = fileScores.get(entry.fileId) || 0;
-        if (score > existing) fileScores.set(entry.fileId, score);
-      }
+      allScores.push([entry.fileId, cosineSimilarity(queryVec, entry.embedding)]);
     }
   }
 
   // 3. Диагностика: top-5 score независимо от порога
-  allScores.sort((a, b) => b.score - a.score);
-  const topDisplay = allScores.slice(0, 5)
-    .map(d => `${d.fileId.split('-').pop()}:${d.score.toFixed(3)}`)
+  const top5 = [...allScores].sort((a, b) => b[1] - a[1]).slice(0, 5)
+    .map(([id, s]) => `${id.split('-').pop()}:${s.toFixed(3)}`)
     .join(', ');
-  console.error(`${C.dim}  [B] Top-5 scores: ${topDisplay}${C.reset}`);
+  console.error(`${C.dim}  [B] Top-5 scores: ${top5}${C.reset}`);
 
-  // 4. Fallback: если ничего не нашли при 0.70 — попробуем SIMILARITY_FALLBACK
-  if (fileScores.size === 0 && allScores.length > 0) {
-    console.error(`${C.yellow}  [B] 0 результатов при ${SIMILARITY_THRESHOLD} — fallback до ${SIMILARITY_FALLBACK}${C.reset}`);
-    for (const { fileId, score } of allScores) {
-      if (score < SIMILARITY_FALLBACK) break; // сортировано по убыванию
-      const existing = fileScores.get(fileId) || 0;
-      if (score > existing) fileScores.set(fileId, score);
-    }
-    if (fileScores.size > 0) {
-      console.error(`${C.dim}  [B] Fallback нашёл ${fileScores.size} документов${C.reset}`);
-    }
-  }
+  // 4. Порог: адаптивный (relative) или фиксированный (absolute) — единое ядро.
+  const { best: fileScores, tau, mode, usedFallback } = applyThreshold(allScores, CFG);
+  console.error(`${C.dim}  [B] Порог: ${mode} τ=${tau.toFixed(3)} → ${fileScores.size} документов${usedFallback ? ' (fallback)' : ''}${C.reset}`);
 
   // 5. Top-K по эффективному score (ground-truth boost: raw/код выше саммари).
   //    Порог фильтрации применяется к ИСТИННОМУ cosine (выше); boost влияет
@@ -558,7 +538,7 @@ async function main() {
   if (queryParts.semantic) {
     const extractor = await initModel();
     streamBResults = await runStreamB(queryParts.semantic, index, extractor);
-    console.error(`${C.cyan}[B]${C.reset} Семантический: ${streamBResults.size} совпадений (>= ${SIMILARITY_THRESHOLD})`);
+    console.error(`${C.cyan}[B]${C.reset} Семантический: ${streamBResults.size} совпадений (порог: ${CFG.threshold_mode})`);
   } else {
     console.error(`${C.dim}[B] Семантический поиск пропущен (нет фразы).${C.reset}`);
   }

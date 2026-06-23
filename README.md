@@ -132,11 +132,13 @@ flowchart LR
 | **A — Symbolic** | Exact match on `id`, `symbols`, `tags`, `wikilinks` | Instant | C# classes, interfaces, enums |
 | **B — Semantic** | Cosine similarity with Jina v3 vectors | 1–2s | Natural language queries (RU/EN) |
 
-**Cosine similarity threshold** (configurable in `system/search-config.json`, default `0.70`):
+**Adaptive threshold** (`threshold_mode` in `system/search-config.json`, default `relative`):
 
-$$\text{similarity}(q, d) = \frac{\vec{q} \cdot \vec{d}}{||\vec{q}|| \cdot ||\vec{d}||} \geq \tau,\quad \tau_{\text{default}} = 0.70$$
+A fixed cosine cutoff is fragile — score distributions shift with model, language and document length, so there is no universal "good" number. The default **relative** mode computes a per-query threshold from that query's own best match:
 
-If nothing clears `τ`, the engine retries at a `similarity_fallback` (default `0.65`) for cross-lingual queries.
+$$\tau_q = \max\bigl(\text{junk\_floor},\; \alpha \cdot \max_d \text{sim}(q,d)\bigr),\quad \alpha = 0.85,\ \text{junk\_floor} = 0.35$$
+
+This adapts to each query (robust to RU/EN and length) and keeps only a low floor to reject noise. The legacy **absolute** mode (fixed `similarity_threshold` + `similarity_fallback`) is still available via config. Calibrate `α` (relative) or `τ` (absolute) on labeled data with `eval-retrieval.js --sweep` — don't hand-pick a magic number.
 
 **Cluster probing (IVF multi-probe)**: Stream B ranks clusters by their centroid and scans the `nprobe` nearest (default `8`). When `nprobe ≥ cluster count` (the small-corpus case) the search is **exhaustive** — zero recall loss. `nprobe` trades recall for speed only on large corpora and is meant to be calibrated on labeled data via `system/scripts/eval-retrieval.js`.
 
