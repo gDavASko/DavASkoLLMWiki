@@ -47,6 +47,16 @@ const PACKAGE_NAME    = '@huggingface/transformers';
 const PACKAGE_VERSION = '^3.0.0';
 const OUTPUT_FILENAME = 'huggingface-transformers.tgz';
 
+// ─── Standalone vendored packages (pinned) ───────────────────────────
+// Small pure-JS deps packed as-is. Pinned versions так как они становятся
+// частью оффлайн-инварианта и должны быть воспроизводимы. argparse —
+// транзитивная зависимость js-yaml@4 (CLI bin); вендорим, чтобы offline
+// `npm install` не ходил в registry.
+const STANDALONE_PACKAGES = [
+  'js-yaml@4.1.0',
+  'argparse@2.0.1',
+];
+
 // ─── ANSI Colors ─────────────────────────────────────────────────────
 const C = {
   reset:  '\x1b[0m',
@@ -184,6 +194,22 @@ async function main() {
     console.log(`${C.dim}  Архив: ${destPath}`);
     console.log(`  Размер: ${(destSize / 1024 / 1024).toFixed(1)}MB`);
     console.log(`  Зависимостей: ${depCount} (включая транзитивные)${C.reset}`);
+
+    // 8. Standalone pure-JS пакеты (js-yaml, argparse) — pinned, для offline install
+    console.log(`\n${C.cyan}[+]${C.reset} Упаковка standalone-пакетов...`);
+    if (!fs.existsSync(VENDOR_DIR)) fs.mkdirSync(VENDOR_DIR, { recursive: true });
+    for (const spec of STANDALONE_PACKAGES) {
+      try {
+        const out = exec(`npm pack ${spec} --pack-destination "${VENDOR_DIR}" --json`, tmpDir).trim();
+        let fname;
+        try { const j = JSON.parse(out); fname = (Array.isArray(j) ? j[0] : j).filename; }
+        catch { fname = out.split('\n').filter(Boolean).pop(); }
+        console.log(`${C.green}[OK]${C.reset} ${spec} → ${fname}`);
+      } catch (err) {
+        console.error(`${C.red}[ERROR]${C.reset} npm pack ${spec} failed: ${err.stderr || err.message}`);
+        throw err;
+      }
+    }
 
     console.log(
       `\n${C.green}[OK]${C.reset} Все зависимости упакованы.\n` +

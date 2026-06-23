@@ -14,11 +14,15 @@
     "lint": "node system/scripts/lint-wiki.js",
     "validate": "node system/scripts/validate-links.js",
     "evals": "node system/scripts/run-evals.js",
+    "eval-retrieval": "node system/scripts/eval-retrieval.js",
+    "staleness": "node system/scripts/check-staleness.js",
     "sync-rules": "node system/sync-ai-rules.js",
     "setup-model": "node system/scripts/setup-model.js",
     "pack-deps": "node system/scripts/pack-deps.js"
   },
   "dependencies": {
-    "@huggingface/transformers": "file:./system/vendor/huggingface-transformers.tgz"
+    "@huggingface/transformers": "file:./system/vendor/huggingface-transformers.tgz",
+    "js-yaml": "file:./system/vendor/js-yaml-4.1.0.tgz",
+    "argparse": "file:./system/vendor/argparse-2.0.1.tgz"
   }
 }

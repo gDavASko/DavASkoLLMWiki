@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { parseFrontmatter as parseFM } from '../lib/frontmatter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,49 +29,13 @@ function readUtf8(filePath) {
   return content;
 }
 
-// Helper to parse simple YAML frontmatter
-function parseFrontmatter(text) {
-  const result = {};
-  if (!text || !text.startsWith('---')) return result;
-  const parts = text.split('---');
-  if (parts.length < 3) return result;
-  const yamlLines = parts[1].split('\n');
-  
-  let currentKey = null;
-
-  yamlLines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-    
-    // Check list item
-    if (trimmed.startsWith('-') && currentKey) {
-      if (!Array.isArray(result[currentKey])) {
-        result[currentKey] = [];
-      }
-      const val = trimmed.substring(1).trim().replace(/^['"]|['"]$/g, '');
-      result[currentKey].push(val);
-      return;
-    }
-    
-    const colonIndex = line.indexOf(':');
-    if (colonIndex === -1) return;
-    
-    const key = line.substring(0, colonIndex).trim();
-    const value = line.substring(colonIndex + 1).trim().replace(/^['"]|['"]$/g, '');
-    
-    currentKey = key;
-    if (value === '') {
-      result[key] = [];
-    } else if (value === 'true') {
-      result[key] = true;
-    } else if (value === 'false') {
-      result[key] = false;
-    } else {
-      result[key] = value;
-    }
-  });
-  
-  return result;
+// YAML frontmatter parsing (delegated to the shared js-yaml-based module).
+// Thin adapter keeps the historical call shape (returns the meta object).
+// Surfaces YAML syntax errors as lint issues via the rel-path-aware variant below.
+function parseFrontmatter(text, rel) {
+  const { meta, error } = parseFM(text);
+  if (error && rel) addIssue(`${rel} has invalid YAML frontmatter: ${error}`);
+  return meta;
 }
 
 // Helper to check raw source deprecation and validation status
@@ -341,7 +306,7 @@ layers.forEach(layer => {
 
     // 3. Required frontmatter check (excluding stubs.md, contradictions.md, index.md)
     if (filename !== 'stubs.md' && filename !== 'contradictions.md' && filename !== 'index.md') {
-      const front = parseFrontmatter(text);
+      const front = parseFrontmatter(text, rel);
       
       // Update metrics: statuses count
       if (front.status === 'draft') metrics.layers[layer].draftsCount++;

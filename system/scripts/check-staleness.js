@@ -21,6 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { parseFrontmatter, updateFrontmatter } from '../lib/frontmatter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,10 +39,6 @@ function readText(filePath) {
   if (content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
   return content;
 }
-function writeMdBom(filePath, content) {
-  const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
-  fs.writeFileSync(filePath, Buffer.concat([bom, Buffer.from(content, 'utf8')]));
-}
 function sha256(text) {
   return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
 }
@@ -56,47 +53,16 @@ function getFilesRecursively(dir, ext) {
   return out;
 }
 
-// ─── минимальный парсер frontmatter (sources list + source_hashes map) ──
-function splitFrontmatter(text) {
-  if (!text.startsWith('---')) return { fm: null, body: text };
-  const end = text.indexOf('\n---', 3);
-  if (end === -1) return { fm: null, body: text };
-  const fm = text.slice(text.indexOf('\n') + 1, end);
-  const body = text.slice(end + 4);
-  return { fm, body, raw: text.slice(0, end + 4) };
+// Нормализация полей meta из js-yaml в форму, удобную детектору.
+function metaSources(meta) {
+  const s = meta.sources;
+  if (Array.isArray(s)) return s.map(String);
+  if (typeof s === 'string' && s.trim()) return [s.trim()];
+  return [];
 }
-
-function parseFrontmatter(fm) {
-  const out = { sources: [], source_hashes: {}, scalars: {} };
-  if (!fm) return out;
-  const lines = fm.split('\n');
-  let mode = null; // 'sources' | 'hashes'
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const indented = /^\s+/.test(line);
-    const listMatch = line.match(/^\s*-\s+(.*)$/);
-    const kvMatch = line.match(/^(\s*)([A-Za-z0-9_.\/-]+)\s*:\s*(.*)$/);
-
-    if (mode === 'sources' && listMatch) {
-      out.sources.push(listMatch[1].trim().replace(/^['"]|['"]$/g, ''));
-      continue;
-    }
-    if (mode === 'hashes' && indented && kvMatch) {
-      const key = kvMatch[2].trim().replace(/^['"]|['"]$/g, '');
-      out.source_hashes[key] = kvMatch[3].trim().replace(/^['"]|['"]$/g, '');
-      continue;
-    }
-    // top-level key resets mode
-    if (kvMatch && !indented) {
-      const key = kvMatch[2].trim();
-      const val = kvMatch[3].trim();
-      if (key === 'sources') { mode = 'sources'; continue; }
-      if (key === 'source_hashes') { mode = 'hashes'; continue; }
-      mode = null;
-      out.scalars[key] = val.replace(/^['"]|['"]$/g, '');
-    }
-  }
-  return out;
+function metaHashes(meta) {
+  const h = meta.source_hashes;
+  return (h && typeof h === 'object' && !Array.isArray(h)) ? h : {};
 }
 
 // ─── обнаружение слоёв (каталоги с wiki.json) ───────────────────────────
@@ -112,8 +78,8 @@ function discoverLayers() {
 }
 
 // ─── собрать процитированные источники страницы ─────────────────────────
-function collectSources(fmParsed, body, layer) {
-  const set = new Set(fmParsed.sources);
+function collectSources(meta, body, layer) {
+  const set = new Set(metaSources(meta));
   // (source: path) и (source: a; source: b) из тела
   const re = /\(source:\s*([^)]+)\)/g;
   let m;
@@ -138,42 +104,19 @@ function collectSources(fmParsed, body, layer) {
 
 // ─── запись source_hashes во frontmatter (для --stamp / refresh) ────────
 function stampPage(file, resolved) {
-  const text = readText(file);
-  const parts = splitFrontmatter(text);
-  if (!parts.fm) {
-    console.error(`[stamp] ${path.relative(submoduleRoot, file)} has no frontmatter — skipped`);
+  const today = new Date().toISOString().slice(0, 10);
+  const hashes = {};
+  for (const r of resolved) if (r.file) hashes[r.source] = sha256(readText(r.file));
+
+  const { content, error } = updateFrontmatter(fs.readFileSync(file, 'utf8'), (meta) => {
+    meta.last_updated = today;
+    meta.source_hashes = hashes;
+  });
+  if (error) {
+    console.error(`[stamp] ${path.relative(submoduleRoot, file)} skipped: ${error}`);
     return false;
   }
-  // удалить существующий блок source_hashes (ключ + вложенные строки)
-  const fmLines = parts.fm.split('\n');
-  const cleaned = [];
-  let skipping = false;
-  for (const line of fmLines) {
-    if (/^source_hashes\s*:/.test(line)) { skipping = true; continue; }
-    if (skipping) {
-      if (/^\s+\S/.test(line)) continue; // вложенная строка карты
-      skipping = false;
-    }
-    if (/^last_updated\s*:/.test(line)) continue; // обновим ниже
-    cleaned.push(line);
-  }
-  // отбросить хвостовые пустые строки очищенного frontmatter
-  while (cleaned.length && !cleaned[cleaned.length - 1].trim()) cleaned.pop();
-
-  // собрать новый блок source_hashes + обновлённый last_updated
-  const hashLines = resolved
-    .filter(r => r.file)
-    .map(r => `  ${r.source}: ${sha256(readText(r.file))}`);
-  const today = new Date().toISOString().slice(0, 10);
-  const newFm = [
-    ...cleaned,
-    `last_updated: ${today}`,
-    'source_hashes:',
-    ...hashLines,
-  ].join('\n');
-
-  const rebuilt = `---\n${newFm}\n---${parts.body}`;
-  writeMdBom(file, rebuilt);
+  fs.writeFileSync(file, Buffer.from(content, 'utf8'));
   return true;
 }
 
@@ -193,14 +136,13 @@ for (const layer of layers) {
     const base = path.basename(file);
     if (['index.md', 'stubs.md', 'contradictions.md'].includes(base)) continue;
 
-    const text = readText(file);
-    const parts = splitFrontmatter(text);
-    const fmParsed = parseFrontmatter(parts.fm);
-    const resolved = collectSources(fmParsed, parts.body || text, layer);
+    const { meta, body, error } = parseFrontmatter(fs.readFileSync(file, 'utf8'));
+    const rel = path.relative(submoduleRoot, file).replace(/\\/g, '/');
+    if (error) { console.error(`[skip] ${rel}: invalid YAML frontmatter (${error})`); continue; }
+
+    const resolved = collectSources(meta, body || '', layer);
     if (resolved.length === 0) continue; // нечего отслеживать
     report.summary.pagesChecked++;
-
-    const rel = path.relative(submoduleRoot, file).replace(/\\/g, '/');
 
     if (STAMP) {
       if (!stampTarget || path.resolve(file) === path.resolve(submoduleRoot, stampTarget)) {
@@ -209,7 +151,7 @@ for (const layer of layers) {
       continue;
     }
 
-    const recorded = fmParsed.source_hashes;
+    const recorded = metaHashes(meta);
     const hasBaseline = Object.keys(recorded).length > 0;
     const changes = [];
     for (const r of resolved) {

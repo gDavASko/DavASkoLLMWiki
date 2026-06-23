@@ -29,6 +29,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { parseFrontmatter } from './lib/frontmatter.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -48,8 +49,8 @@ const VECTOR_DIM     = 1024;
 const DTYPE          = 'fp16';
 
 // ─── Chunking Configuration ─────────────────────────────────────────
-const CHUNK_SIZE_WORDS    = 1200;
-const CHUNK_OVERLAP_WORDS = 200;
+const CHUNK_SIZE_WORDS    = 250;
+const CHUNK_OVERLAP_WORDS = 50;
 
 // ─── Raw File Size Limit ───────────────────────────────────────────────────
 // Большие raw/-файлы (ГДД, ТЗ, транскрипты) не индексируются — они дают сотни
@@ -126,51 +127,6 @@ function cosineSimilarity(a, b) {
   }
   if (normA === 0 || normB === 0) return 0;
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
-}
-
-/**
- * Парсинг YAML-фронтматтера из маркдауна.
- * Возвращает { meta: {...}, body: "..." }
- */
-function parseFrontmatter(content) {
-  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
-  if (!fmMatch) {
-    return { meta: {}, body: content };
-  }
-
-  const yamlBlock = fmMatch[1];
-  const body = content.slice(fmMatch[0].length);
-  const meta = {};
-
-  for (const line of yamlBlock.split(/\r?\n/)) {
-    const colonIdx = line.indexOf(':');
-    if (colonIdx === -1) continue;
-
-    const key   = line.slice(0, colonIdx).trim();
-    let   value = line.slice(colonIdx + 1).trim();
-
-    if (!key || key.startsWith('#') || key.startsWith('-')) continue;
-
-    // Inline YAML array: [item1, item2]
-    const arrMatch = value.match(/^\[(.+)\]$/);
-    if (arrMatch) {
-      meta[key] = arrMatch[1].split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
-      continue;
-    }
-
-    // WikiLink: [[target]]
-    const wlMatch = value.match(/^\[\[(.+?)\]\]$/);
-    if (wlMatch) {
-      meta[key] = wlMatch[1];
-      continue;
-    }
-
-    // Quoted string
-    value = value.replace(/^["']|["']$/g, '');
-    meta[key] = value;
-  }
-
-  return { meta, body };
 }
 
 /**
