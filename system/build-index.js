@@ -29,6 +29,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
+import { chunkMarkdown } from './lib/chunker.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -53,8 +54,13 @@ const DTYPE          = 'fp16';
 const INDEX_CONFIG_FILE = path.join(SYSTEM_DIR, 'index-config.json');
 const INDEX_DEFAULTS = {
   index_code:          true,        // индексировать код (для базы ПРО КОД — по умолчанию да)
-  chunk_size_words:    250,
-  chunk_overlap_words: 50,
+  chunk_strategy:      'structural',// 'structural' (по структуре Markdown) | 'fixed' (окно слов)
+  chunk_size_words:    250,         // целевой размер чанка
+  chunk_min_words:     80,          // мельче — сливается с соседом
+  chunk_max_words:     400,         // крупнее — единственный случай хард-сплита
+  chunk_overlap_words: 50,          // только для fixed-стратегии
+  keep_code_atomic:    true,        // не рвать блоки ```...```
+  heading_breadcrumbs: true,        // приписывать к чанку путь заголовков
   max_raw_file_bytes:  200 * 1024,  // raw/-файлы крупнее — пропускаются (ГДД/ТЗ → сотни чанков)
 };
 function loadIndexConfig() {
@@ -66,8 +72,13 @@ function loadIndexConfig() {
   }
 }
 const ICFG = loadIndexConfig();
+const CHUNK_STRATEGY      = ICFG.chunk_strategy;
 const CHUNK_SIZE_WORDS    = ICFG.chunk_size_words;
+const CHUNK_MIN_WORDS     = ICFG.chunk_min_words;
+const CHUNK_MAX_WORDS     = ICFG.chunk_max_words;
 const CHUNK_OVERLAP_WORDS = ICFG.chunk_overlap_words;
+const KEEP_CODE_ATOMIC    = ICFG.keep_code_atomic;
+const HEADING_BREADCRUMBS = ICFG.heading_breadcrumbs;
 const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
 const INDEX_CODE          = ICFG.index_code;
 
@@ -574,8 +585,21 @@ async function main() {
       shards[clName] = shards[clName].filter(entry => entry.fileId !== fileId);
     }
 
-    // 8b. Чанкинг подготовленного текста
-    const chunks = chunkText(textToEmbed);
+    // 8b. Чанкинг. structural: режем сырой Markdown по структуре (видя заголовки
+    //     и ```-фенсы), затем чистим каждый чанк (код — по index_code). fixed:
+    //     старое окно слов по уже очищенному тексту.
+    let chunks;
+    if (CHUNK_STRATEGY === 'structural') {
+      chunks = chunkMarkdown(body, {
+        targetWords: CHUNK_SIZE_WORDS,
+        minWords: CHUNK_MIN_WORDS,
+        maxWords: CHUNK_MAX_WORDS,
+        keepCodeAtomic: KEEP_CODE_ATOMIC,
+        headingBreadcrumbs: HEADING_BREADCRUMBS,
+      }).map(c => prepareTextForEmbedding(c).trim()).filter(Boolean);
+    } else {
+      chunks = chunkText(textToEmbed);
+    }
     if (chunks.length === 0) {
       process.stdout.write(` — пустой, пропуск\n`);
       continue;
@@ -666,6 +690,7 @@ async function main() {
 
   // 12. Сохранение мета-индекса (JSON — без BOM, иначе ломается JSON.parse)
   index.updatedAt = new Date().toISOString();
+  index.chunkStrategy = CHUNK_STRATEGY; // для воспроизводимости (смена стратегии → нужен --force)
   writeTextNoBom(INDEX_FILE, JSON.stringify(index, null, 2));
 
   const totalDocs = Object.keys(index.documents).length;

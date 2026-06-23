@@ -1,13 +1,23 @@
 {
-  "_README": "Параметры индексации build-index.js. Файл опционален: при отсутствии действуют дефолты из кода.",
+  "_README": "Параметры индексации build-index.js. Файл опционален: при отсутствии действуют дефолты из кода. Смена chunk_strategy/размеров требует пересборки: build-index.js --force.",
   "index_code": true,
+  "chunk_strategy": "structural",
   "chunk_size_words": 250,
+  "chunk_min_words": 80,
+  "chunk_max_words": 400,
   "chunk_overlap_words": 50,
+  "keep_code_atomic": true,
+  "heading_breadcrumbs": true,
   "max_raw_file_bytes": 204800,
   "_fields": {
-    "index_code": "true — код из ```блоков``` индексируется (сохраняется текст, убираются только маркеры); false — блоки кода вырезаются из эмбеддингов. Для базы ПРО КОД рекомендуется true.",
-    "chunk_size_words": "Размер чанка в словах.",
-    "chunk_overlap_words": "Перекрытие соседних чанков в словах.",
+    "index_code": "true — код из ```блоков``` индексируется (текст сохраняется, убираются маркеры); false — блоки кода вырезаются. Для базы ПРО КОД рекомендуется true.",
+    "chunk_strategy": "'structural' (рекомендуется) — резать по структуре Markdown (заголовки/абзацы), размер в коридоре [min,max], код атомарен; 'fixed' — старое окно слов с перекрытием.",
+    "chunk_size_words": "Целевой размер чанка в словах.",
+    "chunk_min_words": "structural: чанк мельче — сливается с соседом.",
+    "chunk_max_words": "structural: верхняя планка; превышение → хард-сплит.",
+    "chunk_overlap_words": "fixed: перекрытие соседних чанков в словах (для structural не используется).",
+    "keep_code_atomic": "structural: не разрывать блоки кода ```...```.",
+    "heading_breadcrumbs": "structural: приписывать к каждому чанку путь заголовков (напр. '[Event Bus > Subscription]').",
     "max_raw_file_bytes": "raw/-файлы крупнее этого размера пропускаются (ГДД/ТЗ дают сотни чанков)."
   }
 }

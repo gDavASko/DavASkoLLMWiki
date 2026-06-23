@@ -161,8 +161,8 @@ The model uses **asymmetric prefixing** for optimal retrieval:
 | Model | `jinaai/jina-embeddings-v3` |
 | Precision | FP16 |
 | Vector dimensions | 1024 |
-| Chunk size | 250 words (configurable, `system/index-config.json`) |
-| Chunk overlap | 50 words (configurable) |
+| Chunking | structure-aware by default (`chunk_strategy: structural`): splits on Markdown headings/paragraphs, keeps code blocks atomic, adds heading breadcrumbs, size kept within `[chunk_min_words, chunk_max_words]`. `fixed` (word-window + overlap) still available |
+| Chunk size | target 250 words (configurable, `system/index-config.json`) |
 | Code in embeddings | on by default (`index_code`); set `false` to strip code blocks |
 | Storage | one JSON shard per layer in `system/index-shards/` (gitignored) |
 
