@@ -111,12 +111,22 @@ export async function embed(extractor, text, vectorDim = 1024) {
   inputs.task_id = new Tensor('int64', BigInt64Array.from([BigInt(taskId)]), [1]);
   const outputs = await extractor.model(inputs);
 
+  // Выбор выходного тензора эмбеддинга ПО ФОРМЕ, а не по магическому имени узла
+  // ('13049' — автоген-номер из конкретного ONNX-экспорта, ломается при переэкспорте).
+  // Имя оставляем как быструю первую попытку, форма — надёжный фолбэк.
+  const tensors = Object.values(outputs).filter(t => t && t.dims && t.data);
+  const pooled2d = tensors.find(t => t.dims.length === 2 && t.dims[t.dims.length - 1] === vectorDim);
+  const hidden3d = tensors.find(t => t.dims.length === 3 && t.dims[t.dims.length - 1] === vectorDim);
+
   let raw;
-  if (outputs['13049']) {
-    raw = Array.from(outputs['13049'].data);
-  } else if (outputs['text_embeds']) {
-    // Резервный mean pooling
-    const lastHiddenState = outputs.text_embeds;
+  const named = outputs['13049'];
+  if (named && named.dims && named.dims[named.dims.length - 1] === vectorDim) {
+    raw = Array.from(named.data);            // быстрый путь: ожидаемый именованный выход
+  } else if (pooled2d) {
+    raw = Array.from(pooled2d.data);         // уже пулленный эмбеддинг [batch, vectorDim]
+  } else if (hidden3d) {
+    // Резервный mean pooling по 3D [batch, seq, vectorDim] с учётом attention_mask
+    const lastHiddenState = hidden3d;
     const attentionMask = inputs.attention_mask;
     const [batchSize, seqLength, embedDim] = lastHiddenState.dims;
     const pooled = new Float32Array(batchSize * embedDim);
@@ -133,7 +143,8 @@ export async function embed(extractor, text, vectorDim = 1024) {
     }
     raw = Array.from(pooled);
   } else {
-    throw new Error('Model outputs did not contain expected keys (13049 or text_embeds)');
+    const shapes = tensors.map(t => `[${t.dims.join(',')}]`).join(' ');
+    throw new Error(`No embedding tensor of expected shape (last dim ${vectorDim}) found. Outputs: ${shapes}`);
   }
 
   let norm = Math.sqrt(raw.reduce((s, v) => s + v * v, 0)) || 1;
