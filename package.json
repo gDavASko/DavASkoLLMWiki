@@ -8,6 +8,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "test": "node --test",
     "build-index": "node system/build-index.js",
     "build-index:force": "node system/build-index.js --force",
     "query": "node system/query-wiki.js --query",

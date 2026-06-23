@@ -227,6 +227,7 @@ sequenceDiagram
 | `node system/scripts/update-links.js` | Safe path migration (DEPRECATED) |
 | `node system/scripts/check-sources.js` | Citation sanity check (cited source files exist); not a quality metric |
 | `node system/scripts/eval-retrieval.js` | Retrieval quality: recall@k/MRR/nDCG vs flat & grep baselines |
+| `npm test` | Unit tests for the retrieval core (cosine, multi-probe, threshold, frontmatter, metrics) — no model required |
 
 ---
 

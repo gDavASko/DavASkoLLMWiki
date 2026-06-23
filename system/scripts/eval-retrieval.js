@@ -35,6 +35,7 @@ import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold } from '../lib/retrieval.js';
+import { recallAtK, mrr, ndcgAtK } from '../lib/metrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,28 +79,7 @@ function loadShard(clName) {
 }
 
 // ─── метрики ─────────────────────────────────────────────────────────────
-function recallAtK(ranked, relevant, k) {
-  if (relevant.size === 0) return 0;
-  const top = ranked.slice(0, k);
-  let hit = 0;
-  for (const id of top) if (relevant.has(id)) hit++;
-  return hit / relevant.size;
-}
-function mrr(ranked, relevant) {
-  for (let i = 0; i < ranked.length; i++) if (relevant.has(ranked[i])) return 1 / (i + 1);
-  return 0;
-}
-function ndcgAtK(ranked, relevant, k) {
-  if (relevant.size === 0) return 0;
-  let dcg = 0;
-  for (let i = 0; i < Math.min(k, ranked.length); i++) {
-    if (relevant.has(ranked[i])) dcg += 1 / Math.log2(i + 2);
-  }
-  let idcg = 0;
-  const ideal = Math.min(relevant.size, k);
-  for (let i = 0; i < ideal; i++) idcg += 1 / Math.log2(i + 2);
-  return idcg === 0 ? 0 : dcg / idcg;
-}
+// Метрики recall@k / MRR / nDCG@k вынесены в ../lib/metrics.js (тестируются отдельно).
 
 // ─── разрешение меток релевантности (id | path | basename) → fileId ──────
 function buildResolver(index) {
