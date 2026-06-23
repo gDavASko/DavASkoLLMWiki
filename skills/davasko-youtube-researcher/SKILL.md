@@ -3,11 +3,12 @@ name: davasko-youtube-researcher
 description: Use this skill to extract transcripts from YouTube video URLs, write structured research notes (summaries, key claims, recommendations), draft an implementation plan for knowledge base ingestion, and automate the ingestion process.
 status: draft
 owner: DavASko
-license: project-internal
-allowed_tools:
-  - filesystem-write
-  - run-command
-  - docs-read
+license: Proprietary
+allowed-tools:
+  - Write
+  - Edit
+  - Read
+  - Bash
 required_reading:
   - references/youtube-extraction-guide.md
   - references/wiki-ingest-protocol.md
@@ -34,15 +35,15 @@ Refer to local reference files for extraction and ingestion rules:
 
 ### 1. Technical Transcript Extraction
 Instructions for downloading video subtitles and transcripts on Windows/macOS/Linux using `youtube-transcript` or `yt-dlp`:
-- [Transcript Extraction Guide](file://references/youtube-extraction-guide.md)
+- [Transcript Extraction Guide](references/youtube-extraction-guide.md)
 
 ### 2. Materials Structure and Ingestion Protocol
 Rules for writing summaries, key claims, implementation plans, and file layouts in `NewData/` before importing:
-- [Ingestion Protocol](file://references/wiki-ingest-protocol.md)
+- [Ingestion Protocol](references/wiki-ingest-protocol.md)
 
 ### 3. Practical Example
 A complete step-by-step example of video analysis, implementation plan drafting, and ingestion:
-- [YouTube Research Example](file://examples/youtube-research-example.md)
+- [YouTube Research Example](examples/youtube-research-example.md)
 
 ## Workflow
 
@@ -56,6 +57,6 @@ A complete step-by-step example of video analysis, implementation plan drafting,
    - Create the target folder structure in `NewData/` based on layers (e.g., `NewData/engine-wiki/transcripts/my-video.md`).
    - Write the structured research notes there.
 6. **Automate Ingestion**:
-   - Run the ingestion script: `node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js`.
+   - Run the ingestion script: `node system/scripts/ingest-newdata.js`.
    - The script will move the files to the permanent layers, update logs and indices, generate `.meta` files, delete the raw files from `NewData/`, and run link checks.
-7. **Sync**: Run `Utils/sync-ai-rules.ps1` if needed to sync project IDE rules.
+7. **Sync**: Run `node system/sync-ai-rules.js` if needed to sync project IDE rules.

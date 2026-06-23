@@ -1,12 +1,12 @@
----
+﻿---
 name: davasko-wiki-search
 description: Use this skill to perform hybrid (symbolic + semantic) search across the DavASko LLM Wiki knowledge base. It queries the pre-built vector index using Jina v3 embeddings and returns relevant wiki pages via a context dump file.
 status: stable
 owner: DavASko
 license: Proprietary
-allowed_tools:
-  - run-command
-  - filesystem-read
+allowed-tools:
+  - Bash
+  - Read
 required_reading:
   - ../../system/docs/architecture-setup.md
   - ../../system/docs/data-standards.md
@@ -62,7 +62,7 @@ node system/query-wiki.js --query "CowController, blend tree animation optimizat
 
 **What happens inside:**
 - **Stream A** (instant): Matches symbols against `id`, `symbols`, `tags`, `wikilinks` fields in the index
-- **Stream B** (1–2s): Vectorizes the semantic phrase with `query:` prefix, finds the nearest cluster centroid, searches the shard using cosine similarity ≥ 0.78, returns Top-3 documents
+- **Stream B** (1–2s): Vectorizes the semantic phrase with `query:` prefix, finds the nearest cluster centroid, searches the shard using cosine similarity ≥ 0.70, returns Top-3 documents
 - **Graph Lift**: For exact matches (Stream A), loads `extends` parent (+1) and `[[WikiLinks]]` references (+1)
 - **Context Dump**: Writes matched documents to `.cursor-context-dump.md` in the project root
 
@@ -89,5 +89,7 @@ Use the retrieved documents as grounded context for answering the user's questio
 
 - **stdout vs stderr**: The script outputs only a short status line to stdout (`WIKI_QUERY_RESULT: ...`). All diagnostic information goes to stderr. This prevents IDE buffer overflow.
 - **Symbol-only queries**: If the query contains only PascalCase symbols (no semantic phrase), the model is NOT loaded, making the search instant.
+- **PascalCase extraction**: PascalCase symbols embedded inside natural language phrases are automatically extracted for Stream A. E.g. `"как регистрировать EventBus"` → symbol `EventBus` + semantic phrase.
 - **Incremental updates**: If wiki pages change, re-run `node system/build-index.js` to update the index. Unchanged files are skipped via MD5 cache.
 - **Full rebuild**: Use `node system/build-index.js --force` to rebuild the entire index from scratch.
+- **Raw documents**: Since v3.1, both `wiki/` pages and `raw/` source documents are indexed. Raw documents contain full code examples and API details; wiki pages are summaries. Both are searched simultaneously. IDs of raw documents are prefixed with `raw-<layer>-`.

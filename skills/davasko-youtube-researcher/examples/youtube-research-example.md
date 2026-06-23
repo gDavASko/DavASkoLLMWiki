@@ -71,7 +71,7 @@ Practical recommendations on utilizing AI coding assistants with a heavy focus o
 ## Step 4. Run the Ingestion Script
 The agent executes the ingestion script:
 ```bash
-node Assets/DavASko/davasko-ai-docs/system/ingest-newdata.js
+node system/scripts/ingest-newdata.js
 ```
 
 The script automatically:

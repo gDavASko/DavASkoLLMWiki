@@ -1,13 +1,14 @@
----
+﻿---
 name: davasko-wiki-ingest
 description: Use this skill to ingest new raw data into the DavASko LLM Wiki knowledge base. It handles file placement into NewData/ folders, runs the ingest pipeline, and triggers re-indexing for the vector search engine.
 status: stable
 owner: DavASko
 license: Proprietary
-allowed_tools:
-  - run-command
-  - filesystem-write
-  - filesystem-read
+allowed-tools:
+  - Bash
+  - Write
+  - Edit
+  - Read
 required_reading:
   - ../../system/docs/architecture-setup.md
   - ../../system/docs/data-standards.md

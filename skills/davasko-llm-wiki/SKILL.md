@@ -1,13 +1,14 @@
-﻿﻿﻿---
+﻿﻿---
 name: davasko-llm-wiki
 description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including search gaps policies), linting scripts, and IDE rule synchronization scripts.
 status: draft
 owner: DavASko
 license: Proprietary
-allowed_tools:
-  - filesystem-write
-  - run-command
-  - docs-read
+allowed-tools:
+  - Write
+  - Edit
+  - Read
+  - Bash
 required_reading:
   - ../../system/docs/architecture-setup.md
   - ../../system/docs/data-standards.md
@@ -20,6 +21,8 @@ known_risks:
   - Forgetting to generate matching Unity .meta files for wiki pages inside the Unity AssetDatabase context.
   - Cluttering individual layers with plans or transcripts instead of placing them in the root plans/ folder or llm-wiki/raw/transcripts/ respectively.
   - Using word/substring-unsafe string replacements when migrating paths/links.
+  - After adding new raw/ documents, forgetting to re-run 'node system/build-index.js --force' — the index will be stale and raw/ sources won't be found by semantic search.
+  - Placing skills or automation scripts inside raw/ (they will be indexed as knowledge). Keep ai-skills~ and skills folders outside raw/ or the RAW_FOLDER_BLACKLIST will exclude them correctly.
 ---
 
 # DavASko LLM Wiki Architect (AI Wiki Deploy & Maintenance Skill)
@@ -31,7 +34,7 @@ You are a Senior Knowledge Base Architect and DevOps Specialist. You are an expe
 
 ## Goal
 
-Initialize, configure, or maintain a multi-layered **DavASko LLM Wiki** structure in a new target workspace. You will copy/generate the baseline directory hierarchy (including parallel project layers and a centralized plans/ directory), layer manifests (`wiki.json`), maintenance scripts (`lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `run-evals.js`), and synchronizers (`sync-ai-rules.ps1`) to ensure the wiki behaves reliably according to the system rules.
+Initialize, configure, or maintain a multi-layered **DavASko LLM Wiki** structure in a new target workspace. You will copy/generate the baseline directory hierarchy (including parallel project layers and a centralized plans/ directory), layer manifests (`wiki.json`), maintenance scripts (`lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `run-evals.js`), and synchronizers (`sync-ai-rules.js`) to ensure the wiki behaves reliably according to the system rules.
 
 ## Core Rules & References
 
@@ -83,3 +86,41 @@ When the user asks you to deploy or setup a new DavASko LLM Wiki:
 ## Full-Text Search Gaps Policy
 
 - **Policy**: If you search or query the codebase, plugins, or skills using grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods because a topic, convention, or code pattern was not directly found in the knowledge base maps or concepts (a search gap), you MUST document your findings. Add the description, links, and code symbols/examples to the knowledge base (under either `framework-wiki` or `project-a-wiki`, depending on the domain) before completing the task. If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic code searches.
+
+## Indexing Raw Sources
+
+**Since v3.1**, `build-index.js` indexes both `wiki/` pages and `raw/` documents within each layer.
+
+### What is indexed
+
+| Source | Path pattern | Indexed |
+|---|---|---|
+| Wiki pages | `<layer>/wiki/**/*.md` | ✅ Always |
+| Raw documentation | `<layer>/raw/**/*.md` | ✅ Since v3.1 |
+| AI Skills | `<layer>/raw/ai-skills~/` | ❌ Excluded (RAW_FOLDER_BLACKLIST) |
+| Skill scripts | `<layer>/skills/` | ❌ Excluded (FOLDER_BLACKLIST) |
+
+### Why raw/ is indexed
+
+Wiki pages are intentional summaries (50–100 lines). Raw documents contain the full detail: code examples,
+API references, architectural decisions, and patterns. Without indexing `raw/`, semantic search would miss
+the most information-dense content.
+
+### Document ID scheme
+
+- Wiki pages: `<basename>` (e.g. `event-bus`)
+- Raw documents: `raw-<layer>-<basename>` (e.g. `raw-kbpro-wiki-EventBus`)
+
+This avoids collisions when a wiki page and a raw document share the same filename.
+
+### Similarity threshold
+
+The semantic search threshold is **0.70** (not 0.78). Short wiki pages produce diffuse embeddings;
+0.70 balances precision and recall across both wiki and raw content.
+
+### After adding new raw/ documents
+
+Always rebuild the index:
+```bash
+node system/build-index.js --force
+```
