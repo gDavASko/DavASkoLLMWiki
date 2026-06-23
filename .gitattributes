@@ -16,3 +16,19 @@ system/vendor/*.tgz filter=lfs diff=lfs merge=lfs -text
 
 # ─── Векторные шарды (JSON с эмбеддингами — могут быть большими) ──────
 system/index-shards/*.json filter=lfs diff=lfs merge=lfs -text
+
+# ═══════════════════════════════════════════════════════════════════════
+# Нормализация текстов и кодировка (см. system/docs/data-standards.md §1)
+#   .md            → UTF-8 с BOM; остальные тексты → UTF-8 без BOM, LF.
+# ═══════════════════════════════════════════════════════════════════════
+*.md   text eol=lf
+*.json text eol=lf
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.ps1  text eol=lf
+*.mdc  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Бинарные/LFS-артефакты исключены из текстовой нормализации правилами выше.

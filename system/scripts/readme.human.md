@@ -1,10 +1,10 @@
-# DavASko AI Docs Obsidian Vault
+﻿# DavASko AI Docs Obsidian Vault
 
 Open this folder in Obsidian:
 
 `Assets/DavASko/davasko-ai-docs`
 
-Start from `dentistry-cow-wiki/wiki/index.md`. The `raw/` folder stores source material and should not be
+Start from `<layer-name>/wiki/index.md`. The `raw/` folder stores source material and should not be
 edited by AI agents. The `wiki/` folder stores compiled knowledge pages maintained by
 AI agents using `LLM-WIKI.md`.
 

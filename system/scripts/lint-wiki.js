@@ -588,6 +588,52 @@ layers.forEach(layer => {
   });
 });
 
+// Encoding policy check (Data Standards §1): .md MUST have a BOM; all other
+// text files MUST NOT have a BOM (a BOM breaks JSON.parse and pollutes diffs).
+// Directories that are build artifacts, vendored, or runtime-generated — skipped.
+const ENCODING_DIR_BLACKLIST = new Set([
+  'node_modules', '.git', 'scratch',
+  '.agents', '.claude', '.codex', '.cursor', '.windsurf', '.cline', '.roo', '.gemini',
+]);
+// Files that are runtime artifacts and exempt from the policy.
+const ENCODING_FILE_BLACKLIST = new Set(['.cursor-context-dump.md']);
+const ENCODING_TEXT_EXT = new Set([
+  '.md', '.json', '.js', '.ps1', '.mdc', '.yml', '.yaml',
+  '.clinerules', '.cursorrules', '.windsurfrules',
+]);
+
+function checkEncodingRecursively(dir) {
+  let entries;
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (ENCODING_DIR_BLACKLIST.has(entry.name)) continue;
+      // Skip vendored / generated heavy folders under system/
+      if (entry.name === 'models-cache' || entry.name === 'vendor' || entry.name === 'index-shards') continue;
+      checkEncodingRecursively(full);
+      continue;
+    }
+    if (ENCODING_FILE_BLACKLIST.has(entry.name)) continue;
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!ENCODING_TEXT_EXT.has(ext)) continue;
+
+    let hasBom = false;
+    try {
+      const head = fs.readFileSync(full).slice(0, 3);
+      hasBom = head[0] === 0xEF && head[1] === 0xBB && head[2] === 0xBF;
+    } catch (e) { continue; }
+
+    const rel = path.relative(submoduleRoot, full).replace(/\\/g, '/');
+    if (ext === '.md') {
+      if (!hasBom) addIssue(`[Encoding] ${rel} is Markdown but missing UTF-8 BOM (Data Standards §1)`);
+    } else {
+      if (hasBom) addIssue(`[Encoding] ${rel} must be UTF-8 without BOM (BOM breaks parsers / pollutes diffs)`);
+    }
+  }
+}
+checkEncodingRecursively(submoduleRoot);
+
 // Output results
 console.log('=== DavASko LLM Wiki Lint ===');
 console.log(`Layers parsed: ${layers.join(', ')}`);

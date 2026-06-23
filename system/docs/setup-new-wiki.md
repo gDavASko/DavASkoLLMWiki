@@ -1,4 +1,4 @@
-# Setup New Wiki Example
+﻿# Setup New Wiki Example
 
 This guide demonstrates how an AI agent uses this skill to initialize and validate a brand-new multi-layered knowledge base inside a project.
 

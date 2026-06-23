@@ -1,4 +1,4 @@
-# Maintenance and Automation Scripts
+﻿# Maintenance and Automation Scripts
 
 To keep the DavASko LLM Wiki healthy, validate cross-references, search content, safely migrate paths, execute regression tests, and automatically process incoming documents, the automation scripts are placed under `system/scripts/` and `system/sync-ai-rules.js`.
 

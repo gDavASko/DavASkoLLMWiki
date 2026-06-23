@@ -51,13 +51,26 @@ const DTYPE          = 'fp16';
 const CHUNK_SIZE_WORDS    = 1200;
 const CHUNK_OVERLAP_WORDS = 200;
 
+// ─── Raw File Size Limit ───────────────────────────────────────────────────
+// Большие raw/-файлы (ГДД, ТЗ, транскрипты) не индексируются — они дают сотни
+// чанков и требуют часы CPU-времени. Индексируются только лаконичные архитектурные
+// документы (EventBus.md, LogicAndModules.md и т.д.) до 200КБ.
+const MAX_RAW_FILE_BYTES = 200 * 1024; // 200 KB
+
 // ─── Folder Blacklist (не индексируются) ─────────────────────────────
+// ВАЖНО: 'raw' намеренно исключён — raw/-папки индексируются отдельным проходом.
+// 'ai-skills~' и 'skills' остаются исключены: скилы не являются базой знаний.
 const FOLDER_BLACKLIST = new Set([
   '.git', '.github', '.obsidian', '.vscode',
   'system', 'node_modules', 'plans', 'NewData',
-  'raw', 'ai-skills~', 'skills',
+  'ai-skills~', 'skills',
   '.agents', '.cursor', '.claude', '.gemini',
   '.cline', '.codex', '.roo', '.windsurf',
+]);
+
+// ─── Raw-folder internal blacklist (папки внутри raw/ которые не индексируются) ──
+const RAW_FOLDER_BLACKLIST = new Set([
+  'ai-skills~', 'skills', 'node_modules',
 ]);
 
 // ─── ANSI Colors ─────────────────────────────────────────────────────
@@ -82,12 +95,19 @@ function readText(filePath) {
   return content;
 }
 
-/** Запись файла UTF-8 с BOM */
+/** Запись файла UTF-8 с BOM (только для .md — см. Data Standards §1) */
 function writeTextBom(filePath, content) {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
   fs.writeFileSync(filePath, Buffer.concat([bom, Buffer.from(content, 'utf8')]));
+}
+
+/** Запись файла UTF-8 без BOM (для .json и прочих не-md: BOM ломает JSON.parse) */
+function writeTextNoBom(filePath, content) {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(filePath, Buffer.from(content, 'utf8'));
 }
 
 /** MD5-хэш строки */
@@ -164,6 +184,17 @@ function extractWikiLinks(body) {
     links.push(m[1]);
   }
   return [...new Set(links)];
+}
+/**
+ * Подготовка текста для эмбеддинга: вырезание блоков кода (```...```),
+ * так как они не несут прямой семантической нагрузки для векторного поиска.
+ */
+function prepareTextForEmbedding(text) {
+  // Вырезаем многострочные блоки кода
+  let cleaned = text.replace(/```[\s\S]*?```/g, '');
+  // Вырезаем однострочные блоки кода
+  cleaned = cleaned.replace(/`[^`\r\n]+`/g, '');
+  return cleaned;
 }
 
 /**
@@ -378,13 +409,45 @@ function discoverLayers() {
 
     const manifestPath = path.join(fullPath, 'wiki.json');
     const wikiDir = path.join(fullPath, 'wiki');
+    const rawDir  = path.join(fullPath, 'raw');
 
     if (fs.existsSync(manifestPath) && fs.existsSync(wikiDir)) {
-      layers.push({ name: entry, dir: fullPath, wikiDir });
+      layers.push({
+        name: entry,
+        dir: fullPath,
+        wikiDir,
+        rawDir: fs.existsSync(rawDir) ? rawDir : null,
+      });
     }
   }
 
   return layers;
+}
+
+/**
+ * Рекурсивный обход raw/-директории с отдельным блэклистом.
+ * ai-skills~ и skills пропускаются — они не являются базой знаний.
+ */
+function getRawFilesRecursively(dir, extensions) {
+  const results = [];
+  if (!fs.existsSync(dir)) return results;
+
+  for (const entry of fs.readdirSync(dir)) {
+    if (entry.startsWith('.') || entry.endsWith('.meta')) continue;
+    if (RAW_FOLDER_BLACKLIST.has(entry)) continue;
+    const fullPath = path.join(dir, entry);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      results.push(...getRawFilesRecursively(fullPath, extensions));
+    } else {
+      const ext = path.extname(entry).toLowerCase();
+      if (extensions.includes(ext)) {
+        results.push(fullPath);
+      }
+    }
+  }
+  return results;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -472,19 +535,41 @@ async function main() {
   // 4. Расчёт/загрузка центроидов
   index.clusters_centroids = await computeCentroids(extractor, layers, index);
 
-  // 5. Сбор всех .md файлов из wiki/ каждого слоя
+  // 5. Сбор всех .md файлов из wiki/ и raw/ каждого слоя
   const allFiles = [];
+  const WIKI_MOC_FILES = new Set(['index', 'stubs', 'contradictions', 'stale-documents']);
+  const RAW_SKIP_FILES = new Set(['README', 'readme', 'index', 'stubs', 'stale-documents', 'CHANGELOG', 'changelog']);
+
   for (const layer of layers) {
-    const mdFiles = getFilesRecursively(layer.wikiDir, ['.md']);
-    for (const f of mdFiles) {
+    // Сбор wiki/-страниц
+    const wikiFiles = getFilesRecursively(layer.wikiDir, ['.md']);
+    for (const f of wikiFiles) {
       const basename = path.basename(f, '.md');
-      // Пропускаем служебные файлы MOC
-      if (['index', 'stubs', 'contradictions'].includes(basename)) continue;
-      allFiles.push({ filePath: f, layer: layer.name });
+      if (WIKI_MOC_FILES.has(basename)) continue;
+      allFiles.push({ filePath: f, layer: layer.name, sourceType: 'wiki' });
+    }
+
+    // Сбор raw/-документов (первичные источники)
+    if (layer.rawDir) {
+      const rawFiles = getRawFilesRecursively(layer.rawDir, ['.md']);
+      for (const f of rawFiles) {
+        const basename = path.basename(f, '.md');
+        if (RAW_SKIP_FILES.has(basename)) continue;
+        // Пропускаем очень большие файлы (ГДД, ТЗ) — они дают сотни чанков
+        const fileSize = fs.statSync(f).size;
+        if (fileSize > MAX_RAW_FILE_BYTES) {
+          const sizekb = (fileSize / 1024).toFixed(0);
+          console.log(`${C.dim}  [SKIP] ${path.relative(ROOT_DIR, f).replace(/\\/g, '/')} (${sizekb}KB > ${MAX_RAW_FILE_BYTES/1024}KB limit)${C.reset}`);
+          continue;
+        }
+        allFiles.push({ filePath: f, layer: layer.name, sourceType: 'raw' });
+      }
     }
   }
 
-  console.log(`${C.cyan}[*]${C.reset} Обнаружено ${allFiles.length} документов для индексации.\n`);
+  const wikiCount = allFiles.filter(f => f.sourceType === 'wiki').length;
+  const rawCount  = allFiles.filter(f => f.sourceType === 'raw').length;
+  console.log(`${C.cyan}[*]${C.reset} Обнаружено документов: ${C.green}${wikiCount} wiki${C.reset} + ${C.cyan}${rawCount} raw${C.reset} = ${allFiles.length} всего.\n`);
 
   // 6. Загрузка шардов в память для быстрого обновления
   const shards = {};
@@ -503,7 +588,7 @@ async function main() {
 
   // 8. Обработка каждого файла
   for (let i = 0; i < allFiles.length; i++) {
-    const { filePath, layer } = allFiles[i];
+    const { filePath, layer, sourceType } = allFiles[i];
     const relPath  = path.relative(ROOT_DIR, filePath).replace(/\\/g, '/');
     const basename = path.basename(filePath, '.md');
 
@@ -511,7 +596,9 @@ async function main() {
     const rawContent = readText(filePath);
     const { meta, body } = parseFrontmatter(rawContent);
 
-    const fileId     = meta.id || basename;
+    // ID: для raw-файлов используем префикс 'raw-<layer>-<basename>' чтобы
+    // избежать коллизий с wiki-страницами при одинаковых именах файлов.
+    const fileId     = meta.id || (sourceType === 'raw' ? `raw-${layer}-${basename}` : basename);
     const symbols    = Array.isArray(meta.symbols) ? meta.symbols : [];
     const tags       = Array.isArray(meta.tags) ? meta.tags : [];
     const extendsRef = meta.extends || '';
@@ -519,8 +606,11 @@ async function main() {
 
     processedIds.add(fileId);
 
-    // MD5-контроль по тексту выжимки (body без фронтматтера)
-    const currentMd5 = md5(body);
+    // Подготовка текста для эмбеддинга (вырезание блоков кода)
+    const textToEmbed = prepareTextForEmbedding(body);
+
+    // MD5-контроль по подготовленному тексту
+    const currentMd5 = md5(textToEmbed);
     const existing   = index.documents[fileId];
 
     if (!forceRebuild && existing && existing.md5 === currentMd5) {
@@ -548,8 +638,8 @@ async function main() {
       shards[clName] = shards[clName].filter(entry => entry.fileId !== fileId);
     }
 
-    // 8b. Чанкинг
-    const chunks = chunkText(body);
+    // 8b. Чанкинг подготовленного текста
+    const chunks = chunkText(textToEmbed);
     if (chunks.length === 0) {
       process.stdout.write(` — пустой, пропуск\n`);
       continue;
@@ -593,6 +683,7 @@ async function main() {
       id: fileId,
       path: relPath,
       layer,
+      sourceType: sourceType || 'wiki',
       symbols,
       tags,
       extends: extendsRef,
@@ -637,9 +728,9 @@ async function main() {
     );
   }
 
-  // 12. Сохранение мета-индекса
+  // 12. Сохранение мета-индекса (JSON — без BOM, иначе ломается JSON.parse)
   index.updatedAt = new Date().toISOString();
-  writeTextBom(INDEX_FILE, JSON.stringify(index, null, 2));
+  writeTextNoBom(INDEX_FILE, JSON.stringify(index, null, 2));
 
   const totalDocs = Object.keys(index.documents).length;
   const totalClusters = Object.keys(index.clusters_centroids).length;

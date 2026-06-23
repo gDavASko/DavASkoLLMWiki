@@ -1,0 +1,26 @@
+root = true
+
+# ═══════════════════════════════════════════════════════════════════════
+# Encoding policy (see system/docs/data-standards.md §1)
+#   .md            → UTF-8 WITH BOM
+#   everything else → UTF-8 WITHOUT BOM (BOM breaks JSON.parse / pollutes diffs)
+# ═══════════════════════════════════════════════════════════════════════
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown carries a BOM as a Cyrillic-detection hint for legacy Windows tools.
+[*.md]
+charset = utf-8-bom
+trim_trailing_whitespace = false
+
+# Generated / runtime artifacts and vendored content — leave untouched.
+[{system/index-shards/**,system/models-cache/**,system/vendor/**,.cursor-context-dump.md}]
+charset = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

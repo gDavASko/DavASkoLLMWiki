@@ -1,4 +1,4 @@
-# Rules & Skill Synchronizer
+﻿# Rules & Skill Synchronizer
 
 To guide AI agents (like Cursor, Windsurf, Claude Code, Cline, Roo, Gemini, and Copilot) according to the project's architecture, we distribute master rules and skills into IDE-specific paths.
 
