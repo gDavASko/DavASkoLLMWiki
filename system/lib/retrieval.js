@@ -204,10 +204,76 @@ export async function embed(extractor, text, vectorDim = 1024) {
     throw new Error(`No embedding tensor of expected shape (last dim ${vectorDim}) found. Outputs: ${shapes}`);
   }
 
-  let norm = Math.sqrt(raw.reduce((s, v) => s + v * v, 0)) || 1;
-  const normalized = raw.map(v => v / norm);
-  if (normalized.length >= vectorDim) return normalized.slice(0, vectorDim);
-  return [...normalized, ...new Array(vectorDim - normalized.length).fill(0)];
+  return normalizeVec(raw, vectorDim);
 }
 
-export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed };
+// L2-нормализация + подгонка длины под vectorDim.
+function normalizeVec(raw, vectorDim) {
+  const norm = Math.sqrt(raw.reduce((s, v) => s + v * v, 0)) || 1;
+  const n = raw.map(v => v / norm);
+  if (n.length >= vectorDim) return n.slice(0, vectorDim);
+  return [...n, ...new Array(vectorDim - n.length).fill(0)];
+}
+
+// Один прогон модели на батче (все тексты с ОДНИМ префиксом/task_id).
+async function embedBatchOne(extractor, texts, vectorDim) {
+  const { Tensor } = await import('@huggingface/transformers');
+  let taskId = 0;
+  const clean = texts.map(t => {
+    if (t.startsWith('passage: ')) { taskId = 1; return t.slice(9); }
+    if (t.startsWith('query: '))   { taskId = 0; return t.slice(7); }
+    return t;
+  });
+  const inputs = extractor.tokenizer(clean, { padding: true, truncation: true });
+  // task_id формы [1]: один LoRA-task на весь батч (все тексты с одним префиксом).
+  inputs.task_id = new Tensor('int64', BigInt64Array.from([BigInt(taskId)]), [1]);
+  const outputs = await extractor.model(inputs);
+
+  const tensors = Object.values(outputs).filter(t => t && t.dims && t.data);
+  const named = outputs['13049'];
+  const pooled = (named && named.dims && named.dims.length === 2 && named.dims[1] === vectorDim) ? named
+    : tensors.find(t => t.dims.length === 2 && t.dims[t.dims.length - 1] === vectorDim);
+
+  const out = [];
+  if (pooled) {
+    const d = pooled.dims[1];
+    for (let i = 0; i < texts.length; i++) {
+      out.push(normalizeVec(Array.from(pooled.data.slice(i * d, (i + 1) * d)), vectorDim));
+    }
+    return out;
+  }
+  const hidden = tensors.find(t => t.dims.length === 3 && t.dims[2] === vectorDim);
+  if (!hidden) throw new Error('embedBatch: no embedding tensor of expected shape');
+  const [b, seq, d] = hidden.dims;
+  const mask = inputs.attention_mask;
+  for (let i = 0; i < b; i++) {
+    const v = new Float32Array(d);
+    let cnt = 0;
+    for (let j = 0; j < seq; j++) {
+      const a = Number(mask.data[i * seq + j]); cnt += a;
+      if (a) for (let k = 0; k < d; k++) v[k] += hidden.data[i * seq * d + j * d + k];
+    }
+    for (let k = 0; k < d; k++) v[k] /= (cnt || 1);
+    out.push(normalizeVec(Array.from(v), vectorDim));
+  }
+  return out;
+}
+
+/**
+ * Батч-эмбеддинг: один прогон модели на batchSize текстов вместо N прогонов.
+ * Корректность гарантируется маскированием padding (паритет с одиночным embed
+ * проверяется system/scripts/check-embed-parity.mjs). Все тексты в одном вызове
+ * должны иметь один префикс (passage:/query:) — в индексации это всегда passage:.
+ * @returns {Promise<number[][]>} нормализованные векторы в порядке texts
+ */
+export async function embedBatch(extractor, texts, vectorDim = 1024, batchSize = 16) {
+  if (!texts || texts.length === 0) return [];
+  const out = [];
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const part = await embedBatchOne(extractor, texts.slice(i, i + batchSize), vectorDim);
+    for (const v of part) out.push(v);
+  }
+  return out;
+}
+
+export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed, embedBatch };

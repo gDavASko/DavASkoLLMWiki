@@ -30,6 +30,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
 import { chunkMarkdown } from './lib/chunker.js';
+import { initModel as libInitModel, embedBatch as libEmbedBatch } from './lib/retrieval.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -81,6 +82,7 @@ const KEEP_CODE_ATOMIC    = ICFG.keep_code_atomic;
 const HEADING_BREADCRUMBS = ICFG.heading_breadcrumbs;
 const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
 const INDEX_CODE          = ICFG.index_code;
+const EMBED_BATCH_SIZE    = ICFG.embed_batch_size || 16;
 
 // ─── Folder Blacklist (не индексируются) ─────────────────────────────
 // ВАЖНО: 'raw' намеренно исключён — raw/-папки индексируются отдельным проходом.
@@ -284,97 +286,24 @@ function saveShard(clusterName, data) {
 //  MODEL INITIALIZATION
 // ═══════════════════════════════════════════════════════════════════════
 
+// Тонкая обёртка над общим ядром ./lib/retrieval.js (логирование + константы).
+// Эмбеддинг (включая shape-резолвер выходного тензора) и батчинг — там же,
+// что и в query-wiki: единый источник, покрыт паритет-тестом.
 async function initModel() {
-  console.log(`${C.cyan}[*]${C.reset} Initializing WebGPU Shaders (First run may take 2 seconds)...`);
+  console.log(`${C.cyan}[*]${C.reset} Initializing model (first run may take a few seconds)...`);
   const startMs = Date.now();
-
-  // Динамический импорт библиотеки трансформеров
-  const { pipeline, env } = await import('@huggingface/transformers');
-
-  // Оффлайн-режим: запрет на скачивание моделей из сети
-  env.allowRemoteModels = false;
-  env.cacheDir = MODELS_CACHE;
-  env.localModelPath = MODELS_CACHE;
-
   let extractor;
   try {
-    extractor = await pipeline('feature-extraction', MODEL_ID, {
-      revision: MODEL_REVISION,
-      dtype: DTYPE,
-    });
+    extractor = await libInitModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE });
   } catch (err) {
     console.error(`\n${C.red}[FATAL]${C.reset} Не удалось загрузить модель из ${MODELS_CACHE}`);
     console.error(`  Убедитесь, что модель скачана: node system/scripts/setup-model.js`);
     console.error(`  Ошибка: ${err.message}\n`);
     process.exit(1);
   }
-
   const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
   console.log(`${C.green}[OK]${C.reset} Модель загружена за ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d)\n`);
-
   return extractor;
-}
-
-/**
- * Генерация вектора для текста с нормализацией и обрезкой до VECTOR_DIM.
- * @param {Object} extractor — pipeline feature-extraction
- * @param {string} text — текст с уже подставленным prefix (passage:/query:)
- * @param {number} taskId — ID задачи для Jina v3 (по умолчанию 1 = passage)
- * @returns {number[]} — вектор длиной VECTOR_DIM
- */
-async function embed(extractor, text, taskId = 1) {
-  let cleanText = text;
-  let resolvedTaskId = taskId;
-  if (text.startsWith('passage: ')) {
-    resolvedTaskId = 1;
-    cleanText = text.slice(9);
-  } else if (text.startsWith('query: ')) {
-    resolvedTaskId = 0;
-    cleanText = text.slice(7);
-  }
-
-  const { Tensor } = await import('@huggingface/transformers');
-  const inputs = extractor.tokenizer(cleanText, {
-    padding: true,
-    truncation: true,
-  });
-  inputs.task_id = new Tensor('int64', BigInt64Array.from([BigInt(resolvedTaskId)]), [1]);
-  const outputs = await extractor.model(inputs);
-
-  let raw;
-  if (outputs['13049']) {
-    raw = Array.from(outputs['13049'].data);
-  } else if (outputs['text_embeds']) {
-    // Резервный mean pooling
-    const lastHiddenState = outputs.text_embeds;
-    const attentionMask = inputs.attention_mask;
-    const [batchSize, seqLength, embedDim] = lastHiddenState.dims;
-    const pooled = new Float32Array(batchSize * embedDim);
-    for (let i = 0; i < batchSize; ++i) {
-      for (let k = 0; k < embedDim; ++k) {
-        let sum = 0;
-        let count = 0;
-        for (let j = 0; j < seqLength; ++j) {
-          const attn = Number(attentionMask.data[i * seqLength + j]);
-          count += attn;
-          sum += lastHiddenState.data[i * embedDim * seqLength + j * embedDim + k] * attn;
-        }
-        pooled[i * embedDim + k] = sum / (count || 1);
-      }
-    }
-    raw = Array.from(pooled);
-  } else {
-    throw new Error('Model outputs did not contain expected keys (13049 or text_embeds)');
-  }
-
-  let norm = Math.sqrt(raw.reduce((sum, val) => sum + val * val, 0));
-  if (norm === 0) norm = 1;
-  const normalized = raw.map(v => v / norm);
-
-  if (normalized.length >= VECTOR_DIM) {
-    return normalized.slice(0, VECTOR_DIM);
-  }
-  return [...normalized, ...new Array(VECTOR_DIM - normalized.length).fill(0)];
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -619,13 +548,14 @@ async function main() {
     const assignedCluster = layer;
     if (!shards[assignedCluster]) shards[assignedCluster] = [];
 
+    // Батч-эмбеддинг чанков документа (паритет с одиночным — проверен).
+    const vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c}`), VECTOR_DIM, EMBED_BATCH_SIZE);
     for (let ci = 0; ci < chunks.length; ci++) {
-      const chunkVec = await embed(extractor, `passage: ${chunks[ci]}`);
       shards[assignedCluster].push({
         fileId,
         chunkIndex: ci,
         centroidScore: 0,
-        embedding: chunkVec,
+        embedding: vecs[ci],
       });
       countChunks++;
     }

@@ -1,6 +1,7 @@
 {
   "_README": "Параметры индексации build-index.js. Файл опционален: при отсутствии действуют дефолты из кода. Смена chunk_strategy/размеров требует пересборки: build-index.js --force.",
   "index_code": true,
+  "embed_batch_size": 16,
   "chunk_strategy": "structural",
   "chunk_size_words": 250,
   "chunk_min_words": 80,
