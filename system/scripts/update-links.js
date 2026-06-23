@@ -97,14 +97,13 @@ function main() {
     'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md',
     'raw/project-docs/ExecPlan_ScenarioGraph_Stabilization.md.meta': 'davasko-wiki/raw/ExecPlan_ScenarioGraph_Stabilization.md.meta',
     
-    // system tools and configs
-    'lint-wiki.js': 'system/lint-wiki.js',
-    'lint-wiki.ps1': 'system/lint-wiki.ps1',
-    'lint-wiki.ps1.meta': 'system/lint-wiki.ps1.meta',
-    'query-wiki.js': 'system/query-wiki.js',
-    'update-links.js': 'system/update-links.js',
-    'readme.human.md': 'system/readme.human.md',
-    'readme.human.md.meta': 'system/readme.human.md.meta',
+    // system tools and configs (maintenance scripts live in system/scripts/;
+    // the orchestrators build-index.js / query-wiki.js / sync-ai-rules.js live in system/)
+    'lint-wiki.js': 'system/scripts/lint-wiki.js',
+    'query-wiki.js': 'system/scripts/query-wiki.js',
+    'update-links.js': 'system/scripts/update-links.js',
+    'readme.human.md': 'system/scripts/readme.human.md',
+    'readme.human.md.meta': 'system/scripts/readme.human.md.meta',
     'AI-Docs-Refactoring_plan.md': 'system/AI-Docs-Refactoring_plan.md',
     'evals/failures.md': 'system/evals/failures.md',
     'evals/failures.md.meta': 'system/evals/failures.md.meta',
