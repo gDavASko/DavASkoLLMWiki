@@ -145,22 +145,24 @@ function parseQuery(rawQuery) {
   const symbols = [];
   const semanticParts = [];
 
+  // Строгий код-идентификатор: PascalCase (≥2 горба), I-интерфейс, m_-поле.
+  // Дженерик-слова с заглавной (How, Plombir, JSON) символами НЕ считаем —
+  // иначе они дают шумные точные совпадения и портят ранжирование (подтверждено
+  // замером на реальном корпусе: MRR падал из-за 'JSON' как «символа»).
+  const isSymbol = (w) =>
+    /^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(w) || /^I[A-Z][A-Za-z0-9]*$/.test(w) || /^m_[A-Za-z0-9]+$/.test(w);
+
   for (const part of parts) {
-    // Проверяем: одно слово, начинается с заглавной, PascalCase / m_prefix / I-interface
-    if (/^[A-Z][a-zA-Z0-9_]*$/.test(part) || /^[mM]_[a-zA-Z0-9]+$/.test(part)) {
+    if (/\s/.test(part)) {
+      // Фраза → семантика + встроенные строгие символы
+      semanticParts.push(part);
+      for (const w of part.split(/[^A-Za-z0-9_]+/)) {
+        if (isSymbol(w) && !symbols.includes(w)) symbols.push(w);
+      }
+    } else if (isSymbol(part)) {
       symbols.push(part);
     } else {
-      // Вся часть идёт в семантику
       semanticParts.push(part);
-
-      // Дополнительно: извлекаем PascalCase-слова, встроенные в русскую/смешанную фразу.
-      // Пример: "как регистрировать EventBus типы" → символ "EventBus" + семантика вся фраза.
-      const embeddedSymbols = part.match(/\b[A-Z][a-zA-Z0-9_]+\b/g) || [];
-      for (const sym of embeddedSymbols) {
-        if (!symbols.includes(sym)) {
-          symbols.push(sym);
-        }
-      }
     }
   }
 
@@ -391,15 +393,18 @@ function assembleAndDump(mergedResults, index, rawQuery) {
 
   totalBytes += Buffer.byteLength(header, 'utf8');
 
-  // Сортируем: streamA первым, затем streamB, затем graphLift; внутри —
-  // по эффективному score с приоритетом ground-truth (raw/код над саммари).
-  const sourceOrder = { streamA: 0, streamB: 1, graphLift: 2 };
+  // Ранжирование ЕДИНОЕ по эффективному score: символьные (Stream A) и
+  // семантические (Stream B) совпадения сравнимы (exact-id≈1.0, cosine 0..1),
+  // поэтому интерливим их по score, а не «Stream A всегда выше» — иначе
+  // тангенциальное символьное совпадение выдавливает сильный семантический хит
+  // (подтверждено замером: при строгих тирах MRR/nDCG ниже). Граф-lift —
+  // трейлинг-контекст (вторичные, связанные документы) — идёт после основных.
+  const tier = (src) => (src === 'graphLift' ? 1 : 0);
   const eff = (fileId, score) =>
     score + (docs[fileId] && docs[fileId].sourceType === 'raw' ? GROUND_TRUTH_BOOST : 0);
   const ordered = [...mergedResults.entries()].sort((a, b) => {
-    const oa = sourceOrder[a[1].source] ?? 3;
-    const ob = sourceOrder[b[1].source] ?? 3;
-    if (oa !== ob) return oa - ob;
+    const ta = tier(a[1].source), tb = tier(b[1].source);
+    if (ta !== tb) return ta - tb;
     return eff(b[0], b[1].score) - eff(a[0], a[1].score);
   });
 

@@ -34,7 +34,7 @@ import path from 'path';
 import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold } from '../lib/retrieval.js';
+import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches } from '../lib/retrieval.js';
 import { recallAtK, mrr, ndcgAtK } from '../lib/metrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -101,25 +101,17 @@ function buildResolver(index) {
   };
 }
 
-// ─── символьный поиск (mirror Stream A) ──────────────────────────────────
+// ─── символьный поиск: извлечение PascalCase + общий scoreSymbolMatches движка ─
 function extractSymbols(query) {
   const out = new Set();
   for (const w of query.split(/[^A-Za-z0-9_]+/)) {
-    if (/^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(w) || /^I[A-Z]/.test(w) || /^m_/.test(w) || /^[A-Z]{2,}$/.test(w)) {
+    // PascalCase (≥2 горба), I-интерфейсы, m_-поля. Голый ALL-CAPS НЕ берём:
+    // дженерик-аббревиатуры (JSON/API/URL) — не код-идентификаторы, дают шум.
+    if (/^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(w) || /^I[A-Z]/.test(w) || /^m_/.test(w)) {
       out.add(w);
     }
   }
   return [...out];
-}
-function retrieveSymbols(query, index) {
-  const syms = extractSymbols(query).map(s => s.toLowerCase());
-  if (syms.length === 0) return [];
-  const ranked = [];
-  for (const [id, doc] of Object.entries(index.documents || {})) {
-    const hay = [id, ...(doc.symbols || []), ...(doc.tags || [])].map(x => String(x).toLowerCase());
-    if (syms.some(s => hay.includes(s))) ranked.push(id);
-  }
-  return ranked;
 }
 
 // ─── семантический multi-probe (mirror Stream B) ─────────────────────────
@@ -135,9 +127,9 @@ function semanticRank(queryVec, index, cfg, { exhaustive = false } = {}) {
   // Единое ядро порога (relative/absolute) — то же, что в боевом query-wiki.
   const { best: fileScores } = applyThreshold(all, cfg);
   const boost = (id) => (docs[id] && docs[id].sourceType === 'raw' ? cfg.ground_truth_boost : 0);
+  // Возвращаем пары [id, score], отсортированные по эффективному score.
   return [...fileScores.entries()]
-    .sort((a, b) => (b[1] + boost(b[0])) - (a[1] + boost(a[0])))
-    .map(x => x[0]);
+    .sort((a, b) => (b[1] + boost(b[0])) - (a[1] + boost(a[0])));
 }
 
 // ─── лексический базлайн ("агент грепает код") ───────────────────────────
@@ -169,7 +161,7 @@ async function runEval(index, queries, cfg, K) {
   const corpus = buildCorpus(index);
   const extractor = await initModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REV, dtype: 'fp16' });
 
-  const retrievers = ['hybrid', 'flat', 'lexical'];
+  const retrievers = ['hybrid', 'semantic', 'flat', 'lexical'];
   const agg = {};
   for (const r of retrievers) agg[r] = { recall: 0, mrr: 0, ndcg: 0, n: 0 };
   const perQuery = [];
@@ -185,13 +177,24 @@ async function runEval(index, queries, cfg, K) {
 
     const queryVec = await embed(extractor, `query: ${q.query}`, VECTOR_DIM);
 
-    const semantic = semanticRank(queryVec, index, cfg, { exhaustive: false });
-    const symbols = retrieveSymbols(q.query, index);
-    const hybrid = [...new Set([...symbols, ...semantic])];
-    const flat = semanticRank(queryVec, index, cfg, { exhaustive: true });
+    const docsMap = index.documents || {};
+    const gtb = (id) => (docsMap[id] && docsMap[id].sourceType === 'raw' ? (cfg.ground_truth_boost || 0) : 0);
+
+    const semanticScored = semanticRank(queryVec, index, cfg, { exhaustive: false }); // [[id,score]]
+    const symScored = scoreSymbolMatches(extractSymbols(q.query), docsMap, { limit: cfg.stream_a_limit || 10 }); // Map id->score
+
+    // hybrid: ЕДИНОЕ ранжирование по score (символы и семантика сравнимы:
+    // exact-id≈1.0, cosine 0..1), а не «символы всегда первыми».
+    const combined = new Map();
+    for (const [id, s] of semanticScored) combined.set(id, Math.max(combined.get(id) || 0, s));
+    for (const [id, s] of symScored) combined.set(id, Math.max(combined.get(id) || 0, s));
+    const hybrid = [...combined.entries()].sort((a, b) => (b[1] + gtb(b[0])) - (a[1] + gtb(a[0]))).map(x => x[0]);
+
+    const semantic = semanticScored.map(x => x[0]);                               // только семантика (multi-probe)
+    const flat = semanticRank(queryVec, index, cfg, { exhaustive: true }).map(x => x[0]); // семантика exhaustive
     const lexical = lexicalRank(q.query, corpus);
 
-    const ranks = { hybrid, flat, lexical };
+    const ranks = { hybrid, semantic, flat, lexical };
     const row = { query: q.query, relevant: relevant.size };
     for (const r of retrievers) {
       const rec = recallAtK(ranks[r], relevant, K);
@@ -238,7 +241,7 @@ async function sweepThreshold(index, queries, cfg, K, extractor) {
     if (!relative) c.similarity_fallback = val;
     let recall = 0;
     for (const p of prepared) {
-      const ranked = semanticRank(p.vec, index, c, { exhaustive: true });
+      const ranked = semanticRank(p.vec, index, c, { exhaustive: true }).map(x => x[0]);
       recall += recallAtK(ranked, p.relevant, K);
     }
     rows.push({ [knob]: val, [`mean_recall@${K}`]: +(prepared.length ? recall / prepared.length : 0).toFixed(3) });
@@ -331,7 +334,7 @@ async function main() {
     console.log(`Queries: ${queries.length} | top-k: ${K} | nprobe: ${cfg.nprobe} | threshold: ${thr}`);
     console.log(`\n${'Retriever'.padEnd(10)} ${('recall@' + K).padEnd(10)} ${'MRR'.padEnd(8)} ${('nDCG@' + K).padEnd(8)}`);
     console.log('-'.repeat(40));
-    for (const r of ['hybrid', 'flat', 'lexical']) {
+    for (const r of ['hybrid', 'semantic', 'flat', 'lexical']) {
       const a = agg[r];
       console.log(`${r.padEnd(10)} ${a.recall.toFixed(3).padEnd(10)} ${a.mrr.toFixed(3).padEnd(8)} ${a.ndcg.toFixed(3).padEnd(8)}`);
     }

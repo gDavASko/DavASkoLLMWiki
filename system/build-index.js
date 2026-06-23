@@ -385,12 +385,21 @@ async function embed(extractor, text, taskId = 1) {
  * Обнаруживает все слои (директории с wiki.json) в корне репозитория.
  * Возвращает массив: [{ name, dir, wikiDir }]
  */
+// --layers a,b,c → индексировать только указанные слои (для частичной пересборки/тестов).
+function layerFilter() {
+  const i = process.argv.indexOf('--layers');
+  if (i === -1 || i + 1 >= process.argv.length) return null;
+  return new Set(process.argv[i + 1].split(',').map(s => s.trim()).filter(Boolean));
+}
+
 function discoverLayers() {
   const layers = [];
   if (!fs.existsSync(ROOT_DIR)) return layers;
+  const only = layerFilter();
 
   for (const entry of fs.readdirSync(ROOT_DIR)) {
     if (FOLDER_BLACKLIST.has(entry)) continue;
+    if (only && !only.has(entry)) continue;
     const fullPath = path.join(ROOT_DIR, entry);
     if (!fs.statSync(fullPath).isDirectory()) continue;
 
