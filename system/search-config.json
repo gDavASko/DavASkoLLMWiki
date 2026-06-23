@@ -1,0 +1,15 @@
+{
+  "_README": "Параметры гибридного поиска query-wiki.js. Калибруются скриптом eval-retrieval.js на размеченном наборе, а не подбираются на глаз.",
+  "similarity_threshold": 0.70,
+  "similarity_fallback": 0.65,
+  "top_k_documents": 5,
+  "nprobe": 8,
+  "ground_truth_boost": 0.05,
+  "_fields": {
+    "similarity_threshold": "Порог cosine для семантических совпадений (Stream B).",
+    "similarity_fallback": "Если при threshold 0 результатов — повторить с этим порогом.",
+    "top_k_documents": "Сколько документов возвращать.",
+    "nprobe": "Сколько ближайших кластеров сканировать (IVF multi-probe). nprobe>=число_кластеров или <=0 => исчерпывающий поиск по всем шардам.",
+    "ground_truth_boost": "Бонус к score для raw/код (ground truth) над wiki-саммари при ранжировании (#2)."
+  }
+}

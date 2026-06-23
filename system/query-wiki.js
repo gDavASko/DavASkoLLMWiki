@@ -11,7 +11,7 @@
  *              в мета-индексе wiki-index.json
  *   Stream B — Семантический (1–2s): векторизация запроса с "query: " prefix,
  *              подбор ближайшего центроида, линейный проход по шарду,
- *              фильтр по cosine >= 0.78, Top-3 документа
+ *              фильтр по cosine >= 0.70, Top-3 документа
  *
  *   Графовый лифт: для точных совпадений (Stream A) подгружает extends +1
  *   и [[WikiLinks]] +1 step
@@ -31,6 +31,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { cosineSimilarity, selectProbeClusters, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -43,10 +44,34 @@ const MODELS_CACHE = path.join(SYSTEM_DIR, 'models-cache');
 const INDEX_FILE   = path.join(SYSTEM_DIR, 'wiki-index.json');
 const SHARDS_DIR   = path.join(SYSTEM_DIR, 'index-shards');
 const DUMP_FILE    = path.join(ROOT_DIR, '.cursor-context-dump.md');
+const CONFIG_FILE  = path.join(SYSTEM_DIR, 'search-config.json');
 
-// ─── Search Configuration ────────────────────────────────────────────
-const SIMILARITY_THRESHOLD = 0.78;
-const TOP_K_DOCUMENTS      = 3;
+// ─── Search Configuration (externalized → system/search-config.json) ──
+// Магические константы вынесены в конфиг, чтобы калибровать их на данных
+// (eval-retrieval.js), а не править код. Файл может отсутствовать — тогда
+// действуют значения по умолчанию ниже.
+const SEARCH_DEFAULTS = {
+  similarity_threshold: 0.70,
+  similarity_fallback:  0.65,
+  top_k_documents:      5,
+  nprobe:               8,
+  ground_truth_boost:   0.05,
+};
+function loadSearchConfig() {
+  try {
+    const raw = fs.readFileSync(CONFIG_FILE, 'utf8').replace(/^﻿/, '');
+    const cfg = JSON.parse(raw);
+    return { ...SEARCH_DEFAULTS, ...cfg };
+  } catch {
+    return { ...SEARCH_DEFAULTS };
+  }
+}
+const CFG = loadSearchConfig();
+const SIMILARITY_THRESHOLD = CFG.similarity_threshold;
+const SIMILARITY_FALLBACK  = CFG.similarity_fallback;
+const TOP_K_DOCUMENTS      = CFG.top_k_documents;
+const NPROBE               = CFG.nprobe;
+const GROUND_TRUTH_BOOST   = CFG.ground_truth_boost;
 const MAX_CONTEXT_BYTES    = 120_000; // ~120KB safety limit
 const MODEL_ID             = 'jinaai/jina-embeddings-v3';
 const MODEL_REVISION       = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
@@ -81,18 +106,7 @@ function writeTextBom(filePath, content) {
   fs.writeFileSync(filePath, Buffer.concat([bom, Buffer.from(content, 'utf8')]));
 }
 
-/** Косинусное сходство двух векторов */
-function cosineSimilarity(a, b) {
-  const len = Math.min(a.length, b.length);
-  let dot = 0, normA = 0, normB = 0;
-  for (let i = 0; i < len; i++) {
-    dot   += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
-  }
-  if (normA === 0 || normB === 0) return 0;
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
-}
+// cosineSimilarity импортируется из ./lib/retrieval.js (единое ядро поиска).
 
 /**
  * Парсинг --query из CLI-аргументов.
@@ -127,7 +141,17 @@ function parseQuery(rawQuery) {
     if (/^[A-Z][a-zA-Z0-9_]*$/.test(part) || /^[mM]_[a-zA-Z0-9]+$/.test(part)) {
       symbols.push(part);
     } else {
+      // Вся часть идёт в семантику
       semanticParts.push(part);
+
+      // Дополнительно: извлекаем PascalCase-слова, встроенные в русскую/смешанную фразу.
+      // Пример: "как регистрировать EventBus типы" → символ "EventBus" + семантика вся фраза.
+      const embeddedSymbols = part.match(/\b[A-Z][a-zA-Z0-9_]+\b/g) || [];
+      for (const sym of embeddedSymbols) {
+        if (!symbols.includes(sym)) {
+          symbols.push(sym);
+        }
+      }
     }
   }
 
@@ -167,85 +191,27 @@ function loadIndex() {
   }
 }
 
+// Тонкая обёртка над ядром ./lib/retrieval.js (логирование + общие константы).
 async function initModel() {
-  console.error(`${C.cyan}[*]${C.reset} Initializing WebGPU Shaders (First run may take 2 seconds)...`);
+  console.error(`${C.cyan}[*]${C.reset} Initializing model (First run may take a few seconds)...`);
   const startMs = Date.now();
-
-  const { pipeline, env } = await import('@huggingface/transformers');
-  env.allowRemoteModels = false;
-  env.cacheDir = MODELS_CACHE;
-  env.localModelPath = MODELS_CACHE;
-
   let extractor;
   try {
-    extractor = await pipeline('feature-extraction', MODEL_ID, {
-      revision: MODEL_REVISION,
-      dtype: DTYPE,
+    extractor = await libInitModel({
+      modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE,
     });
   } catch (err) {
     console.error(`${C.red}[FATAL]${C.reset} Модель не загружена: ${err.message}`);
     console.error(`  Убедитесь: node system/scripts/setup-model.js`);
     process.exit(1);
   }
-
   const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
   console.error(`${C.green}[OK]${C.reset} Модель: ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d)`);
   return extractor;
 }
 
-async function embed(extractor, text, taskId = 0) {
-  let cleanText = text;
-  let resolvedTaskId = taskId;
-  if (text.startsWith('passage: ')) {
-    resolvedTaskId = 1;
-    cleanText = text.slice(9);
-  } else if (text.startsWith('query: ')) {
-    resolvedTaskId = 0;
-    cleanText = text.slice(7);
-  }
-
-  const { Tensor } = await import('@huggingface/transformers');
-  const inputs = extractor.tokenizer(cleanText, {
-    padding: true,
-    truncation: true,
-  });
-  inputs.task_id = new Tensor('int64', BigInt64Array.from([BigInt(resolvedTaskId)]), [1]);
-  const outputs = await extractor.model(inputs);
-
-  let raw;
-  if (outputs['13049']) {
-    raw = Array.from(outputs['13049'].data);
-  } else if (outputs['text_embeds']) {
-    // Резервный mean pooling
-    const lastHiddenState = outputs.text_embeds;
-    const attentionMask = inputs.attention_mask;
-    const [batchSize, seqLength, embedDim] = lastHiddenState.dims;
-    const pooled = new Float32Array(batchSize * embedDim);
-    for (let i = 0; i < batchSize; ++i) {
-      for (let k = 0; k < embedDim; ++k) {
-        let sum = 0;
-        let count = 0;
-        for (let j = 0; j < seqLength; ++j) {
-          const attn = Number(attentionMask.data[i * seqLength + j]);
-          count += attn;
-          sum += lastHiddenState.data[i * embedDim * seqLength + j * embedDim + k] * attn;
-        }
-        pooled[i * embedDim + k] = sum / (count || 1);
-      }
-    }
-    raw = Array.from(pooled);
-  } else {
-    throw new Error('Model outputs did not contain expected keys (13049 or text_embeds)');
-  }
-
-  let norm = Math.sqrt(raw.reduce((sum, val) => sum + val * val, 0));
-  if (norm === 0) norm = 1;
-  const normalized = raw.map(v => v / norm);
-
-  if (normalized.length >= VECTOR_DIM) {
-    return normalized.slice(0, VECTOR_DIM);
-  }
-  return [...normalized, ...new Array(VECTOR_DIM - normalized.length).fill(0)];
+function embed(extractor, text) {
+  return libEmbed(extractor, text, VECTOR_DIM);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -302,6 +268,19 @@ function runStreamA(symbols, index) {
       }
     }
 
+    // Fallback: содержится ли символ в самом docId (raw-layer-Basename).
+    // Нужно для raw-документов: 'EventBus' в 'raw-kbpro-wiki-EventBus' → true.
+    // Защита: проверяем только символы длиной >= 4 чтобы избежать ложных срабатываний.
+    if (!matched) {
+      const docIdLower = docId.toLowerCase();
+      for (const sym of symbolsLower) {
+        if (sym.length >= 4 && docIdLower.includes(sym)) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
     if (matched) {
       results.set(docId, { source: 'streamA', score: 1.0 });
     }
@@ -315,11 +294,19 @@ function runStreamA(symbols, index) {
 // ═══════════════════════════════════════════════════════════════════════
 
 /**
- * Семантический поиск:
+ * Семантический поиск (IVF multi-probe):
  *   1. Векторизация запроса с "query: " prefix
- *   2. Определение ближайшего центроида-кластера
- *   3. Линейный проход по шарду, фильтр по cosine >= threshold
- *   4. Top-K документов по лучшему совпадению чанка
+ *   2. Ранжирование кластеров по близости к их центроиду; скан top-NPROBE
+ *   3. Диагностика: печатает top-5 score (score, fileId)
+ *   4. Фильтр >= SIMILARITY_THRESHOLD; если 0 результатов — fallback до SIMILARITY_FALLBACK
+ *   5. Top-K_DOCUMENTS документов
+ *
+ * Про nprobe:
+ *   nprobe — число ближайших кластеров для скана (как в IVF-индексах).
+ *   nprobe >= число кластеров ИЛИ nprobe <= 0  =>  исчерпывающий поиск
+ *   по всем шардам (нулевая потеря recall — корректно для малого корпуса).
+ *   Меньший nprobe ускоряет поиск на большом корпусе ценой recall;
+ *   оптимум подбирается на размеченных данных через eval-retrieval.js.
  */
 async function runStreamB(semanticQuery, index, extractor) {
   /** @type {Map<string, {source: string, score: number}>} */
@@ -329,66 +316,61 @@ async function runStreamB(semanticQuery, index, extractor) {
   // 1. Векторизация запроса с prefix
   const queryVec = await embed(extractor, `query: ${semanticQuery}`);
 
-  // 2. Определение ближайшего центроида-кластера
+  // 2. Multi-probe: ранжируем кластеры по центроиду, берём top-NPROBE
   const centroids = index.clusters_centroids || {};
-  let bestCluster = null;
-  let bestClusterScore = -Infinity;
+  const clusterNames = Object.keys(centroids);
+  const { clusters: probeClusters, exhaustive } = selectProbeClusters(queryVec, centroids, NPROBE);
+  console.error(`${C.dim}  [B] Multi-probe: ${probeClusters.length}/${clusterNames.length} кластеров${exhaustive ? ' (исчерпывающий)' : ` (nprobe=${NPROBE})`}${C.reset}`);
 
-  for (const [clName, centroid] of Object.entries(centroids)) {
-    const score = cosineSimilarity(queryVec, centroid);
-    if (score > bestClusterScore) {
-      bestClusterScore = score;
-      bestCluster = clName;
-    }
-  }
-
-  if (!bestCluster) return results;
-
-  console.error(`${C.dim}  Ближайший кластер: ${bestCluster} (score: ${bestClusterScore.toFixed(3)})${C.reset}`);
-
-  // 3. Загрузка шарда для ближайшего кластера
-  const shardPath = path.join(SHARDS_DIR, `embeddings-${bestCluster}.json`);
-  if (!fs.existsSync(shardPath)) return results;
-
-  const shard = JSON.parse(readText(shardPath));
-
-  // 4. Линейный проход: вычисляем cosine(queryVec, chunkVec) для каждого чанка
-  /** @type {Map<string, number>} fileId → лучший score */
+  /** fileId → лучший score среди всех чанков */
   const fileScores = new Map();
 
-  for (const entry of shard) {
-    const score = cosineSimilarity(queryVec, entry.embedding);
-    if (score >= SIMILARITY_THRESHOLD) {
-      const existing = fileScores.get(entry.fileId) || 0;
-      if (score > existing) {
-        fileScores.set(entry.fileId, score);
+  /** Диагностика: все полученные score для top-N */
+  const allScores = [];
+
+  for (const clName of probeClusters) {
+    const shardPath = path.join(SHARDS_DIR, `embeddings-${clName}.json`);
+    if (!fs.existsSync(shardPath)) continue;
+
+    const shard = JSON.parse(readText(shardPath));
+    for (const entry of shard) {
+      const score = cosineSimilarity(queryVec, entry.embedding);
+      allScores.push({ fileId: entry.fileId, score });
+
+      if (score >= SIMILARITY_THRESHOLD) {
+        const existing = fileScores.get(entry.fileId) || 0;
+        if (score > existing) fileScores.set(entry.fileId, score);
       }
     }
   }
 
-  // Если основной шард дал мало результатов, пробуем остальные шарды
-  if (fileScores.size < TOP_K_DOCUMENTS) {
-    for (const clName of Object.keys(centroids)) {
-      if (clName === bestCluster) continue;
-      const otherShardPath = path.join(SHARDS_DIR, `embeddings-${clName}.json`);
-      if (!fs.existsSync(otherShardPath)) continue;
+  // 3. Диагностика: top-5 score независимо от порога
+  allScores.sort((a, b) => b.score - a.score);
+  const topDisplay = allScores.slice(0, 5)
+    .map(d => `${d.fileId.split('-').pop()}:${d.score.toFixed(3)}`)
+    .join(', ');
+  console.error(`${C.dim}  [B] Top-5 scores: ${topDisplay}${C.reset}`);
 
-      const otherShard = JSON.parse(readText(otherShardPath));
-      for (const entry of otherShard) {
-        const score = cosineSimilarity(queryVec, entry.embedding);
-        if (score >= SIMILARITY_THRESHOLD) {
-          const existing = fileScores.get(entry.fileId) || 0;
-          if (score > existing) {
-            fileScores.set(entry.fileId, score);
-          }
-        }
-      }
+  // 4. Fallback: если ничего не нашли при 0.70 — попробуем SIMILARITY_FALLBACK
+  if (fileScores.size === 0 && allScores.length > 0) {
+    console.error(`${C.yellow}  [B] 0 результатов при ${SIMILARITY_THRESHOLD} — fallback до ${SIMILARITY_FALLBACK}${C.reset}`);
+    for (const { fileId, score } of allScores) {
+      if (score < SIMILARITY_FALLBACK) break; // сортировано по убыванию
+      const existing = fileScores.get(fileId) || 0;
+      if (score > existing) fileScores.set(fileId, score);
+    }
+    if (fileScores.size > 0) {
+      console.error(`${C.dim}  [B] Fallback нашёл ${fileScores.size} документов${C.reset}`);
     }
   }
 
-  // 5. Top-K по score
+  // 5. Top-K по эффективному score (ground-truth boost: raw/код выше саммари).
+  //    Порог фильтрации применяется к ИСТИННОМУ cosine (выше); boost влияет
+  //    только на ранжирование/отбор top-K, отображается всегда истинный score.
+  const docsMap = index.documents || {};
+  const gtBoost = (id) => (docsMap[id] && docsMap[id].sourceType === 'raw' ? GROUND_TRUTH_BOOST : 0);
   const sorted = [...fileScores.entries()]
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => (b[1] + gtBoost(b[0])) - (a[1] + gtBoost(a[0])))
     .slice(0, TOP_K_DOCUMENTS);
 
   for (const [fileId, score] of sorted) {
@@ -469,13 +451,16 @@ function assembleAndDump(mergedResults, index, rawQuery) {
 
   totalBytes += Buffer.byteLength(header, 'utf8');
 
-  // Сортируем: streamA первым, затем streamB, затем graphLift
+  // Сортируем: streamA первым, затем streamB, затем graphLift; внутри —
+  // по эффективному score с приоритетом ground-truth (raw/код над саммари).
   const sourceOrder = { streamA: 0, streamB: 1, graphLift: 2 };
+  const eff = (fileId, score) =>
+    score + (docs[fileId] && docs[fileId].sourceType === 'raw' ? GROUND_TRUTH_BOOST : 0);
   const ordered = [...mergedResults.entries()].sort((a, b) => {
     const oa = sourceOrder[a[1].source] ?? 3;
     const ob = sourceOrder[b[1].source] ?? 3;
     if (oa !== ob) return oa - ob;
-    return b[1].score - a[1].score;
+    return eff(b[0], b[1].score) - eff(a[0], a[1].score);
   });
 
   for (const [fileId, info] of ordered) {
@@ -505,10 +490,15 @@ function assembleAndDump(mergedResults, index, rawQuery) {
       graphLift: '🔗 Graph+1',
     }[info.source] || info.source;
 
+    // Метка происхождения: raw/код — первоисточник (истина), wiki — производное саммари.
+    const kind = doc.sourceType === 'raw'
+      ? '📄 SOURCE (ground truth)'
+      : '📝 SUMMARY (derived — may lag the source)';
+
     sections.push([
       `## ${doc.id}`,
       ``,
-      `> **Source**: ${sourceTag} | **Score**: ${info.score.toFixed(3)} | **Path**: \`${doc.path}\``,
+      `> **Source**: ${sourceTag} | **Kind**: ${kind} | **Score**: ${info.score.toFixed(3)} | **Path**: \`${doc.path}\``,
       `> **Layer**: ${doc.layer} | **Cluster**: ${doc.cluster}`,
       Array.isArray(doc.symbols) && doc.symbols.length > 0
         ? `> **Symbols**: ${doc.symbols.join(', ')}`

@@ -132,13 +132,19 @@ flowchart LR
 | **A — Symbolic** | Exact match on `id`, `symbols`, `tags`, `wikilinks` | Instant | C# classes, interfaces, enums |
 | **B — Semantic** | Cosine similarity with Jina v3 vectors | 1–2s | Natural language queries (RU/EN) |
 
-**Cosine similarity threshold**: `cos(q, d) ≥ 0.78`
+**Cosine similarity threshold** (configurable in `system/search-config.json`, default `0.70`):
 
-$$\text{similarity}(q, d) = \frac{\vec{q} \cdot \vec{d}}{||\vec{q}|| \cdot ||\vec{d}||} \geq 0.78$$
+$$\text{similarity}(q, d) = \frac{\vec{q} \cdot \vec{d}}{||\vec{q}|| \cdot ||\vec{d}||} \geq \tau,\quad \tau_{\text{default}} = 0.70$$
+
+If nothing clears `τ`, the engine retries at a `similarity_fallback` (default `0.65`) for cross-lingual queries.
+
+**Cluster probing (IVF multi-probe)**: Stream B ranks clusters by their centroid and scans the `nprobe` nearest (default `8`). When `nprobe ≥ cluster count` (the small-corpus case) the search is **exhaustive** — zero recall loss. `nprobe` trades recall for speed only on large corpora and is meant to be calibrated on labeled data via `system/scripts/eval-retrieval.js`.
 
 **Graph Lift** (+1 step): For exact matches, the engine also returns:
 - Parent document via `extends` field
 - Referenced documents via `[[WikiLinks]]` in the body
+
+All retrieval constants (`similarity_threshold`, `similarity_fallback`, `top_k_documents`, `nprobe`, `ground_truth_boost`) live in `system/search-config.json`, **not** hardcoded.
 
 ### Jina v3 Asymmetric Prefixes
 
