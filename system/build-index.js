@@ -7,13 +7,12 @@
  * Инкрементальная индексация базы знаний с векторным шардированием.
  *
  * Алгоритм:
- *   1. Сканирование слоёв (wiki.json) и папок-кластеров
- *   2. Расчёт и кэширование центроидов папок (passage: prefix)
- *   3. MD5-контроль изменений файлов (по тексту выжимки)
- *   4. Мультиязычный чанкинг (1200 слов, 200 слов перекрытие)
- *   5. Векторизация чанков через jinaai/jina-embeddings-v3 (FP16, 1024d)
- *   6. Динамическая кластеризация по ближайшему центроиду
- *   7. Внутришардовая сортировка по косинусной близости
+ *   1. Сканирование слоёв (wiki.json); один шард на слой
+ *   2. MD5-контроль изменений файлов (по тексту выжимки)
+ *   3. Мультиязычный чанкинг (параметры из system/index-config.json)
+ *   4. Векторизация чанков через jinaai/jina-embeddings-v3 (FP16, 1024d)
+ *   5. Настоящие центроиды слоёв = среднее векторов их членов
+ *   6. Внутришардовая сортировка по близости к центроиду
  *
  * Использование:
  *   node system/build-index.js
@@ -48,15 +47,29 @@ const MODEL_REVISION = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
 const VECTOR_DIM     = 1024;
 const DTYPE          = 'fp16';
 
-// ─── Chunking Configuration ─────────────────────────────────────────
-const CHUNK_SIZE_WORDS    = 250;
-const CHUNK_OVERLAP_WORDS = 50;
-
-// ─── Raw File Size Limit ───────────────────────────────────────────────────
-// Большие raw/-файлы (ГДД, ТЗ, транскрипты) не индексируются — они дают сотни
-// чанков и требуют часы CPU-времени. Индексируются только лаконичные архитектурные
-// документы (EventBus.md, LogicAndModules.md и т.д.) до 200КБ.
-const MAX_RAW_FILE_BYTES = 200 * 1024; // 200 KB
+// ─── Indexing Configuration (externalized → system/index-config.json) ──
+// Вынесено в конфиг, чтобы тюнить без правки кода. Файл может отсутствовать —
+// тогда действуют дефолты ниже.
+const INDEX_CONFIG_FILE = path.join(SYSTEM_DIR, 'index-config.json');
+const INDEX_DEFAULTS = {
+  index_code:          true,        // индексировать код (для базы ПРО КОД — по умолчанию да)
+  chunk_size_words:    250,
+  chunk_overlap_words: 50,
+  max_raw_file_bytes:  200 * 1024,  // raw/-файлы крупнее — пропускаются (ГДД/ТЗ → сотни чанков)
+};
+function loadIndexConfig() {
+  try {
+    const raw = fs.readFileSync(INDEX_CONFIG_FILE, 'utf8').replace(/^﻿/, '');
+    return { ...INDEX_DEFAULTS, ...JSON.parse(raw) };
+  } catch {
+    return { ...INDEX_DEFAULTS };
+  }
+}
+const ICFG = loadIndexConfig();
+const CHUNK_SIZE_WORDS    = ICFG.chunk_size_words;
+const CHUNK_OVERLAP_WORDS = ICFG.chunk_overlap_words;
+const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
+const INDEX_CODE          = ICFG.index_code;
 
 // ─── Folder Blacklist (не индексируются) ─────────────────────────────
 // ВАЖНО: 'raw' намеренно исключён — raw/-папки индексируются отдельным проходом.
@@ -145,11 +158,18 @@ function extractWikiLinks(body) {
  * Подготовка текста для эмбеддинга: вырезание блоков кода (```...```),
  * так как они не несут прямой семантической нагрузки для векторного поиска.
  */
-function prepareTextForEmbedding(text) {
-  // Вырезаем многострочные блоки кода
-  let cleaned = text.replace(/```[\s\S]*?```/g, '');
-  // Вырезаем однострочные блоки кода
-  cleaned = cleaned.replace(/`[^`\r\n]+`/g, '');
+function prepareTextForEmbedding(text, indexCode = INDEX_CODE) {
+  let cleaned = text;
+  if (indexCode) {
+    // Индексируем код: убираем только маркеры ``` (и язык), текст кода сохраняем —
+    // иначе примеры/сигнатуры/API нельзя найти семантически (это база ПРО КОД).
+    cleaned = cleaned.replace(/```[\w+-]*\r?\n?/g, '');
+  } else {
+    // Не индексируем код: вырезаем блоки ```...``` целиком.
+    cleaned = cleaned.replace(/```[\s\S]*?```/g, '');
+  }
+  // Инлайн-бэктики убираем всегда, текст внутри сохраняем.
+  cleaned = cleaned.replace(/`/g, '');
   return cleaned;
 }
 
@@ -410,50 +430,9 @@ function getRawFilesRecursively(dir, extensions) {
 //  CENTROID COMPUTATION
 // ═══════════════════════════════════════════════════════════════════════
 
-/**
- * Вычисляет или обновляет центроиды для каждого слоя-кластера.
- * Центроид = embedding("passage: <layer-name>").
- * Кэшируется в clusters_centroids.
- */
-async function computeCentroids(extractor, layers, index) {
-  const centroids = index.clusters_centroids || {};
-  let computed = 0;
-
-  for (const layer of layers) {
-    if (centroids[layer.name] && Array.isArray(centroids[layer.name]) && centroids[layer.name].length === VECTOR_DIM) {
-      continue; // Центроид уже закэширован
-    }
-    const vec = await embed(extractor, `passage: ${layer.name}`);
-    centroids[layer.name] = vec;
-    computed++;
-  }
-
-  if (computed > 0) {
-    console.log(`${C.cyan}[*]${C.reset} Вычислено ${computed} новых центроидов кластеров.`);
-  } else {
-    console.log(`${C.dim}[*] Все центроиды загружены из кэша.${C.reset}`);
-  }
-
-  return centroids;
-}
-
-/**
- * Находит ближайший кластер для данного вектора.
- */
-function findNearestCluster(vector, centroids) {
-  let bestCluster = null;
-  let bestScore   = -Infinity;
-
-  for (const [clusterName, centroid] of Object.entries(centroids)) {
-    const score = cosineSimilarity(vector, centroid);
-    if (score > bestScore) {
-      bestScore   = score;
-      bestCluster = clusterName;
-    }
-  }
-
-  return { cluster: bestCluster, score: bestScore };
-}
+// Центроиды теперь вычисляются как среднее векторов членов шарда в main()
+// (шаг 9b), а не как эмбеддинг имени папки. Прежние computeCentroids /
+// findNearestCluster (name-based routing) удалены как ошибочные.
 
 // ═══════════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE
@@ -488,8 +467,9 @@ async function main() {
   // 3. Инициализация модели
   const extractor = await initModel();
 
-  // 4. Расчёт/загрузка центроидов
-  index.clusters_centroids = await computeCentroids(extractor, layers, index);
+  // 4. Центроиды считаются ПОСЛЕ эмбеддинга (шаг 9b) как среднее векторов
+  //    членов каждого слоя-шарда — настоящий centroid, а не эмбеддинг имени папки.
+  index.clusters_centroids = {};
 
   // 5. Сбор всех .md файлов из wiki/ и raw/ каждого слоя
   const allFiles = [];
@@ -601,36 +581,19 @@ async function main() {
       continue;
     }
 
-    // 8c. Векторизация чанков (с префиксом passage:)
-    let assignedCluster = layer; // По умолчанию — физический слой
-    let bestCentroidScore = -Infinity;
+    // 8c. Векторизация чанков (с префиксом passage:). Один шард на слой;
+    //     centroidScore проставим на шаге 9b, когда посчитаем настоящий центроид.
+    const assignedCluster = layer;
+    if (!shards[assignedCluster]) shards[assignedCluster] = [];
 
     for (let ci = 0; ci < chunks.length; ci++) {
       const chunkVec = await embed(extractor, `passage: ${chunks[ci]}`);
-
-      // Определяем ближайший кластер для ПЕРВОГО чанка (определяет кластер документа)
-      if (ci === 0) {
-        const nearest = findNearestCluster(chunkVec, index.clusters_centroids);
-        assignedCluster   = nearest.cluster || layer;
-        bestCentroidScore = nearest.score;
-      }
-
-      // Вычисляем centroidScore относительно назначенного кластера
-      const centroidVec = index.clusters_centroids[assignedCluster];
-      const centroidScore = centroidVec ? cosineSimilarity(chunkVec, centroidVec) : 0;
-
-      // Инициализация шарда, если его нет
-      if (!shards[assignedCluster]) {
-        shards[assignedCluster] = [];
-      }
-
       shards[assignedCluster].push({
         fileId,
         chunkIndex: ci,
-        centroidScore,
+        centroidScore: 0,
         embedding: chunkVec,
       });
-
       countChunks++;
     }
 
@@ -650,8 +613,7 @@ async function main() {
     };
 
     process.stdout.write(
-      ` → ${chunks.length} чанков → ${C.cyan}${assignedCluster}${C.reset}` +
-      ` (score: ${bestCentroidScore.toFixed(3)})\n`
+      ` → ${chunks.length} чанков → ${C.cyan}${assignedCluster}${C.reset}\n`
     );
   }
 
@@ -667,6 +629,24 @@ async function main() {
       delete index.documents[docId];
       countRemoved++;
     }
+  }
+
+  // 9b. Настоящие центроиды: среднее нормализованных векторов членов шарда
+  //     (а не эмбеддинг имени папки). Делает nprobe-маршрутизацию осмысленной.
+  index.clusters_centroids = {};
+  for (const [clName, data] of Object.entries(shards)) {
+    if (!data.length) continue;
+    const dim = data[0].embedding.length;
+    const mean = new Array(dim).fill(0);
+    for (const e of data) {
+      for (let k = 0; k < dim; k++) mean[k] += e.embedding[k];
+    }
+    for (let k = 0; k < dim; k++) mean[k] /= data.length;
+    const norm = Math.sqrt(mean.reduce((s, v) => s + v * v, 0)) || 1;
+    const centroid = mean.map(v => v / norm);
+    index.clusters_centroids[clName] = centroid;
+    // centroidScore = близость чанка к центроиду слоя (для внутришардовой сортировки)
+    for (const e of data) e.centroidScore = cosineSimilarity(e.embedding, centroid);
   }
 
   // 10. Внутришардовая сортировка по убыванию centroidScore

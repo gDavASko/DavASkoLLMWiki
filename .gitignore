@@ -9,8 +9,9 @@ package-lock.json
 # ─── Рантайм-артефакты RAG-поиска ────────────────────────────────────
 .cursor-context-dump.md
 
-# ─── Мета-индекс (пересобирается через build-index.js) ───────────────
+# ─── Мета-индекс и векторные шарды (пересобираются build-index.js) ───
 system/wiki-index.json
+system/index-shards/
 
 # ─── Отчёт детектора устаревания (пересобирается check-staleness.js) ──
 system/staleness-report.json

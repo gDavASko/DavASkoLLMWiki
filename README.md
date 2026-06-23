@@ -108,10 +108,10 @@ The framework includes a built-in **Retrieval-Augmented Generation (RAG)** engin
 ```mermaid
 flowchart LR
     subgraph Indexing ["build-index.js (offline)"]
-        A["Scan layers<br/>(wiki.json)"] --> B["Chunk text<br/>(1200 words)"]
+        A["Scan layers<br/>(wiki.json)"] --> B["Chunk text<br/>(config: index-config.json)"]
         B --> C["Embed chunks<br/>(passage: prefix)"]
-        C --> D["Assign to cluster<br/>(nearest centroid)"]
-        D --> E["Write shards<br/>(sorted by score)"]
+        C --> D["One shard per layer<br/>centroid = mean of members"]
+        D --> E["Write shards<br/>(sorted by centroid)"]
     end
 
     subgraph Query ["query-wiki.js (runtime)"]
@@ -161,9 +161,10 @@ The model uses **asymmetric prefixing** for optimal retrieval:
 | Model | `jinaai/jina-embeddings-v3` |
 | Precision | FP16 |
 | Vector dimensions | 1024 |
-| Chunk size | 1200 words |
-| Chunk overlap | 200 words |
-| Storage | JSON shards in `system/index-shards/` |
+| Chunk size | 250 words (configurable, `system/index-config.json`) |
+| Chunk overlap | 50 words (configurable) |
+| Code in embeddings | on by default (`index_code`); set `false` to strip code blocks |
+| Storage | one JSON shard per layer in `system/index-shards/` (gitignored) |
 
 ### Core Context Protocol (CCP)
 
@@ -224,7 +225,8 @@ sequenceDiagram
 | `node system/scripts/query-wiki.js` | Legacy page lookup and single-file ingestion |
 | `node system/scripts/ingest-newdata.js` | Process `NewData/` incoming folder |
 | `node system/scripts/update-links.js` | Safe path migration (DEPRECATED) |
-| `node system/scripts/run-evals.js` | Regression test runner |
+| `node system/scripts/check-sources.js` | Citation sanity check (cited source files exist); not a quality metric |
+| `node system/scripts/eval-retrieval.js` | Retrieval quality: recall@k/MRR/nDCG vs flat & grep baselines |
 
 ---
 
@@ -291,7 +293,7 @@ Validate the database setup and run regression tests:
 ```bash
 node system/scripts/lint-wiki.js
 node system/scripts/validate-links.js
-node system/scripts/run-evals.js
+node system/scripts/check-sources.js
 ```
 
 Test the search engine:
