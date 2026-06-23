@@ -26,6 +26,8 @@ Before answering any question about the knowledge base, architecture, code patte
 | `node system/scripts/ingest-newdata.js` | Import from NewData/ |
 | `node system/scripts/check-staleness.js` | Detect wiki pages whose cited sources changed (CI gate) |
 | `node system/scripts/check-staleness.js --stamp [page]` | Re-stamp provenance hashes after actualizing a page |
+| `node system/scripts/eval-retrieval.js` | Measure retrieval quality (recall@k/MRR/nDCG) vs flat & grep baselines |
+| `node system/scripts/eval-retrieval.js --sweep` | Calibrate the similarity threshold on labeled data |
 | `node system/scripts/run-evals.js` | Run regression tests |
 | `node system/sync-ai-rules.js` | Sync IDE rules and skills |
 

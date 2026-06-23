@@ -15,6 +15,9 @@ system/wiki-index.json
 # ─── Отчёт детектора устаревания (пересобирается check-staleness.js) ──
 system/staleness-report.json
 
+# ─── Отчёт измерения качества поиска (пересобирается eval-retrieval.js) ─
+system/evals/retrieval-report.json
+
 # ─── Сгенерированные адаптеры скилов (создаёт sync-ai-rules.js) ──────
 # Источник истины — каталог skills/. Скомпилированные копии для IDE —
 # build-артефакты: не версионируются, чтобы не плодить двойную регистрацию.

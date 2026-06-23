@@ -1,0 +1,11 @@
+[
+  {
+    "_comment": "Пример размеченного набора для eval-retrieval.js. Скопируйте в retrieval-queries.json и заполните реальными запросами. 'relevant' — список меток: путь страницы (layer/wiki/.../page.md), её basename, или fileId из индекса.",
+    "query": "publish subscribe messaging between modules",
+    "relevant": ["framework-wiki/wiki/concepts/event-bus.md"]
+  },
+  {
+    "query": "как зарегистрировать обработчик в шине событий EventBus",
+    "relevant": ["event-bus", "raw-framework-wiki-EventBus"]
+  }
+]
