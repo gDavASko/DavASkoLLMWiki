@@ -156,7 +156,7 @@
     <tr><td>Model</td><td class="n">jinaai/jina-embeddings-v3, fp16, 1024-d, rev 815152c…</td></tr>
     <tr><td>top-k</td><td class="n">5</td></tr>
     <tr><td>Threshold</td><td class="n">relative (&alpha;=0.85, junk_floor=0.35)</td></tr>
-    <tr><td>Hardware</td><td class="n">CPU, ONNX Runtime (offline); ~2.3 s / chunk indexing</td></tr>
+    <tr><td>Hardware</td><td class="n">ONNX Runtime (offline); GPU via DirectML with CPU fallback (auto-detected). CPU ~2.3 s/chunk; GPU ~8&times; faster (§7.3)</td></tr>
   </table>
   <p><b>Retrievers compared.</b> <code>semantic</code> — dense multi-probe only; <code>hybrid</code> — symbolic + semantic, unified ranking; <code>flat</code> — exhaustive flat cosine (isolates clustering effect); <code>lexical</code> — a grep-like term-overlap baseline over the same files ("agent reads the files directly").</p>
   <p><b>Metrics.</b> recall@5 (fraction of relevant docs retrieved in top-5), MRR (reciprocal rank of the first relevant), nDCG@5 (position-discounted ranking quality). The eval harness shares the engine's core scoring functions (embedding, cosine, threshold, symbol scoring) so it measures the real engine, not a re-implementation.</p>
@@ -256,8 +256,17 @@
   </table>
   <div class="cap"><b>Table 3.</b> Structure-aware chunking improves ranking by <span class="win">+7.8% MRR</span> and +7% nDCG at equal recall — coherent, section-bounded chunks with atomic code produce embeddings that rank the relevant document higher. This confirms the common qualitative claim quantitatively, on this corpus.</div>
 
-  <h3>7.3 Batched embedding: speed with proven parity</h3>
-  <p>Indexing embedded one chunk per model call. We added batched embedding and first <b>proved correctness</b>: across mixed-length samples in one batch, batched vs single-item embeddings are numerically identical — minimum cosine <b>0.99999997</b>, maximum absolute element difference <b>2.8&times;10<sup>-5</sup></b> (floating-point noise). Only then did we measure speed: <b>114&nbsp;s &rarr; 101&nbsp;s (~11%)</b> for 45 chunks. The gain is modest because a 570M-parameter forward pass saturates CPU compute; batching saves only per-call overhead. We keep batching on (no accuracy cost) but identify GPU / quantization as the real speed levers.</p>
+  <h3>7.3 Indexing speed: GPU, batching, and proven parity</h3>
+  <p>Indexing embedded one chunk per model call on CPU. We addressed speed on two fronts, each gated by a correctness check first.</p>
+  <p><b>Batched embedding.</b> We batch a document's chunks into one model call. Correctness was <b>proved before</b> measuring speed: across mixed-length samples in one batch, batched vs single-item embeddings are numerically identical — minimum cosine <b>0.99999997</b>, max absolute element difference <b>2.8&times;10<sup>-5</sup></b> (FP noise). On CPU the speed-up is modest — <b>114&nbsp;s &rarr; 101&nbsp;s (~11%)</b> for 45 chunks — because a 570M-parameter forward pass saturates CPU compute; batching only removes per-call overhead.</p>
+  <p><b>GPU acceleration (the real lever).</b> The vendored ONNX runtime ships a DirectML execution provider (any DX12 GPU: NVIDIA/AMD/Intel). The engine auto-detects the GPU and falls back to CPU, logging the device used. Measured on 12 embeddings: <b>CPU 9657&nbsp;ms vs GPU 1205&nbsp;ms — an 8.0&times; speed-up</b>, with min cosine(CPU,&nbsp;GPU)&nbsp;=&nbsp;<b>0.999984</b> (numerically equivalent for retrieval). Full-corpus indexing drops from ~30&nbsp;min on CPU to a few minutes on GPU. This dwarfs batching and removes the indexing bottleneck where a GPU is present.</p>
+  <table>
+    <tr><th>Configuration</th><th class="n">time (12 embeds)</th><th class="n">speed-up</th><th class="n">parity vs CPU</th></tr>
+    <tr><td>CPU (baseline)</td><td class="n">9657 ms</td><td class="n">1.0&times;</td><td class="n">—</td></tr>
+    <tr><td>CPU + batching (45 chunks)</td><td class="n">~11% faster</td><td class="n">~1.1&times;</td><td class="n">cos &ge; 0.99999997</td></tr>
+    <tr class="best"><td><b>GPU (DirectML, fp16)</b></td><td class="n win">1205 ms</td><td class="n win">8.0&times;</td><td class="n">cos = 0.999984</td></tr>
+  </table>
+  <div class="cap"><b>Table 4.</b> Indexing-speed interventions, each correctness-gated. GPU acceleration is the dominant lever; batching is a small, free CPU-side gain.</div>
 
   <h2 id="disc">8. Discussion</h2>
   <p><b>The value question is answered — on this corpus.</b> The dense layer is not decorative: it nearly doubles recall and markedly improves ranking over grep. For natural-language questions, semantic search is the workhorse; the symbolic stream is neutral here but is designed to add precision on identifier-style queries (e.g. <code>CowController</code>) that this question set does not contain.</p>
@@ -271,7 +280,7 @@
     <li><b>Label proxy.</b> "Required sources" annotations approximate relevance; they were authored for a Q&amp;A regression set, not as exhaustive relevance judgments, so recall may be under- or over-counted.</li>
     <li><b>Partial index for the eval.</b> The reported table indexes 2 of 6 layers (those covering the labels); fewer distractor documents can make retrieval optically easier than full-corpus deployment.</li>
     <li><b>Recall ceiling.</b> recall@5 = 0.633 means ~37% of relevant material is missed in the top-5; a re-ranker would not fix recall (it reorders), so the next lever is larger k, query expansion, or chunk/representation changes — to be decided by measurement.</li>
-    <li><b>CPU-bound indexing.</b> ~2.3 s/chunk makes large rebuilds slow; batching helps only ~11%.</li>
+    <li><b>Indexing throughput.</b> CPU indexing is slow (~2.3 s/chunk); GPU (DirectML) removes this (~8&times;) where a DX12 GPU and a GPU-enabled ONNX runtime are present, otherwise the system falls back to CPU.</li>
     <li><b>Drift remains a process, not a guarantee.</b> Provenance hashing makes staleness <i>detectable</i>; it does not eliminate the dual-source-of-truth between code and wiki.</li>
   </ul>
 

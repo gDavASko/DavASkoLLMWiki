@@ -220,7 +220,9 @@ npm test                                           # 32 unit tests of the retrie
 
 Full write-up — method, dataset, all tables, charts, threat-to-validity — is the bundled scientific report: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html).
 
-> Honest caveats: n = 15 questions (small); indexing a 570M-param model on CPU is the speed bottleneck (batching adds only ~11 %); cluster routing is layer-coarse. These are documented, not hidden — see the report's *Limitations* section.
+**Speed.** Embedding runs on **GPU via DirectML when available** (auto-detected, CPU fallback) — measured **8× faster** than CPU (cosine parity 0.999984); CPU-side batching adds a further ~11 %. Set `device` in `system/index-config.json` / `search-config.json` (`auto` by default).
+
+> Honest caveats: n = 15 questions (small); cluster routing is layer-coarse; without a GPU, CPU indexing is slow. These are documented, not hidden — see the report's *Limitations* section.
 
 ---
 
