@@ -1,196 +1,327 @@
-﻿# DavASko LLM Wiki
+﻿# 📚 DavASko LLM Wiki
 
-A multi-layered, self-validating, Obsidian-compatible knowledge base framework with a built-in hybrid (symbolic + semantic) retrieval engine, designed to organize AI-agent work with modern LLMs (Claude, Gemini, GPT) in developer workspaces. It runs **fully offline** (vendored model + dependencies).
+**A knowledge base that AI agents can actually search — fully offline.**
 
-> **Validated on a real corpus.** On a deployed 162-document knowledge base (KBPro) with 15 labeled questions, the semantic retriever reaches **recall@5 = 0.633 / MRR = 0.718**, versus a lexical (grep) baseline of **0.333 / 0.435** — i.e. the retrieval layer roughly **doubles recall** and **+65 % MRR** over "just grep the files". Two data-driven fixes raised the hybrid ranker's MRR from 0.641 to 0.718 (+12 %), and structure-aware chunking beat fixed-window by +7.8 % MRR. Full methodology, tables and charts: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html). See §6 below.
+🌐 **English** · [Русская версия](README.ru.md)
 
----
+DavASko LLM Wiki turns your project's scattered docs, code notes, and transcripts into a **structured, layered knowledge base** with a built‑in **hybrid search engine** (keywords + meaning). AI coding agents (Claude, Gemini, GPT) query it *before* answering, so they reason from your real project knowledge instead of guessing.
 
-## 1. Core Concept & Architecture
+It runs **100% offline** — the embedding model and all dependencies are vendored.
 
-The **DavASko LLM Wiki** separates knowledge into hierarchical, independent folders called **layers**. This ensures that general AI rules, engine-specific constraints, framework conventions, and project-specific documentation are kept in separate contexts.
-
-### The Dependency Chain
-Dependencies flow strictly **downward**. A higher-level layer can depend on and link to a lower-level layer, but not vice versa. Multiple independent project layers can run in parallel and inherit from the common framework layer.
-
-```mermaid
-graph TD
-    Project1[Project 1 Layer: project-a-wiki] --> Framework[Framework Layer: framework-wiki]
-    Project2[Project 2 Layer: project-b-wiki] --> Framework
-    Project3[Project 3 Layer: project-c-wiki] --> Framework
-    Framework --> Engine[Engine Layer: engine-wiki]
-    Engine --> Root[Core LLM Layer: llm-wiki]
-```
-
-- **`llm-wiki`** (Core Layer): Contains universal AI rules, developer guidelines, video transcripts, and general helper scripts.
-- **`engine-wiki`** (Engine Layer): Contains game engine details, naming styles, physics guidelines, and assembly rules.
-- **`framework-wiki`** (Framework Layer): Contains core framework packages, architectural principles, C# code styles, and custom libraries definitions.
-- **`project-a-wiki`, `project-b-wiki`, `project-c-wiki`** (Project Layers): Contain GDDs, scene lists, gameplay logic, and module definitions for their respective projects. Each project is fully isolated from others.
-
-Each layer contains a manifest file `wiki.json` specifying its dependencies:
-```json
-{
-  "name": "davasko-wiki",
-  "dependencies": ["engine-wiki", "llm-wiki"]
-}
-```
+> ### ✅ It's measured, not promised
+> On a real 162‑document knowledge base with 15 labeled questions, semantic search reaches **recall@5 = 0.633 / MRR = 0.718**, vs a plain "grep the files" baseline of **0.333 / 0.435**. In plain words: the search layer **finds ~2× more** of the right pages and ranks the first correct hit **+65% higher** than just searching text. Full method, tables & charts: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html).
 
 ---
 
-## 2. Knowledge Priorities & Conflict Resolution
+## 🧭 Table of contents
 
-Knowledge has different weights depending on its "proximity to the project":
-
-$$\text{Project Layer} > \text{Framework Layer} > \text{Engine Layer} > \text{Core LLM Layer}$$
-
-### The Priority Override Rules
-If a page, rule, or concept exists in multiple layers (e.g. both `engine-wiki` and `llm-wiki` contain a rule with conflicting conventions):
-1. **Default Option**: The version in the most specific (project-level) layer is chosen and followed by default.
-2. **Warn User**: The AI assistant must print a warning message notifying the user about the duplicate rules.
-3. **Offer Choice**: The AI assistant must prompt the user to choose between using the default (project-level) rule or overriding it with the general base rule.
-4. **Grep Search Gaps**: If the AI assistant searches the codebase using low-level search tools (grep, ripgrep) because of undocumented patterns or missing references, it MUST document the findings in the most appropriate layer of the knowledge base.
-5. **Aesthetic Independence**: Rules, schemas, and instructions MUST NOT contain proprietary names or paths (such as client-specific folders or proprietary framework names) in general-purpose layers. Keep all conventions abstract, generalized, and portable.
-
----
-
-## 3. Full-Text Search Gaps Policy
-
-To continuously improve the quality and coverage of the knowledge base:
-- **Search Gap Definition**: If an AI assistant performs a full-text search (using grep, ripgrep, custom script searches, etc.) because a topic, convention, or code pattern was not directly found in the wiki maps or concepts, this indicates a search gap.
-- **Mandatory Documentation**: The AI assistant MUST document its findings before completing the task. This involves adding the description, links, and code symbols to the knowledge base (under the appropriate layer, e.g. `davasko-wiki` or `project-wiki`).
-- **Linking Updates**: If the topic already exists but lacked the specific links/details that forced the search, it must be updated with the missing references so future searches can be done directly via the wiki query system.
+1. [What is this, in one picture](#1--what-is-this-in-one-picture)
+2. [Why it exists](#2--why-it-exists)
+3. [Core idea: layers](#3--core-idea-layers)
+4. [`wiki/` vs `raw/`: derived vs truth](#4--wiki-vs-raw-derived-vs-truth)
+5. [One shared model, many knowledge bases](#5--one-shared-model-many-knowledge-bases)
+6. [✍️ Writing knowledge (the ingest pipeline)](#6-️-writing-knowledge-the-ingest-pipeline)
+7. [🔎 Reading knowledge (the search pipeline)](#7--reading-knowledge-the-search-pipeline)
+8. [🧩 The skills — what each one does](#8--the-skills--what-each-one-does)
+9. [🚀 Deploy a knowledge base (2 ways)](#9--deploy-a-knowledge-base-2-ways)
+10. [⌨️ Command cheat‑sheet](#10-️-command-cheatsheet)
+11. [📊 Evaluation & results](#11--evaluation--results)
+12. [📐 Data standards](#12--data-standards)
+13. [🗂️ Repository layout](#13-️-repository-layout)
 
 ---
 
-## 4. Directory Layout and Plans Isolation
+## 1. 🖼️ What is this, in one picture
 
-The system separates planning documentation (ExecPlans, checklists) from the durable knowledge base:
-
-### Workspace Root Layout
-```
-<workspace-root>/
-├── plans/                      # Centralized planning: task.md, implementation plans
-├── system/                     # Maintenance scripts (lint-wiki.js, etc.)
-├── NewData/                    # Buffer folder for manual document ingestion
-├── llm-wiki/                   # Core LLM Layer (contains rules, scripts, transcripts)
-├── engine-wiki/                 # Engine Layer (Unity specific)
-├── framework-wiki/                 # Framework Layer (framework conventions, C# code styles)
-└── <project-wiki>/             # Isolated project-specific layers (e.g. project-a-wiki)
-```
-
-### Folder Structure of a Single Layer
-Each individual layer directory must conform to the following directory layout:
-```
-<layer-directory>/
-├── wiki.json                   # Manifest file specifying dependencies
-├── wiki/                       # Compiled, AI-maintained knowledge base
-│   ├── index.md                # Layer-specific catalog of pages (Table of Contents)
-│   ├── contradictions.md       # Open conflicts and questions register
-│   ├── stubs.md                # Declared stubs to resolve out-of-boundary references
-│   ├── concepts/               # Reusable patterns, guidelines, and rules
-│   ├── entities/               # Service definitions, scenes, classes, packages
-│   ├── runbooks/               # Step-by-step developer checklists and guides
-│   ├── sources/                # AI-generated summaries of raw materials
-│   ├── syntheses/              # Comparative designs and analyses
-│   └── decisions/              # Architectural Decision Records (ADRs)
-└── raw/                        # Immutable source materials (read-only)
-    ├── docs/                   # Copied project documentation
-    ├── transcripts/            # Text transcripts of meetings (llm-wiki/raw/transcripts/ only)
-    └── ai-skills~/             # Portable AI skills (SKILL.md and assets)
-```
-
----
-
-## 5. RAG Vector Search Engine (v3.x)
-
-The framework includes a built-in **Retrieval-Augmented Generation (RAG)** engine powered by [Jina v3 embeddings](https://huggingface.co/jinaai/jina-embeddings-v3) for semantic search across the entire knowledge base.
-
-### Architecture Overview
+Think of it as a **librarian for your AI agent**. You put knowledge in; the agent asks questions; the librarian hands back exactly the right pages.
 
 ```mermaid
 flowchart LR
-    subgraph Indexing ["build-index.js (offline)"]
-        A["Scan layers<br/>(wiki.json)"] --> B["Chunk text<br/>(config: index-config.json)"]
-        B --> C["Embed chunks<br/>(passage: prefix)"]
-        C --> D["One shard per layer<br/>centroid = mean of members"]
-        D --> E["Write shards<br/>(sorted by centroid)"]
+    subgraph YOU["👤 You / your team"]
+        SRC["📄 Docs, code notes,<br/>GDDs, YouTube talks"]
+    end
+    subgraph KB["📚 Knowledge Base (per project)"]
+        RAW["raw/ — original sources<br/>(the truth)"]
+        WIKI["wiki/ — short AI summaries<br/>(the index)"]
+        IDX["🔢 Vector index"]
+    end
+    MODEL["🧠 Shared embedding model<br/>(one copy on the machine)"]
+    subgraph AGENT["🤖 AI agent (Claude / Gemini / GPT)"]
+        Q["Question"]
+        A["Grounded answer<br/>+ citations"]
     end
 
-    subgraph Query ["query-wiki.js (runtime)"]
-        F["Parse query"] --> G["Stream A: Symbol match<br/>(instant)"]
-        F --> H["Stream B: Semantic search<br/>(query: prefix)"]
-        G --> I["Merge + Graph Lift"]
-        H --> I
-        I --> J["Write .cursor-context-dump.md"]
-    end
+    SRC -->|ingest| RAW --> WIKI --> IDX
+    MODEL -. vectorizes .-> IDX
+    Q -->|hybrid search| IDX --> A
 ```
 
-### Search Algorithm
+**The three moving parts:**
 
-**Hybrid search** combines two parallel streams:
-
-| Stream | Method | Speed | Use Case |
-|---|---|---|---|
-| **A — Symbolic** | Exact match on `id`, `symbols`, `tags`, `wikilinks` | Instant | C# classes, interfaces, enums |
-| **B — Semantic** | Cosine similarity with Jina v3 vectors | 1–2s | Natural language queries (RU/EN) |
-
-**Adaptive threshold** (`threshold_mode` in `system/search-config.json`, default `relative`):
-
-A fixed cosine cutoff is fragile — score distributions shift with model, language and document length, so there is no universal "good" number. The default **relative** mode computes a per-query threshold from that query's own best match:
-
-$$\tau_q = \max\bigl(\text{junk\_floor},\; \alpha \cdot \max_d \text{sim}(q,d)\bigr),\quad \alpha = 0.85,\ \text{junk\_floor} = 0.35$$
-
-This adapts to each query (robust to RU/EN and length) and keeps only a low floor to reject noise. The legacy **absolute** mode (fixed `similarity_threshold` + `similarity_fallback`) is still available via config. Calibrate `α` (relative) or `τ` (absolute) on labeled data with `eval-retrieval.js --sweep` — don't hand-pick a magic number.
-
-**Cluster probing (IVF multi-probe)**: Stream B ranks clusters by their centroid and scans the `nprobe` nearest (default `8`). When `nprobe ≥ cluster count` (the small-corpus case) the search is **exhaustive** — zero recall loss. `nprobe` trades recall for speed only on large corpora and is meant to be calibrated on labeled data via `system/scripts/eval-retrieval.js`.
-
-**Graph Lift** (+1 step): For exact matches, the engine also returns:
-- Parent document via `extends` field
-- Referenced documents via `[[WikiLinks]]` in the body
-
-All retrieval constants (`similarity_threshold`, `similarity_fallback`, `top_k_documents`, `nprobe`, `ground_truth_boost`) live in `system/search-config.json`, **not** hardcoded.
-
-### Jina v3 Asymmetric Prefixes
-
-The model uses **asymmetric prefixing** for optimal retrieval:
-- **Indexing**: `passage: <chunk text>` — used when embedding document chunks
-- **Querying**: `query: <search phrase>` — used when embedding the search query
-
-### Model & Vector Specs
-
-| Parameter | Value |
+| Part | Plain meaning |
 |---|---|
-| Model | `jinaai/jina-embeddings-v3` |
-| Precision | FP16 |
-| Vector dimensions | 1024 |
-| Chunking | structure-aware by default (`chunk_strategy: structural`): splits on Markdown headings/paragraphs, keeps code blocks atomic, adds heading breadcrumbs, size kept within `[chunk_min_words, chunk_max_words]`. `fixed` (word-window + overlap) still available |
-| Chunk size | target 250 words (configurable, `system/index-config.json`) |
-| Code in embeddings | on by default (`index_code`); set `false` to strip code blocks |
-| Storage | one JSON shard per layer in `system/index-shards/` (gitignored) |
-
-### Core Context Protocol (CCP)
-
-AI agents should follow this protocol before answering questions:
-
-```bash
-# 1. Search the knowledge base
-node system/query-wiki.js --query "CowController, blend tree optimization"
-
-# 2. Read the context dump
-cat .cursor-context-dump.md
-
-# 3. Use retrieved documents as grounded context
-```
-
-The context dump file (`.cursor-context-dump.md`) is limited to **120KB** and only a short status line is sent to stdout to prevent IDE buffer overflow.
+| 📚 **Knowledge base** | Your project's facts, organized into folders called *layers*. |
+| 🧠 **Embedding model** | Turns text into numbers ("vectors") so the computer can find *meaning*, not just exact words. Installed **once per machine**, shared by every KB. |
+| 🔎 **Search engine** | Given a question, returns the most relevant pages — by keyword **and** by meaning. |
 
 ---
 
-## 6. Evaluation & Results (measured, not assumed)
+## 2. 🤔 Why it exists
 
-Retrieval quality is **measured**, not asserted. `system/scripts/eval-retrieval.js` runs a labeled query set through several retrievers and reports **recall@k / MRR / nDCG@k**, including a `lexical` (grep-like) baseline that answers the only question that matters: *does the RAG layer beat just reading the files?*
+An AI agent without grounding **guesses**. The common alternative — let it `grep` your files — is weak: grep only finds exact words, misses synonyms, and floods the agent with noise.
 
-**Result on a real deployed corpus** (KBPro, 162 docs across 2 layers, 15 labeled questions, top-k = 5):
+This project asks the only honest question: **is a real search layer actually better than grep?** The answer, measured on a real corpus, is yes:
+
+```mermaid
+xychart-beta
+    title "Recall@5 — how much of the right knowledge is found"
+    x-axis ["grep baseline", "this engine"]
+    y-axis "Recall@5 (higher = better)" 0 --> 1
+    bar [0.333, 0.633]
+```
+
+Roughly **double the recall**. See [§11](#11--evaluation--results) for the full numbers.
+
+---
+
+## 3. 🧱 Core idea: layers
+
+Knowledge is split into **layers** — independent folders, each a self‑contained slice. A layer may **depend on** lower layers (and reuse their pages), but never the other way around. This keeps general rules separate from project specifics.
+
+```mermaid
+graph TD
+    P1["🎮 project-a-wiki<br/>(game A docs)"] --> F
+    P2["🎮 project-b-wiki<br/>(game B docs)"] --> F
+    F["🧩 framework-wiki<br/>(your code conventions)"] --> E
+    E["⚙️ engine-wiki<br/>(Unity / engine rules)"] --> L
+    L["🌐 llm-wiki<br/>(universal AI rules + tooling)"]
+
+    classDef base fill:#eef5ff,stroke:#5b8def;
+    class L base;
+```
+
+- Arrows mean **"depends on / can read from"**. Dependencies flow **strictly downward** — no cycles.
+- Each layer carries a manifest `wiki.json`:
+
+```json
+{ "name": "project-a-wiki", "dependencies": ["framework-wiki", "engine-wiki", "llm-wiki"] }
+```
+
+**Conflict rule:** if the same topic exists in two layers, the **more specific** (closer‑to‑the‑project) layer wins. The agent should warn you about the duplicate and let you override. Order of priority:
+
+```
+project layer  >  framework layer  >  engine layer  >  llm-wiki (base)
+```
+
+---
+
+## 4. 📂 `wiki/` vs `raw/`: derived vs truth
+
+Every layer has two halves. This split is the heart of the system.
+
+```mermaid
+flowchart LR
+    subgraph LAYER["one layer"]
+        direction TB
+        RAW["📦 raw/ — SOURCE OF TRUTH<br/>original files, never edited<br/>(code dumps, GDDs, transcripts)"]
+        WIKI["📝 wiki/ — DERIVED<br/>short curated pages that<br/>summarize & link the raw"]
+    end
+    RAW -->|"summarized into"| WIKI
+    RAW -. "provenance hash" .-> WIKI
+```
+
+| | `raw/` | `wiki/` |
+|---|---|---|
+| **Role** | Ground truth | Human/AI‑friendly summary & map |
+| **Edited?** | No (immutable snapshots) | Yes (curated) |
+| **If they disagree** | `raw/` wins | flagged as possibly stale |
+
+Each wiki page stores a **content hash** of the sources it cites. When a source changes, `check-staleness.js` flags the derived page as out‑of‑date — drift becomes *detectable*, not silent.
+
+Inside `wiki/`, pages are typed: `concepts/`, `entities/`, `runbooks/`, `sources/`, `syntheses/`, `decisions/`, plus three special pages per layer: `index.md` (table of contents), `stubs.md` (planned pages), `contradictions.md` (open conflicts).
+
+---
+
+## 5. 🧠 One shared model, many knowledge bases
+
+The embedding model is ~**1.1 GB**. Copying it into every knowledge base would waste gigabytes. Instead it's installed **once** into a system location, and a small **marker file** tells every KB where to find it.
+
+```mermaid
+flowchart TD
+    subgraph SYS["💽 System location (per machine)"]
+        M["🧠 model (1.1 GB)<br/>in the system models-cache"]
+        MARK["🏷️ marker: config.json<br/>(points to the model)"]
+    end
+    KB1["📚 KB #1"] -->|reads marker| MARK
+    KB2["📚 KB #2"] -->|reads marker| MARK
+    KB3["📚 KB #3"] -->|reads marker| MARK
+    MARK --> M
+```
+
+**How a KB finds the model** (`system/lib/model-locator.js`), first match wins:
+
+```mermaid
+flowchart LR
+    A["env var<br/>DAVASKO_LLM_WIKI_MODELS"] --> B["🏷️ system marker<br/>config.json"] --> C["repo‑local fallback<br/>system/models-cache"] --> D["❌ not found →<br/>ask where to install"]
+```
+
+- **Default location:** Windows `%LOCALAPPDATA%\DavASkoLLMWiki\models-cache`, Linux/macOS `~/.davasko-llm-wiki/models-cache`.
+- `setup-model.js` installs the model there (copying the bundled source offline, or downloading) and writes the marker. If nothing is found, the deploy **asks you** where to put it.
+
+---
+
+## 6. ✍️ Writing knowledge (the ingest pipeline)
+
+You drop files into `NewData/<layer>/…`, run one command, and the pipeline does the rest — **ending with vectorization**, so the new knowledge is instantly searchable.
+
+```mermaid
+flowchart TD
+    START(["📥 Put file in<br/>NewData/&lt;layer&gt;/sub/doc.md"]) --> RUN["▶️ node system/scripts/ingest-newdata.js"]
+    RUN --> S1["1️⃣ Move → &lt;layer&gt;/raw/sub/doc.md<br/>(re‑encode as UTF‑8 + BOM)"]
+    S1 --> S2["2️⃣ Auto‑create wiki summary STUB<br/>&lt;layer&gt;/wiki/sources/doc.md (+ .meta)"]
+    S2 --> S3["3️⃣ Delete NewData/, run linter"]
+    S3 --> S4["4️⃣ 🔢 build-index — VECTORIZE"]
+    S4 --> DONE(["🔎 Searchable"])
+    S2 -.->|"⚠️ stub fails lint until you complete it"| FIX["✅ Fill Key Claims + related,<br/>then re‑lint & re‑index"]
+```
+
+> ⚠️ **Important:** step 2 creates a *stub* summary (`related: []`, "No claims extracted") that **fails the linter on purpose**. You must fill in real **Key Claims** (each citing the raw source) and a non‑empty **related** list. This is what the **davasko-wiki-ingest** skill walks you through.
+
+---
+
+## 7. 🔎 Reading knowledge (the search pipeline)
+
+One command searches by **keyword and meaning at the same time**, then writes the best pages to a context file the agent reads.
+
+```mermaid
+flowchart TD
+    Q(["❓ node system/query-wiki.js --query '...'"]) --> P["Parse query →<br/>code symbols + meaning phrase"]
+    P --> A["🅰️ Stream A — Symbols<br/>exact match on ids/symbols/tags<br/>(instant, no model)"]
+    P --> B["🅱️ Stream B — Semantic<br/>embed query, cosine similarity<br/>over nearest clusters"]
+    B --> T["🎚️ Adaptive threshold<br/>keep only strong matches"]
+    A --> MERGE["🔗 Merge by score + Graph Lift<br/>(pull in linked / parent pages)"]
+    T --> MERGE
+    MERGE --> DUMP(["📝 .cursor-context-dump.md<br/>📄 SOURCE vs 📝 SUMMARY + scores"])
+```
+
+**Why two streams?** Code identifiers (`CowController`, `IEvent`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
+
+**Adaptive threshold** — instead of a fragile fixed cutoff, the engine keeps matches scoring at least `α · (best score for this query)` (default α = 0.85, floor 0.35). Robust across languages and lengths. Tune it on labeled data with `eval-retrieval.js --sweep`, never by hand.
+
+---
+
+## 8. 🧩 The skills — what each one does
+
+Skills are portable instruction packs (`skills/`) that teach any AI agent how to operate the KB. They sync into Cursor, Claude Code, Windsurf, Cline/Roo, Gemini, Copilot.
+
+```mermaid
+mindmap
+  root((DavASko<br/>skills))
+    🚀 davasko-llm-wiki
+      deploy & maintain a KB
+    ✍️ davasko-wiki-ingest
+      add knowledge correctly
+    🔎 davasko-wiki-search
+      query the KB
+    ♻️ davasko-wiki-refresh
+      fix stale pages
+    ▶️ davasko-youtube-researcher
+      YouTube → knowledge
+```
+
+| Skill | What it's for | When to use it |
+|---|---|---|
+| 🚀 **davasko-llm-wiki** | **Deploy & maintain** a knowledge base: scaffold layers, install the shared model + marker, install rules, install skills, set up the test/validation environment. | "Set up / deploy the wiki here", growing the structure. |
+| ✍️ **davasko-wiki-ingest** | **Add knowledge** through the exact pipeline (raw placement → auto‑summary → lint → vectorize) and bring the auto‑summary up to standard. | Importing any new source document. |
+| 🔎 **davasko-wiki-search** | **Read knowledge**: run a hybrid query and hand the agent the right context. | Before answering any question about the project. |
+| ♻️ **davasko-wiki-refresh** | **Actualize** wiki pages that `check-staleness.js` flags because their cited sources changed. | After raw sources change. |
+| ▶️ **davasko-youtube-researcher** | **YouTube → knowledge**: pull a transcript, write structured notes, and hand them to the ingest pipeline. | Turning a video/lecture into KB pages. |
+
+---
+
+## 9. 🚀 Deploy a knowledge base (2 ways)
+
+A full deploy always does the **same five things**:
+
+```mermaid
+flowchart LR
+    D1["1️⃣ Scaffold KB<br/>layers + plans/ + NewData/"] --> D2["2️⃣ Install shared model<br/>+ marker"] --> D3["3️⃣ Install rules<br/>(CCP)"] --> D4["4️⃣ Install skills"] --> D5["5️⃣ Test environment<br/>+ validation"]
+```
+
+### 🅰️ Way A — one command (the script)
+
+Best when you just want it done. From this repo:
+
+```bash
+node system/scripts/deploy-wiki.js --target ../my-kb --layers llm-wiki,project-a-wiki
+```
+
+It scaffolds the layers (with base pages + Unity `.meta`), copies the engine, runs an **offline** `npm install`, installs the **shared model + marker**, seeds the rules, syncs IDE adapters, and runs `npm test` + lint + `build-index`. A fresh deploy is **lint‑clean**.
+
+| Flag | Meaning |
+|---|---|
+| `--target <path>` | **(required)** where to deploy |
+| `--layers a,b,c` | layers to create (default `llm-wiki`; it's always the base) |
+| `--model-dir <path>` | custom system location for the shared model |
+| `--no-model` / `--no-install` / `--no-index` | skip heavy steps (reuse existing model, etc.) |
+| `--force` | write into a non‑empty folder |
+
+> 🛡️ **Your existing files are safe.** If the target already has a `CLAUDE.md` / `AGENTS.md`, the deploy **appends** its rules in a managed block — your content is preserved, never overwritten.
+
+### 🅱️ Way B — via the skill (conversational)
+
+Best when you want the agent to tailor the layers to your project. Just ask:
+
+> *"Deploy the DavASko LLM Wiki into `./my-kb` with a layer for project A."*
+
+The **davasko-llm-wiki** skill performs the same five functions, inspecting your workspace to choose sensible layers.
+
+---
+
+## 10. ⌨️ Command cheat‑sheet
+
+```mermaid
+flowchart LR
+    subgraph Setup
+        sm["setup-model.js<br/>🧠 install shared model"]
+        dw["deploy-wiki.js<br/>🚀 full deploy"]
+    end
+    subgraph Write
+        ing["ingest-newdata.js<br/>✍️ add + vectorize"]
+        bi["build-index.js<br/>🔢 re‑vectorize"]
+    end
+    subgraph Read
+        qw["query-wiki.js<br/>🔎 search"]
+    end
+    subgraph Check
+        lint["lint-wiki.js"]
+        vl["validate-links.js"]
+        ev["eval-retrieval.js"]
+        t["npm test"]
+    end
+```
+
+| Command | What it does |
+|---|---|
+| `node system/scripts/deploy-wiki.js --target <p>` | **One‑command full deploy** (scaffold + model + rules + skills + tests). |
+| `node system/scripts/setup-model.js` | Install the shared model into the system location + write the marker. |
+| `node system/scripts/ingest-newdata.js` | Run the **write pipeline**: place sources, lint, **vectorize**. |
+| `node system/build-index.js [--force]` | Build / rebuild the vector index (incremental by default). |
+| `node system/query-wiki.js --query "..."` | **Hybrid search** → `.cursor-context-dump.md`. |
+| `node system/sync-ai-rules.js [--global]` | Sync IDE rules (append‑safe) + compile skill adapters. |
+| `node system/scripts/lint-wiki.js` | Validate encoding, frontmatter, links (must be **0 errors**). |
+| `node system/scripts/validate-links.js` | Check every `[[wiki link]]` and file link. |
+| `node system/scripts/check-staleness.js` | Detect wiki pages whose cited sources changed. |
+| `node system/scripts/eval-retrieval.js [--sweep]` | Measure retrieval quality (recall@k / MRR / nDCG) vs baselines. |
+| `npm test` | 32 unit tests of the retrieval core (no model needed). |
+
+---
+
+## 11. 📊 Evaluation & results
+
+Quality is **measured**, not asserted. `eval-retrieval.js` runs a labeled query set through several retrievers — including a `lexical` (grep‑like) baseline — and reports recall@k / MRR / nDCG.
+
+**Real corpus** (162 docs, 15 labeled questions, top‑k = 5):
 
 | Retriever | recall@5 | MRR | nDCG@5 |
 |---|---|---|---|
@@ -198,152 +329,58 @@ Retrieval quality is **measured**, not asserted. `system/scripts/eval-retrieval.
 | hybrid (symbols + semantic) | 0.633 | 0.718 | 0.626 |
 | lexical (grep baseline) | 0.333 | 0.435 | 0.303 |
 
-The retrieval layer roughly **doubles recall** and improves first-hit ranking by **+65 % MRR** over a lexical baseline — empirical justification for the engine's existence.
-
-**Data-driven refinements** (each measured before/after on the same corpus):
+**Data‑driven refinements** (measured before/after on the same corpus):
 
 | Change | hybrid MRR |
 |---|---|
-| baseline (strict "symbols first" merge) | 0.641 |
-| → unified score-based ranking | 0.685 |
+| baseline (strict "symbols first") | 0.641 |
+| → unified score‑based ranking | 0.685 |
 | → drop generic acronyms (JSON/API) from symbol matching | **0.718** |
 
-**Chunking A/B** (structure-aware vs fixed word-window, same corpus): MRR **0.718 vs 0.666 (+7.8 %)**, nDCG +7 %, equal recall — structure-aware chunking wins.
+Structure‑aware chunking beat fixed‑window by **+7.8% MRR** at equal recall. Embedding runs on **GPU via DirectML** when available — measured **8× faster** than CPU (cosine parity 0.999984).
 
-**Reproduce it:**
 ```bash
-node system/build-index.js --force                 # build the index (offline)
-node system/scripts/eval-retrieval.js              # recall@k / MRR / nDCG + baselines
-node system/scripts/eval-retrieval.js --sweep      # calibrate the threshold on data
-npm test                                           # 32 unit tests of the retrieval core
+node system/build-index.js --force            # build the index (offline)
+node system/scripts/eval-retrieval.js         # recall@k / MRR / nDCG + baselines
+node system/scripts/eval-retrieval.js --sweep # calibrate the threshold on data
 ```
 
-Full write-up — method, dataset, all tables, charts, threat-to-validity — is the bundled scientific report: [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html).
+> **Honest caveats:** n = 15 questions is small; cluster routing is layer‑coarse; CPU indexing is slow without a GPU. Documented, not hidden — see the report's *Limitations* section.
 
-**Speed.** Embedding runs on **GPU via DirectML when available** (auto-detected, CPU fallback) — measured **8× faster** than CPU (cosine parity 0.999984); CPU-side batching adds a further ~11 %. Set `device` in `system/index-config.json` / `search-config.json` (`auto` by default).
-
-> Honest caveats: n = 15 questions (small); cluster routing is layer-coarse; without a GPU, CPU indexing is slow. These are documented, not hidden — see the report's *Limitations* section.
+Full write‑up (method, dataset, charts, threats to validity): [`docs/paper/davasko-llm-wiki.html`](docs/paper/davasko-llm-wiki.html).
 
 ---
 
-## 7. System Scripts & Commands
+## 12. 📐 Data standards
 
-The framework includes automation tools in the `system/` directory:
+A few hard rules keep the KB machine‑readable (the linter enforces them):
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant NewData as Incoming Buffer (NewData/)
-    participant Script as Ingest Script (ingest-newdata.js)
-    participant Raw as Immutable Layer (raw/)
-    participant Wiki as Derived Wiki Page (wiki/)
-    participant Index as index.md
-
-    User->>NewData: Drop raw documentation file
-    User->>Script: Run node system/scripts/ingest-newdata.js
-    Script->>Raw: Move file, convert to UTF-8 BOM, create .meta
-    Script->>Wiki: Generate source summary in wiki/sources/
-    Script->>Index: Update local index.md
-    Script->>Script: Run system/scripts/lint-wiki.js validator
-```
-
-### RAG Engine Scripts
-
-| Command | Description |
-|---|---|
-| `node system/build-index.js` | Build/update vector index (incremental, MD5 cache) |
-| `node system/build-index.js --force` | Full index rebuild (ignores MD5 cache) |
-| `node system/query-wiki.js --query "..."` | Hybrid search → `.cursor-context-dump.md` |
-| `node system/scripts/setup-model.js` | Download Jina v3 model to `system/models-cache/` |
-| `node system/scripts/pack-deps.js` | Pack all npm dependencies into `system/vendor/` |
-
-### Maintenance Scripts
-
-| Command | Description |
-|---|---|
-| `node system/sync-ai-rules.js` | Sync IDE rules and compile skill adapters |
-| `node system/scripts/lint-wiki.js` | Validate wiki pages (frontmatter, links, BOM) |
-| `node system/scripts/validate-links.js` | Check all wiki and markdown links |
-| `node system/scripts/query-wiki.js` | Legacy page lookup and single-file ingestion |
-| `node system/scripts/ingest-newdata.js` | Process `NewData/` incoming folder |
-| `node system/scripts/update-links.js` | Safe path migration (DEPRECATED) |
-| `node system/scripts/check-sources.js` | Citation sanity check (cited source files exist); not a quality metric |
-| `node system/scripts/eval-retrieval.js` | Retrieval quality: recall@k/MRR/nDCG vs flat & grep baselines |
-| `npm test` | Unit tests for the retrieval core (cosine, multi-probe, threshold, frontmatter, metrics) — no model required |
+- **Encoding:** `.md` → UTF‑8 **with BOM**; `.json` / `.js` / rules → UTF‑8 **without BOM** (a BOM breaks `JSON.parse`).
+- **Frontmatter** (every wiki page): `title`, `type`, `status`, `sources`, `last_updated`, **non‑empty** `related`.
+- **Links:** Obsidian‑style `[[page-name]]`, resolvable within the layer's dependency chain.
+- **Plans** live in the root `plans/` folder — never inside a layer, never cited as a wiki source.
 
 ---
 
-## 8. How to Deploy the LLM Wiki in a New Workspace
+## 13. 🗂️ Repository layout
 
-Follow these steps to initialize the DavASko LLM Wiki in any project:
-
-### Step 1: Clone Submodule
-1. Add this repository as a submodule named `davasko-ai-docs` in your project repository:
-   ```bash
-   git submodule add <repo-url> Assets/DavASko/davasko-ai-docs
-   ```
-
-### Step 2: Install Dependencies
-1. Install Node.js dependencies (uses offline `.tgz` from `system/vendor/`):
-   ```bash
-   npm install
-   ```
-2. Download the Jina v3 embedding model (one-time, requires internet):
-   ```bash
-   node system/scripts/setup-model.js
-   ```
-
-### Step 3: Initialize Layers and Plans
-1. Create directories for your layers (e.g. `llm-wiki/`, `engine-wiki/`, `framework-wiki/`, and project-specific layers).
-2. Create a `plans/` directory in the workspace root.
-3. Add a `wiki.json` manifest to each layer to define its dependency chain.
-4. In each layer, create the basic folder structures and write initial placeholder lists:
-   - wiki/index.md
-   - wiki/stubs.md
-   - wiki/contradictions.md
-
-### Step 4: Build the Search Index
-Build the vector index for semantic search:
-```bash
-node system/build-index.js
+```
+DavASkoLLMWiki/
+├── system/                      # the engine
+│   ├── build-index.js           # vectorize the KB
+│   ├── query-wiki.js            # hybrid search
+│   ├── sync-ai-rules.js         # deploy rules/skills to IDEs (append‑safe)
+│   ├── lib/                     # model-locator, retrieval core, chunker, metrics
+│   ├── scripts/                 # deploy-wiki, setup-model, ingest-newdata, lint, eval…
+│   ├── vendor/                  # offline npm deps (.tgz)
+│   └── models-cache/            # bundled model SOURCE (copied to the system location)
+├── skills/                      # the 5 portable skills (sources of truth)
+├── docs/paper/                  # the measured scientific report (EN + RU)
+├── CLAUDE.md / AGENTS.md        # agent rules (Core Context Protocol)
+├── README.md / README.ru.md     # this file
+└── LICENSE.md                   # Proprietary EULA
 ```
 
-### Step 5: Install AI Skills
-You can install the portable skills from this repository either project-locally or globally:
+---
 
-#### Option A: Project-Local Installation (Recommended)
-Copy the skills you want to use from the `skills/` directory of this repository into your layer's `raw/ai-skills~/` folder:
-- `llm-wiki/raw/ai-skills~/davasko-llm-wiki/`
-- `llm-wiki/raw/ai-skills~/davasko-wiki-search/`
-- `llm-wiki/raw/ai-skills~/davasko-wiki-ingest/`
-- `llm-wiki/raw/ai-skills~/davasko-youtube-researcher/`
-
-Run the synchronizer to deploy rules and compile skill adapters for your IDE:
-```bash
-node system/sync-ai-rules.js
-```
-
-#### Option B: Global Installation
-You can synchronize the skills globally to your system's global AI configurations directory (`~/.gemini/config/skills/`) by running the synchronizer with the `--global` flag:
-```bash
-node system/sync-ai-rules.js --global
-```
-
-This makes the skill globally available to all projects on this machine.
-
-### Step 6: Verify the Setup
-Validate the database setup and run regression tests:
-```bash
-node system/scripts/lint-wiki.js
-node system/scripts/validate-links.js
-node system/scripts/check-sources.js
-```
-
-Test the search engine:
-```bash
-node system/query-wiki.js --query "test query"
-cat .cursor-context-dump.md
-```
-
-If the validation passes with **0 errors**, your workspace is fully prepared for structured AI collaboration!
-
+<p align="center"><sub>© DavASko · Proprietary (<a href="LICENSE.md">EULA</a>) · Fully offline, reproducible · <a href="README.ru.md">Русская версия</a></sub></p>
