@@ -56,7 +56,12 @@ A complete step-by-step example of video analysis, implementation plan drafting,
 5. **Prepare Files**:
    - Create the target folder structure in `NewData/` based on layers (e.g., `NewData/engine-wiki/transcripts/my-video.md`).
    - Write the structured research notes there.
-6. **Automate Ingestion**:
-   - Run the ingestion script: `node system/scripts/ingest-newdata.js`.
-   - The script will move the files to the permanent layers, update logs and indices, generate `.meta` files, delete the raw files from `NewData/`, and run link checks.
-7. **Sync**: Run `node system/sync-ai-rules.js` if needed to sync project IDE rules.
+6. **Automate Ingestion** (delegates to the **davasko-wiki-ingest** pipeline):
+   - Run: `node system/scripts/ingest-newdata.js`.
+   - The pipeline moves each note into `<layer>/raw/<subfolder>/` (UTF-8 BOM), **auto-creates a wiki source-summary stub** in `<layer>/wiki/sources/`, generates the Unity `.meta`, deletes `NewData/`, lints, and **re-runs vectorization (build-index)**.
+7. **Actualize the auto-summaries (REQUIRED — rules gate)**:
+   - Each generated `<layer>/wiki/sources/<name>.md` is a STUB that FAILS the linter. Using the transcript, fill real `## Key Claims` (each with a `(source: <layer>/raw/<sub>/<file>)` citation), a non-empty `related:` (`[[page-name]]`), and the `**Summary**` — exactly as the **davasko-wiki-ingest** skill specifies.
+   - Re-run to validate and re-vectorize your edits: `node system/scripts/lint-wiki.js` (0 errors) → `node system/build-index.js`.
+8. **Verify & sync**:
+   - Findability: `node system/query-wiki.js --query "<topic from the video>"` (expect `raw-<layer>-<name>` and/or the summary page).
+   - Run `node system/sync-ai-rules.js` if IDE rules/skills need refreshing.

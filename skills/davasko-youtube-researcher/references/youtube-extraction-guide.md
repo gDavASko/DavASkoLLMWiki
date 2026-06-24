@@ -9,7 +9,7 @@ To analyze video materials, the AI agent must first extract the full text transc
 This method is the most reliable and fastest as it queries YouTube transcript endpoints directly.
 
 ### Step 1. Write the Node.js script
-Create a script named `get_yt_transcript.js` in the conv scratch directory (`C:\Users\DavASko\.gemini\antigravity-ide\brain\<conv-id>\scratch/`):
+Create a script named `get_yt_transcript.js` in a temporary scratch directory (e.g. the KB root `scratch/` folder, or the agent's per-session scratch dir — never inside a wiki layer or `raw/`):
 
 ```javascript
 const { YoutubeTranscript } = require('youtube-transcript');

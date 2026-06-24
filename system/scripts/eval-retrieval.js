@@ -35,6 +35,7 @@ import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches } from '../lib/retrieval.js';
+import { resolveModelsCache } from '../lib/model-locator.js';
 import { recallAtK, mrr, ndcgAtK } from '../lib/metrics.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,7 +48,10 @@ const CONFIG_FILE  = path.join(SYSTEM_DIR, 'search-config.json');
 const QUERIES_FILE = path.join(SYSTEM_DIR, 'evals', 'retrieval-queries.json');
 const REPORT_FILE  = path.join(SYSTEM_DIR, 'evals', 'retrieval-report.json');
 
-const MODELS_CACHE = path.join(SYSTEM_DIR, 'models-cache');
+const MODELS_CACHE = (() => {
+  const r = resolveModelsCache({ localFallback: path.join(SYSTEM_DIR, 'models-cache') });
+  return r.dir || r.hint;
+})();
 const MODEL_ID     = 'jinaai/jina-embeddings-v3';
 const MODEL_REV    = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
 const VECTOR_DIM   = 1024;

@@ -34,10 +34,11 @@ Before using this skill, ensure:
    ```bash
    node system/build-index.js
    ```
-2. **Model downloaded**: The Jina v3 model must be cached in `system/models-cache/`. If not:
+2. **Shared model installed**: The Jina v3 model lives in a single **system-wide** location referenced by a marker (`…/DavASkoLLMWiki/config.json`) — it is NOT stored inside the KB. If the query can't find it, install once:
    ```bash
    node system/scripts/setup-model.js
    ```
+   Resolution order (see `system/lib/model-locator.js`): env `DAVASKO_LLM_WIKI_MODELS` → marker → repo-local `system/models-cache` (fallback). If nothing is found, `setup-model.js` asks where to place the shared model.
 3. **Dependencies installed**: Run `npm install` from the repository root (uses offline `.tgz` from `system/vendor/`).
 
 ## Workflow

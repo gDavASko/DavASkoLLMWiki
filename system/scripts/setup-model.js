@@ -1,20 +1,27 @@
 #!/usr/bin/env node
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * DavASkoLLMWiki v3.x — Установщик модели (setup-model.js)
+ * DavASkoLLMWiki v3.x — Установщик общей модели (setup-model.js)
  * ═══════════════════════════════════════════════════════════════════════
  *
- * Скачивает модель jinaai/jina-embeddings-v3 (ONNX, FP16) из
- * Hugging Face Hub и сохраняет в system/models-cache/ для полностью
- * оффлайн-работы build-index.js и query-wiki.js.
+ * Ставит модель jinaai/jina-embeddings-v3 (ONNX, FP16) в ОДНО системное
+ * место (per-user) и публикует путь через системную метку. Любая база
+ * знаний находит модель по метке и работает с одной копией — без дублей
+ * по 1.1 GB в каждой развёрнутой базе.
+ *
+ * Источник модели (по приоритету):
+ *   1. Репо-исходник <system>/models-cache (offline-копия) — если есть
+ *   2. Скачивание из Hugging Face Hub — фолбэк
  *
  * Использование:
- *   node system/scripts/setup-model.js
- *   node system/scripts/setup-model.js --force   (перезагрузка)
+ *   node system/scripts/setup-model.js                 # → системное место + метка
+ *   node system/scripts/setup-model.js --dir <path>    # системное место вручную
+ *   node system/scripts/setup-model.js --local         # легаси: в <system>/models-cache, без метки
+ *   node system/scripts/setup-model.js --force          # переустановить
  *
  * После выполнения:
- *   - system/models-cache/ содержит все файлы модели
- *   - Готово для коммита через Git LFS
+ *   - модель лежит в системном месте (или указанном --dir)
+ *   - системная метка (global config.json) указывает на неё
  * ═══════════════════════════════════════════════════════════════════════
  */
 
@@ -22,14 +29,17 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { fileURLToPath } from 'url';
+import {
+  getDefaultSystemModelsDir, getMarkerPath, writeMarker, isModelPresent,
+} from '../lib/model-locator.js';
 
 // ─── ESM Shim ────────────────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ─── Paths ───────────────────────────────────────────────────────────
-const SYSTEM_DIR   = path.resolve(__dirname, '..');
-const MODELS_CACHE = path.join(SYSTEM_DIR, 'models-cache');
+const SYSTEM_DIR    = path.resolve(__dirname, '..');
+const LOCAL_MODELS  = path.join(SYSTEM_DIR, 'models-cache'); // репо-исходник
 
 // ─── Model Configuration ────────────────────────────────────────────
 const MODEL_ID       = 'jinaai/jina-embeddings-v3';
@@ -136,25 +146,32 @@ function hfUrl(modelId, revision, filePath) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  CACHE DIRECTORY SETUP
+//  TARGET / SOURCE HELPERS
 // ═══════════════════════════════════════════════════════════════════════
 
-/**
- * Подготавливает структуру директорий для кэша модели.
- * Структура совместима с @huggingface/transformers env.cacheDir:
- *
- *   models-cache/
- *     jinaai/
- *       jina-embeddings-v3/
- *         config.json
- *         tokenizer.json
- *         onnx/
- *           model.onnx
- *           model.onnx_data
- */
-function getModelCacheDir() {
-  const parts = MODEL_ID.split('/');
-  return path.join(MODELS_CACHE, ...parts);
+/** Каталог модели внутри данной models-cache: <cache>/<org>/<model>. */
+function modelDirIn(modelsCache) {
+  return path.join(modelsCache, ...MODEL_ID.split('/'));
+}
+
+/** Разбор аргументов: --force, --local, --dir <path>. */
+function parseArgs(argv) {
+  const force = argv.includes('--force');
+  const local = argv.includes('--local');
+  const di = argv.indexOf('--dir');
+  const dir = di >= 0 ? argv[di + 1] : null;
+  return { force, local, dir };
+}
+
+/** Рекурсивная копия каталога модели (offline-перенос репо-исходника). */
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, entry.name);
+    const d = path.join(dest, entry.name);
+    if (entry.isDirectory()) copyDir(s, d);
+    else fs.copyFileSync(s, d);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -162,74 +179,72 @@ function getModelCacheDir() {
 // ═══════════════════════════════════════════════════════════════════════
 
 async function main() {
-  const forceDownload = process.argv.includes('--force');
+  const { force, local, dir } = parseArgs(process.argv.slice(2));
 
-  console.log(`\n${C.bold}═══ DavASkoLLMWiki v3.x — Установка модели ═══${C.reset}\n`);
-  console.log(`${C.dim}Модель:    ${MODEL_ID}`);
-  console.log(`Ревизия:   ${MODEL_REVISION}`);
-  console.log(`Кэш:      ${MODELS_CACHE}${C.reset}\n`);
+  // Целевое место: --dir > --local (репо) > системное место по умолчанию.
+  const targetCache = local ? LOCAL_MODELS : (dir ? path.resolve(dir) : getDefaultSystemModelsDir());
+  const targetModelDir = modelDirIn(targetCache);
 
-  const modelDir = getModelCacheDir();
+  console.log(`\n${C.bold}═══ DavASkoLLMWiki — Установка общей модели ═══${C.reset}\n`);
+  console.log(`${C.dim}Модель:   ${MODEL_ID}`);
+  console.log(`Цель:     ${targetCache}${local ? ' (--local, легаси)' : ''}${C.reset}\n`);
 
-  // Проверка: модель уже скачана?
-  const configPath = path.join(modelDir, 'config.json');
-  if (!forceDownload && fs.existsSync(configPath)) {
-    console.log(`${C.green}[OK]${C.reset} Модель уже загружена в ${modelDir}`);
-    console.log(`${C.dim}    Используйте --force для повторной загрузки.${C.reset}\n`);
+  // Уже установлена?
+  if (!force && isModelPresent(targetCache, MODEL_ID)) {
+    console.log(`${C.green}[OK]${C.reset} Модель уже на месте: ${targetModelDir}`);
+    if (!local) {
+      const m = writeMarker({ modelsCache: targetCache, modelId: MODEL_ID, revision: MODEL_REVISION });
+      console.log(`${C.dim}    Метка обновлена: ${m}${C.reset}`);
+    }
+    console.log(`${C.dim}    Используйте --force для переустановки.${C.reset}\n`);
     return;
   }
+  if (force) console.log(`${C.yellow}[!] --force: переустановка.${C.reset}\n`);
 
-  if (forceDownload) {
-    console.log(`${C.yellow}[!] Режим --force: перезагрузка всех файлов модели.${C.reset}\n`);
+  // Источник №1 — репо-исходник (offline-копия).
+  const haveLocalSource = isModelPresent(LOCAL_MODELS, MODEL_ID);
+  if (haveLocalSource && path.resolve(targetCache) !== path.resolve(LOCAL_MODELS)) {
+    process.stdout.write(`  ${C.cyan}[COPY]${C.reset} репо-исходник → системное место...`);
+    try {
+      copyDir(modelDirIn(LOCAL_MODELS), targetModelDir);
+      console.log(` ${C.green}OK${C.reset}`);
+      const m = writeMarker({ modelsCache: targetCache, modelId: MODEL_ID, revision: MODEL_REVISION });
+      console.log(`\n${C.green}[OK]${C.reset} Модель скопирована в ${targetModelDir}`);
+      if (!local) console.log(`${C.dim}  Метка: ${m}${C.reset}`);
+      console.log(`${C.dim}  build-index.js и query-wiki.js работают оффлайн через метку.${C.reset}\n`);
+      return;
+    } catch (err) {
+      console.log(` ${C.red}FAIL${C.reset} — ${err.message} ${C.dim}(перехожу на загрузку)${C.reset}`);
+    }
   }
 
-  // Скачивание файлов
-  let downloaded = 0;
-  let errors = 0;
-
+  // Источник №2 — Hugging Face Hub.
+  let downloaded = 0, errors = 0;
   for (const filePath of MODEL_FILES) {
-    const url      = hfUrl(MODEL_ID, MODEL_REVISION, filePath);
-    const destPath = path.join(modelDir, filePath);
-
-    // Пропускаем уже скачанные (если не --force)
-    if (!forceDownload && fs.existsSync(destPath)) {
-      console.log(`${C.dim}  [SKIP] ${filePath} (exists)${C.reset}`);
-      continue;
-    }
-
+    const url = hfUrl(MODEL_ID, MODEL_REVISION, filePath);
+    const destPath = path.join(targetModelDir, filePath);
+    if (!force && fs.existsSync(destPath)) { console.log(`${C.dim}  [SKIP] ${filePath}${C.reset}`); continue; }
     process.stdout.write(`  ${C.cyan}[GET]${C.reset} ${filePath}...`);
     try {
       await downloadFile(url, destPath);
       const size = fs.statSync(destPath).size;
-      const sizeStr = size > 1024 * 1024
-        ? `${(size / 1024 / 1024).toFixed(1)}MB`
-        : `${(size / 1024).toFixed(0)}KB`;
-      console.log(` ${C.green}OK${C.reset} (${sizeStr})`);
-      downloaded++;
-    } catch (err) {
-      console.log(` ${C.red}FAIL${C.reset} — ${err.message}`);
-      errors++;
-    }
+      const sizeStr = size > 1024 * 1024 ? `${(size / 1024 / 1024).toFixed(1)}MB` : `${(size / 1024).toFixed(0)}KB`;
+      console.log(` ${C.green}OK${C.reset} (${sizeStr})`); downloaded++;
+    } catch (err) { console.log(` ${C.red}FAIL${C.reset} — ${err.message}`); errors++; }
   }
+  fs.writeFileSync(path.join(targetModelDir, '.revision'), MODEL_REVISION, 'utf8');
 
-  // Записываем маркер ревизии
-  const revisionFile = path.join(modelDir, '.revision');
-  fs.writeFileSync(revisionFile, MODEL_REVISION, 'utf8');
-
-  // Итог
   console.log('');
   if (errors > 0) {
-    console.error(
-      `${C.red}[ERROR]${C.reset} ${errors} файл(ов) не удалось скачать.\n` +
-      `  Проверьте подключение к интернету и повторите.\n`
-    );
+    console.error(`${C.red}[ERROR]${C.reset} ${errors} файл(ов) не удалось скачать. Проверьте сеть и повторите.\n`);
     process.exit(1);
   }
-
+  const m = writeMarker({ modelsCache: targetCache, modelId: MODEL_ID, revision: MODEL_REVISION });
   console.log(
-    `${C.green}[OK]${C.reset} Модель установлена: ${downloaded} файлов загружено.\n` +
-    `${C.dim}  Директория: ${modelDir}\n` +
-    `  Теперь build-index.js и query-wiki.js будут работать оффлайн.${C.reset}\n`
+    `${C.green}[OK]${C.reset} Модель установлена: ${downloaded} файлов.\n` +
+    `${C.dim}  Директория: ${targetModelDir}\n` +
+    (local ? '' : `  Метка: ${m}\n`) +
+    `  build-index.js и query-wiki.js будут работать оффлайн.${C.reset}\n`
   );
 }
 

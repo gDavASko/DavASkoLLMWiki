@@ -164,8 +164,21 @@ function run() {
   } catch (err) {
     console.warn('[WARNING] Линтер вернул предупреждения или ошибки.');
   }
-  
-  console.log('--- Импорт завершен! ---');
+
+  // Финальный шаг пайплайна записи: ВЕКТОРИЗАЦИЯ. Без неё новые raw-документы и
+  // их wiki-саммари не попадут в семантический поиск. Инкрементально (MD5-кэш),
+  // модель берётся из общего системного места (см. system/lib/model-locator.js).
+  console.log('\n--- Векторизация: пересборка индекса (build-index) ---');
+  try {
+    execSync(`node "${path.join(submoduleRoot, 'system', 'build-index.js')}"`, {
+      stdio: 'inherit',
+      cwd: submoduleRoot
+    });
+  } catch (err) {
+    console.warn('[WARNING] Векторизация не выполнена. Установите модель (node system/scripts/setup-model.js) и запустите вручную: node system/build-index.js');
+  }
+
+  console.log('--- Импорт завершён: знания размещены, провалидированы и векторизованы. ---');
 }
 
 run();

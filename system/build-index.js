@@ -31,6 +31,7 @@ import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
 import { chunkMarkdown } from './lib/chunker.js';
 import { initModel as libInitModel, embedBatch as libEmbedBatch } from './lib/retrieval.js';
+import { resolveModelsCache } from './lib/model-locator.js';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -39,7 +40,12 @@ const __dirname = path.dirname(__filename);
 // ─── Paths ───────────────────────────────────────────────────────────
 const SYSTEM_DIR   = __dirname;
 const ROOT_DIR     = path.resolve(SYSTEM_DIR, '..');
-const MODELS_CACHE = path.join(SYSTEM_DIR, 'models-cache');
+// Путь к модели: общая системная копия (по системной метке) с фолбэком на
+// репо-исходник <system>/models-cache. См. system/lib/model-locator.js.
+const MODELS_CACHE = (() => {
+  const r = resolveModelsCache({ localFallback: path.join(SYSTEM_DIR, 'models-cache') });
+  return r.dir || r.hint;
+})();
 const INDEX_FILE   = path.join(SYSTEM_DIR, 'wiki-index.json');
 const SHARDS_DIR   = path.join(SYSTEM_DIR, 'index-shards');
 

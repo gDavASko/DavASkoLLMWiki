@@ -1,6 +1,6 @@
-﻿﻿---
+﻿---
 name: davasko-llm-wiki
-description: Use this skill to deploy, configure, and maintain the DavASko LLM Wiki multi-layered knowledge base framework. It manages layer directories, manifests, data standards (including search gaps policies), linting scripts, and IDE rule synchronization scripts.
+description: Use this skill to DEPLOY a new DavASko LLM Wiki knowledge base into a target folder and keep it running. It (1) scaffolds the KB (layers, manifests, engine), (2) installs the shared vectorization model + toolkit into a single system-wide location referenced by a marker (never duplicated per-KB), (3) installs the agent rules, (4) installs the companion skills (search/ingest/refresh), and (5) installs a test environment for basic validation. Trigger on requests like "deploy/setup the wiki", "развернуть базу знаний", "install the wiki engine here".
 status: draft
 owner: DavASko
 license: Proprietary
@@ -16,122 +16,87 @@ required_reading:
   - ../../system/docs/sync-integration.md
   - ../../system/docs/setup-new-wiki.md
 known_risks:
-  - Breaking dependency chains in wiki.json leading to recursive link parsing issues.
-  - Creating new markdown pages without UTF-8 with BOM encoding, breaking Cyrillic character support on Windows and Unity.
-  - Forgetting to generate matching Unity .meta files for wiki pages inside the Unity AssetDatabase context.
-  - Cluttering individual layers with plans or transcripts instead of placing them in the root plans/ folder or llm-wiki/raw/transcripts/ respectively.
-  - Using word/substring-unsafe string replacements when migrating paths/links.
-  - After adding new raw/ documents, forgetting to re-run 'node system/build-index.js --force' — the index will be stale and raw/ sources won't be found by semantic search.
-  - Placing skills or automation scripts inside raw/ (they will be indexed as knowledge). Keep ai-skills~ and skills folders outside raw/ or the RAW_FOLDER_BLACKLIST will exclude them correctly.
+  - Installing the 1.1GB vectorization model INTO the knowledge base instead of the shared system location — every KB then carries a duplicate. Always go through setup-model.js + the system marker.
+  - Breaking dependency chains in wiki.json (must be a strictly descending DAG, no cycles).
+  - Creating .md pages without UTF-8 BOM, or writing .json/.js WITH BOM (BOM breaks JSON.parse). See Data Standards §1.
+  - Forgetting matching Unity .meta files when the KB lives inside a Unity Assets/ folder.
+  - Placing plans or skills inside raw/ (they get indexed as knowledge). Plans → root plans/; skills → ai-skills~/ or skills/ (blacklisted from indexing).
+  - Forgetting to run build-index.js --force after adding raw/ docs — semantic search stays stale.
 ---
 
-# DavASko LLM Wiki Architect (AI Wiki Deploy & Maintenance Skill)
+# DavASko LLM Wiki — Deploy & Maintenance Skill
 
-## Persona / Identity
+## Persona
 
-You are a Senior Knowledge Base Architect and DevOps Specialist. You are an expert in Obsidian-compatible Markdown documentation systems, hierarchical knowledge layers, static link validators, and AI IDE rule integrations (Cursor, Windsurf, Claude Code, Cline/Roo, Gemini CLI, Copilot). Your specialty is establishing robust, structured, and self-validating knowledge bases that AI agents can navigate efficiently.
+You are a Senior Knowledge-Base Architect and DevOps engineer. You stand up self-validating, Obsidian-compatible, hierarchical knowledge bases that LLM agents navigate via hybrid (symbolic + semantic) search, and you wire them into AI IDEs (Cursor, Windsurf, Claude Code, Cline/Roo, Gemini, Copilot).
 
+## What "deploy a knowledge base" means — the five functions
 
-## Goal
+When the user asks to deploy/set up the wiki into a target folder, perform these five steps **in order**. Each is idempotent: re-running detects what already exists and only fills gaps.
 
-Initialize, configure, or maintain a multi-layered **DavASko LLM Wiki** structure in a new target workspace. You will copy/generate the baseline directory hierarchy (including parallel project layers and a centralized plans/ directory), layer manifests (`wiki.json`), maintenance scripts (`lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `check-sources.js`), and synchronizers (`sync-ai-rules.js`) to ensure the wiki behaves reliably according to the system rules.
+### 1. Scaffold the knowledge base in the target folder
+- Confirm the **target folder** (ask if not given). Inspect the workspace to decide the layers.
+- Create one directory per layer; each layer holds `wiki/` (curated pages), `raw/` (immutable source snapshots), and a `wiki.json` manifest declaring its `dependencies` (a **strictly descending DAG** — no cycles).
+- Create a root `plans/` directory (human planning only — kept out of layers).
+- Create `NewData/<layer>/` inbound folders for ingestion.
+- Copy the engine: the `system/` folder (engine `system/lib`, scripts `system/scripts`, configs `index-config.json` / `search-config.json`, vendored deps `system/vendor/*.tgz`).
+- Install offline deps: `npm install` (uses the vendored `.tgz`, no registry needed).
+- See [Architecture Setup](../../system/docs/architecture-setup.md) and [Setup Walkthrough](../../system/docs/setup-new-wiki.md).
 
-## Core Rules & References
+### 2. Install the shared vectorization model + toolkit (system-wide, never per-KB)
+**The model (jinaai/jina-embeddings-v3, ~1.1GB) is installed ONCE per machine into a system location and shared by every knowledge base via a marker.** Do not copy it into the KB.
 
-Always refer to the local reference documents inside the skill package before writing configuration or code:
+Run from the target's engine:
+```bash
+node system/scripts/setup-model.js
+```
+Behavior (implemented in `system/lib/model-locator.js` + `setup-model.js`):
+- **System location (default):** Windows `%LOCALAPPDATA%\DavASkoLLMWiki\models-cache`, *nix `~/.davasko-llm-wiki/models-cache` (or `$XDG_DATA_HOME/davasko-llm-wiki`).
+- **System marker:** `…/DavASkoLLMWiki/config.json` records `{ modelsCache, modelId, revision }`. This is the single source of truth for the model path.
+- **Source of the model:** if the repo carries a bundled copy in `system/models-cache/` (the master *source*), `setup-model.js` **copies it offline** into the system location; otherwise it downloads from Hugging Face.
+- **Resolution at runtime:** `build-index.js`, `query-wiki.js`, `eval-retrieval.js` all resolve the path via `resolveModelsCache()` — order: env `DAVASKO_LLM_WIKI_MODELS` → **marker** → repo-local `system/models-cache` (fallback) → none.
 
-### 1. Multi-Layered Wiki Architecture
-Structure layers, directory structures, and layer-to-layer dependencies:
-- [Architecture Setup Guide](../../system/docs/architecture-setup.md)
+**If the marker is missing when deploying a KB**, you (the skill) must:
+1. Check `node -e "import('./system/lib/model-locator.js').then(m=>console.log(JSON.stringify(m.readMarker())))"` (or just run `setup-model.js`, which is idempotent).
+2. If no model is found anywhere, **ask the user where to place the shared model** for common use, then run `node system/scripts/setup-model.js --dir "<chosen path>"` (omit `--dir` to accept the default system location). This writes the marker so all future KBs link to it automatically.
+- `--local` forces the legacy per-KB install into `system/models-cache` (no marker) — only for isolated/offline-bundle cases.
 
-### 2. Knowledge Base Data Standards
-Strict requirements for encoding (UTF-8 with BOM), markdown frontmatter, required fields, and wiki links:
-- [Data Standards Reference](../../system/docs/data-standards.md)
+### 3. Install the rules for working with the knowledge base
+- Generate the root agent-instruction files and the Core Context Protocol (`CLAUDE.md` / `AGENTS.md` / IDE rule files) that tell agents to query the wiki first.
+- Run the synchronizer: `node system/sync-ai-rules.js` — it compiles rule adapters for each IDE and bundles the portable skills.
+- See [Sync Integration](../../system/docs/sync-integration.md) and [Data Standards](../../system/docs/data-standards.md) (encoding, frontmatter, links).
 
-### 3. Maintenance and Automation Scripts
-Clean, portable Javascript templates of the primary utility scripts:
-- [Scripts Templates Reference](../../system/docs/scripts-templates.md)
+### 4. Install the skills for working with the knowledge base
+Install/sync the companion skills alongside this one so agents can operate the KB:
+- **davasko-wiki-search** — query the KB (hybrid search → context dump).
+- **davasko-wiki-ingest** — import new sources from `NewData/` into layers.
+- **davasko-wiki-refresh** — actualize wiki pages flagged stale by provenance hashing.
+`sync-ai-rules.js` (step 3) deploys these into each IDE's skills folder.
 
-### 4. Rules & Skill Synchronizer Script
-How to configure and synchronize IDE agent rule files and local portable skills:
-- [Sync Integration Guide](../../system/docs/sync-integration.md)
+### 5. Install the test environment for basic validation
+Set up and run the baseline checks that prove the KB is healthy:
+```bash
+npm test                                   # engine unit tests (no model required)
+node system/build-index.js --force         # build the vector index (uses the shared model)
+node system/scripts/lint-wiki.js           # encoding + frontmatter gate (must be 0 errors)
+node system/scripts/validate-links.js      # [[link]] + file-link gate
+node system/scripts/check-sources.js       # cited sources exist
+node system/scripts/eval-retrieval.js      # retrieval quality vs flat & grep baselines (needs a labeled set)
+```
+A healthy deployment: `npm test` green, lint 0 errors, validate 0 errors, and a live `query-wiki.js` returns relevant context.
 
-### 5. Setup Walkthrough Example
-A complete example showing how to initialize a multi-project wiki from scratch:
-- [Setup New Wiki Example](../../system/docs/setup-new-wiki.md)
+## Core data standards (always honor)
+- Encoding: **`.md` → UTF-8 WITH BOM**; **`.json` / `.js` / rules → UTF-8 WITHOUT BOM** (a BOM breaks `JSON.parse`). The linter enforces this.
+- Wiki pages require frontmatter: `title`, `type`, `status`, `sources`, `last_updated`, non-empty `related`.
+- Link pages with Obsidian `[[page-name]]` within the dependency chain.
+- Source-of-truth: code/`raw/` is the truth, `wiki/` is derived. Record `source_hashes`; when `check-staleness.js` flags a page, refresh it (don't just re-stamp).
 
-## High-Level Workflow
-
-When the user asks you to deploy or setup a new DavASko LLM Wiki:
-
-1. **Understand Workspace Context**: Inspect the target project directory (Unity project, web app, or standalone codebase) to determine the number and scope of needed knowledge layers. Support separating multiple independent projects into separate parallel project layers.
-2. **Define Layers & Dependency Graph**:
-   - Create directories for each layer (e.g. `llm-wiki`, `engine-wiki`, `framework-wiki`, and project-specific layers like `project-a-wiki`, `project-b-wiki`, etc.).
-   - Write `wiki.json` manifests defining the dependency hierarchy.
-3. **Deploy Plans Directory**:
-   - Create a `plans/` directory in the workspace root for task checklists, implementation plans, and walkthroughs, ensuring they do not clutter raw layers.
-4. **Deploy System Automation**:
-   - System scripts reside inside the submodule under `davasko-ai-docs/system/scripts/` (e.g. `lint-wiki.js`, `query-wiki.js`, `validate-links.js`, `ingest-newdata.js`, `update-links.js`, `check-sources.js`).
-5. **Deploy Synchronizer Script**:
-   - Run the synchronizer from the submodule folder: `node davasko-ai-docs/system/sync-ai-rules.js` to copy rule files and compile rules/skills adapters.
-6. **Establish Inbound Ingestion**:
-   - Ensure a `NewData/` folder is present at the wiki root to receive new external sources, with subfolders for each layer.
-   - Place video transcripts directly under `llm-wiki/raw/transcripts/`.
-7. **Validate the Installation**:
-   - Run the wiki linter: `node davasko-ai-docs/system/scripts/lint-wiki.js`.
-   - Run the link validator: `node davasko-ai-docs/system/scripts/validate-links.js`.
-   - Verify cited sources exist: `node davasko-ai-docs/system/scripts/check-sources.js`.
-   - Ensure `validate_errors.json` has 0 errors.
+## Indexing model (what gets vectorized)
+- Indexed: `<layer>/wiki/**/*.md` and `<layer>/raw/**/*.md`.
+- Excluded: `<layer>/raw/ai-skills~/` and `<layer>/skills/` (RAW/FOLDER blacklist) so skills aren't indexed as knowledge.
+- Doc IDs: wiki pages → `<basename>`; raw → `raw-<layer>-<basename>`.
+- Threshold is adaptive (`relative` mode, per-query τ = max(junk_floor, α·top)); calibrate with `eval-retrieval.js --sweep`, never hand-pick.
+- After adding raw/ docs: `node system/build-index.js --force`.
 
 ## Full-Text Search Gaps Policy
-
-- **Policy**: If you search or query the codebase, plugins, or skills using grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods because a topic, convention, or code pattern was not directly found in the knowledge base maps or concepts (a search gap), you MUST document your findings. Add the description, links, and code symbols/examples to the knowledge base (under either `framework-wiki` or `project-a-wiki`, depending on the domain) before completing the task. If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic code searches.
-
-## Indexing Raw Sources
-
-**Since v3.1**, `build-index.js` indexes both `wiki/` pages and `raw/` documents within each layer.
-
-### What is indexed
-
-| Source | Path pattern | Indexed |
-|---|---|---|
-| Wiki pages | `<layer>/wiki/**/*.md` | ✅ Always |
-| Raw documentation | `<layer>/raw/**/*.md` | ✅ Since v3.1 |
-| AI Skills | `<layer>/raw/ai-skills~/` | ❌ Excluded (RAW_FOLDER_BLACKLIST) |
-| Skill scripts | `<layer>/skills/` | ❌ Excluded (FOLDER_BLACKLIST) |
-
-### Why raw/ is indexed
-
-Wiki pages are intentional summaries (50–100 lines). Raw documents contain the full detail: code examples,
-API references, architectural decisions, and patterns. Without indexing `raw/`, semantic search would miss
-the most information-dense content.
-
-### Document ID scheme
-
-- Wiki pages: `<basename>` (e.g. `event-bus`)
-- Raw documents: `raw-<layer>-<basename>` (e.g. `raw-kbpro-wiki-EventBus`)
-
-This avoids collisions when a wiki page and a raw document share the same filename.
-
-### Similarity threshold (adaptive by default)
-
-Retrieval no longer uses a fixed cosine cutoff. The default `threshold_mode` is **relative**
-(`system/search-config.json`): per-query τ = `max(junk_floor, relative_alpha · top_score)`
-(defaults α = 0.85, floor = 0.35). This adapts to each query and removes the "magic 0.70".
-An `absolute` mode (fixed `similarity_threshold`) is still available. Calibrate on labeled data
-with `node system/scripts/eval-retrieval.js --sweep` — never hand-pick a number.
-
-### Tuning & quality tooling
-
-- **Search config**: `system/search-config.json` — threshold mode, α, floor, top_k, nprobe, ground-truth boost.
-- **Index config**: `system/index-config.json` — chunk strategy (default `structural`), sizes, `index_code`, `embed_batch_size`.
-- **Measure quality**: `node system/scripts/eval-retrieval.js` (recall@k / MRR / nDCG vs flat & grep baselines).
-- **Detect drift**: `node system/scripts/check-staleness.js` (provenance hashes); refresh with the **davasko-wiki-refresh** skill.
-- **Unit tests**: `npm test` (retrieval core, no model required).
-
-### After adding new raw/ documents
-
-Always rebuild the index:
-```bash
-node system/build-index.js --force
-```
+If you resort to grep/ripgrep/global code search because a topic was not in the KB maps/concepts (a search gap), you MUST document the finding (description, links, code symbols) into the appropriate layer before finishing — so future lookups go through the wiki, not generic search.
