@@ -40,36 +40,46 @@
   ol.refs li{margin:6px 0;text-align:justify}
   hr{border:0;border-top:1px solid var(--line);margin:30px 0}
   .small{font-size:12.5px;color:var(--muted)}
-  @media(max-width:720px){.page{padding:26px 16px}}
+  .toc{font-family:Helvetica,Arial,sans-serif;font-size:12.5px;columns:2;column-gap:32px;margin:10px 0 4px}
+  .toc a{color:var(--ink)}
+  @media(max-width:720px){.page{padding:26px 16px}.toc{columns:1}}
 </style>
 </head>
 <body>
 <main class="page">
 
   <div class="udk">UDC 004.8 (artificial intelligence); 004 (computer science)</div>
-  <h1>A Layered Self-Validating Knowledge Base with Hybrid Retrieval for Grounding LLM Agents: Method and Empirical Evaluation on a Real Corpus</h1>
+  <h1>A Layered Self-Validating Knowledge Base with Hybrid Retrieval for Grounding LLM Agents: Architecture, Method and Empirical Evaluation on a Real Corpus</h1>
   <div class="authors">DavASko</div>
   <div class="aff">System development and numerical experiments were carried out with the aid of AI tools (LLM assistants)</div>
   <div class="meta">DavASko&nbsp;LLM&nbsp;Wiki framework, v3.x · Fully offline, reproducible · <a href="davasko-llm-wiki.ru.html">Русская версия</a></div>
 
   <div class="block">
     <h3>Abstract</h3>
-    <p>It is verified empirically whether a curated hybrid (symbolic and semantic) retrieval layer over a knowledge base outperforms a trivial lexical file search when grounding LLM agents. On a deployed 162-document base with 15 labeled queries, recall@5, MRR and nDCG@5 are computed for the proposed engine and for baselines. Semantic retrieval yields recall@5 0.633 and MRR 0.718 against 0.333 and 0.435 for the lexical baseline; structure-aware chunking exceeds the fixed-window one by 7.8% MRR; GPU embedding gives an eight-fold speed-up. The retrieval layer is justified by measurement.</p>
+    <p>It is verified empirically whether a curated hybrid (symbolic and semantic) retrieval layer over a knowledge base outperforms a trivial lexical file search when grounding LLM agents. The system architecture is described in detail: a downward-dependent layer model that separates immutable source snapshots from derived curated pages with content-hash provenance; a hybrid retriever with a per-query adaptive threshold; and a deduplicated, machine-shared embedding model resolved through a system marker. On a deployed 162-document base with 15 labeled queries, recall@5, MRR and nDCG@5 are computed for the proposed engine and for baselines. Semantic retrieval yields recall@5 0.633 and MRR 0.718 against 0.333 and 0.435 for the lexical baseline; structure-aware chunking exceeds the fixed-window one by 7.8% MRR; GPU embedding gives an eight-fold speed-up. The retrieval layer is justified by measurement.</p>
   </div>
   <div class="block">
     <h3>Keywords</h3>
-    <p>information retrieval; knowledge base; retrieval-augmented generation; vector embeddings; ranking quality evaluation; LLM agents</p>
+    <p>information retrieval; knowledge base; retrieval-augmented generation; vector embeddings; layered architecture; ranking quality evaluation; LLM agents</p>
+  </div>
+
+  <div class="block">
+    <h3>Contents</h3>
+    <div class="toc">
+      1. Introduction · 2. Materials and Methods (2.1 System overview · 2.2 Layered knowledge model · 2.3 Hybrid retrieval · 2.4 Routing and adaptive threshold · 2.5 Structure-aware chunking and provenance · 2.6 Shared embedding model and deployment · 2.7 Evaluation metrics · 2.8 Experimental setup) · 3. Results · 4. Result Discussion and Method Refinement · 5. Discussion · 6. Limitations · 7. Conclusion · References
+    </div>
   </div>
 
   <h2>1. Introduction</h2>
   <p><b>Relevance.</b> LLM agents in software development increasingly operate over large and evolving project knowledge. A common grounding approach is retrieval-augmented generation (RAG) [5], in which relevant context is retrieved and supplied to the model. Yet the underlying assumption that a dedicated retrieval layer is effective is usually asserted rather than tested: it remains open whether a curated indexed knowledge layer beats the trivial alternative — direct full-text search by the agent over the files. A retrieval layer that does not beat that baseline is negative-value complexity, as it adds maintenance burden and a second, drifting copy of the truth.</p>
-  <p><b>Aim and objectives.</b> The aim of this work is to establish quantitatively whether the proposed hybrid retrieval engine earns its use. The objectives are: (1) to formalize the architecture and retrieval method; (2) to build an evaluation harness with information-retrieval metrics and baselines; (3) to evaluate on a real corpus; (4) to refine the method based on observed data.</p>
+  <p><b>Aim and objectives.</b> The aim of this work is to establish quantitatively whether the proposed hybrid retrieval engine earns its use, and to describe the architecture that makes it maintainable. The objectives are: (1) to formalize the layered architecture and retrieval method; (2) to build an evaluation harness with information-retrieval metrics and baselines; (3) to evaluate on a real corpus; (4) to refine the method based on observed data.</p>
+  <p><b>Contributions.</b> (i) A layered, self-validating knowledge-base architecture with explicit source-vs-derived separation and content-hash provenance (§2.2, §2.5); (ii) a hybrid retriever with a per-query adaptive threshold (2) proposed as a replacement for a constant cosine cutoff (§2.4); (iii) a machine-shared embedding model resolved through a marker, removing per-base model duplication (§2.6); (iv) an evaluation harness sharing the engine's own core, and a measurement-driven refinement loop (§3–§4).</p>
   <p><b>Related work.</b> Dense retrieval maps a query and text fragments into a shared vector space and ranks by cosine similarity [4]; RAG couples such retrieval with a generator [5, 2]. The embedding model used is the multilingual Jina&nbsp;v3 with task-specific LoRA adapters and asymmetric <code>query:</code>/<code>passage:</code> prefixes [8], run locally via ONNX&nbsp;Runtime in Transformers.js [10]. Inverted-file (IVF) indexes partition vectors into clusters and probe the nearest at query time, trading recall for speed [3]. Structure-aware text splitters cut a document along its structure (headings, paragraphs) and improve fragment coherence [1]. Combining lexical and dense retrieval is established practice [2].</p>
 
   <h2>2. Materials and Methods</h2>
 
-  <h3>2.1 Architecture</h3>
-  <p>Knowledge is organized into independent layers with a strictly downward dependency graph. Each layer separates immutable source snapshots (<code>raw/</code>) from derived curated pages (<code>wiki/</code>); both are indexed. The offline-indexing and online-query pipelines are shown in figure&nbsp;1.</p>
+  <h3>2.1 System overview</h3>
+  <p>The system has two pipelines over a shared store: an offline <i>indexing</i> pipeline that turns knowledge into vectors, and an online <i>query</i> pipeline that retrieves grounded context for an agent. The store is organized into independent layers (§2.2); each layer separates immutable source snapshots (<code>raw/</code>) from derived curated pages (<code>wiki/</code>), and both are indexed. The end-to-end pipelines are shown in figure&nbsp;1.</p>
 
   <div class="fig">
     <svg viewBox="0 0 840 250" width="100%" role="img" aria-label="Pipeline">
@@ -78,7 +88,7 @@
       <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7a8aa0"/></marker></defs>
       <text class="tl" x="14" y="18">Offline indexing</text>
       <rect class="b" x="14" y="28" width="120" height="44" rx="6"/><text class="t" x="30" y="47">Scan layers</text><text class="tl" x="30" y="62">wiki/ + raw/</text>
-      <rect class="b" x="158" y="28" width="138" height="44" rx="6"/><text class="t" x="172" y="47">Structure-aware</text><text class="tl" x="172" y="62">chunking (2.4)</text>
+      <rect class="b" x="158" y="28" width="138" height="44" rx="6"/><text class="t" x="172" y="47">Structure-aware</text><text class="tl" x="172" y="62">chunking (2.5)</text>
       <rect class="b" x="320" y="28" width="138" height="44" rx="6"/><text class="t" x="334" y="47">Batched embed</text><text class="tl" x="334" y="62">Jina v3, GPU/CPU</text>
       <rect class="b" x="482" y="28" width="150" height="44" rx="6"/><text class="t" x="496" y="47">Shard per layer</text><text class="tl" x="496" y="62">centroid=mean</text>
       <rect class="b" x="656" y="28" width="170" height="44" rx="6"/><text class="t" x="670" y="47">Index + vector</text><text class="tl" x="670" y="62">shards</text>
@@ -94,20 +104,89 @@
   </div>
   <div class="cap">Figure 1 — Indexing (top) and query (bottom) pipelines</div>
 
-  <h3>2.2 Hybrid retrieval</h3>
+  <h3>2.2 Layered knowledge model</h3>
+  <p>Knowledge is partitioned into independent <i>layers</i> forming a strictly downward dependency graph (a directed acyclic graph): a more specific layer may depend on and link to more general ones, never the reverse. This isolates universal agent rules from engine constraints, framework conventions and project specifics, and lets several project layers reuse a common base in parallel. Each layer declares its dependencies in a <code>wiki.json</code> manifest. When the same topic exists in two layers, the more specific layer wins by default; the agent must flag the duplicate. The dependency model and the internal split of a single layer are shown in figure&nbsp;2.</p>
+
+  <div class="fig">
+    <svg viewBox="0 0 840 300" width="100%" role="img" aria-label="Layered knowledge model">
+      <style>.lb{fill:#f1f5fd;stroke:#9db8e6}.lbase{fill:#e7eefb;stroke:#5b8def}
+        .rawb{fill:#fdf3ec;stroke:#e0a878}.wikib{fill:#effaf6;stroke:#7fcab8}
+        .t{font:12px Helvetica,Arial;fill:#1a1f2b}.tb{font:12px Helvetica,Arial;fill:#1a1f2b;font-weight:700}
+        .tl{font:11px Helvetica,Arial;fill:#5b6573}.ar{stroke:#7a8aa0;stroke-width:1.4;marker-end:url(#b)}.dash{stroke:#b08968;stroke-width:1.3;stroke-dasharray:4 3;marker-end:url(#c)}</style>
+      <defs><marker id="b" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7a8aa0"/></marker>
+        <marker id="c" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b08968"/></marker></defs>
+      <text class="tl" x="14" y="16">Dependency graph (downward only)</text>
+      <rect class="lb" x="20" y="26" width="150" height="34" rx="6"/><text class="t" x="34" y="47">project-a-wiki</text>
+      <rect class="lb" x="190" y="26" width="150" height="34" rx="6"/><text class="t" x="204" y="47">project-b-wiki</text>
+      <rect class="lb" x="105" y="96" width="150" height="34" rx="6"/><text class="t" x="119" y="117">framework-wiki</text>
+      <rect class="lb" x="105" y="160" width="150" height="34" rx="6"/><text class="t" x="119" y="181">engine-wiki</text>
+      <rect class="lbase" x="105" y="224" width="150" height="34" rx="6"/><text class="tb" x="119" y="245">llm-wiki (base)</text>
+      <line class="ar" x1="95" y1="60" x2="160" y2="94"/><line class="ar" x1="265" y1="60" x2="200" y2="94"/>
+      <line class="ar" x1="180" y1="130" x2="180" y2="158"/><line class="ar" x1="180" y1="194" x2="180" y2="222"/>
+      <text class="tl" x="276" y="150">"depends on /</text><text class="tl" x="276" y="164">can read from"</text>
+
+      <text class="tl" x="470" y="16">Inside one layer</text>
+      <rect class="rawb" x="470" y="26" width="330" height="86" rx="8"/>
+      <text class="tb" x="486" y="48">raw/  —  source of truth (immutable)</text>
+      <text class="tl" x="486" y="68">code dumps · GDDs · transcripts · API docs</text>
+      <text class="tl" x="486" y="86">never edited · re-encoded UTF-8+BOM on ingest</text>
+      <text class="tl" x="486" y="104">indexed as raw-&lt;layer&gt;-&lt;name&gt;</text>
+      <rect class="wikib" x="470" y="170" width="330" height="100" rx="8"/>
+      <text class="tb" x="486" y="192">wiki/  —  derived, curated pages</text>
+      <text class="tl" x="486" y="211">concepts · entities · runbooks · sources ·</text>
+      <text class="tl" x="486" y="229">syntheses · decisions  + index/stubs/contradictions</text>
+      <text class="tl" x="486" y="248">short summaries that map &amp; link the raw</text>
+      <text class="tl" x="486" y="266">indexed as &lt;name&gt;</text>
+      <line class="ar" x1="560" y1="112" x2="560" y2="168"/><text class="t" x="572" y="146">summarized into</text>
+      <path class="dash" d="M720,170 C760,150 760,135 722,114"/><text class="tl" x="700" y="146">provenance</text><text class="tl" x="700" y="160">hash</text>
+    </svg>
+  </div>
+  <div class="cap">Figure 2 — Layered dependency graph (left) and the source-vs-derived split inside one layer (right)</div>
+
+  <h3>2.3 Hybrid retrieval</h3>
   <p>The symbolic stream (A) matches strict code identifiers (PascalCase of at least two parts, <code>I*</code> interfaces, <code>m_*</code> fields) against document fields; matches are weighted by field type and down-weighted by an inverse document frequency in the spirit of IDF [6]. The semantic stream (B) embeds the query with the <code>query:</code> prefix and ranks fragments by cosine similarity (1) [6]:</p>
   <div class="formula">sim(q, d) = (q · d) / (‖q‖ · ‖d‖) &nbsp;&nbsp;&nbsp;(1)</div>
-  <p>The streams are merged by a single effective score rather than by a hard precedence of one over the other (justification in section&nbsp;4.1).</p>
+  <p>The streams are merged by a single effective score rather than by a hard precedence of one over the other (justification in section&nbsp;4.1). Exact symbolic hits (score ≈ 1.0) and dense cosine scores (0–1) thus compete on one scale, so a strong semantic match can outrank a tangential identifier match.</p>
 
-  <h3>2.3 Routing and adaptive threshold</h3>
+  <h3>2.4 Routing and adaptive threshold</h3>
   <p>Vectors are stored one shard per layer; a shard centroid is defined as the mean of its member vectors. At query time, shards are ranked by centroid proximity and the <code>nprobe</code> nearest are scanned (IVF-style multi-probe [3]); when <code>nprobe</code> is not smaller than the number of shards, the search is exhaustive and loses no recall. Instead of a fixed cosine threshold, sensitive to a shift of the similarity distribution, a per-query adaptive threshold (2) is used:</p>
   <div class="formula">τ<sub>q</sub> = max( φ, &nbsp; α · max<sub>d</sub> sim(q, d) ) &nbsp;&nbsp;&nbsp;(2)</div>
-  <p>where α is a fraction of the maximum similarity (default 0.85) and φ is a lower "noise floor" (default 0.35). Construction (2) is proposed in this work as a replacement for a constant threshold.</p>
+  <p>where α is a fraction of the maximum similarity (default 0.85) and φ is a lower "noise floor" (default 0.35). Construction (2) is proposed in this work as a replacement for a constant threshold: it adapts to each query's own best score and is therefore robust to distribution shifts induced by language (RU/EN) and document length. Finally, <i>graph-lift</i> expands the top results by one hop along <code>extends</code> parents and <code>[[wiki-links]]</code>, pulling in directly related pages.</p>
 
-  <h3>2.4 Structure-aware chunking and provenance</h3>
-  <p>The indexer tokenizes Markdown into headings, paragraphs and atomic code blocks, packs them to a target size within the [min, max] word range, hard-splits only oversized blocks, merges undersized fragments and prepends the heading path; the approach follows the idea of structure-aware splitting [1]. Code is treated as the source of truth and <code>wiki/</code> pages as derived; on close scores the source is ranked higher and results are labeled primary (SOURCE) or derived (SUMMARY). Each page stores content hashes of its cited sources, which makes their divergence detectable.</p>
+  <h3>2.5 Structure-aware chunking and provenance</h3>
+  <p>The indexer tokenizes Markdown into headings, paragraphs and atomic code blocks, packs them to a target size within the [min, max] word range, hard-splits only oversized blocks, merges undersized fragments and prepends the heading path; the approach follows the idea of structure-aware splitting [1]. Code is treated as the source of truth and <code>wiki/</code> pages as derived; on close scores the source is ranked higher and results are labeled primary (SOURCE) or derived (SUMMARY). Each derived page stores content hashes of its cited sources; a staleness check recomputes them, so a divergence between a changed source and its summary becomes <i>detectable</i> rather than silent.</p>
 
-  <h3>2.5 Evaluation metrics</h3>
+  <h3>2.6 Shared embedding model and deployment</h3>
+  <p>The embedding model is large (~1.1&nbsp;GB). Storing a copy inside every deployed base would multiply disk use and management. Instead the model is installed once per machine into a system location and its path is published through a small <i>marker</i> file (a JSON config); every base resolves the model through that marker. Resolution order is: an explicit environment variable, then the marker, then a repository-local fallback, and otherwise the deployer asks where to install the shared model. The mechanism is shown in figure&nbsp;3.</p>
+
+  <div class="fig">
+    <svg viewBox="0 0 840 250" width="100%" role="img" aria-label="Shared model resolution">
+      <style>.sys{fill:#eef5ff;stroke:#5b8def}.kb{fill:#f1f5fd;stroke:#9db8e6}.mark{fill:#fff7e6;stroke:#d9a843}
+        .t{font:12px Helvetica,Arial;fill:#1a1f2b}.tb{font:12px Helvetica,Arial;fill:#1a1f2b;font-weight:700}
+        .tl{font:11px Helvetica,Arial;fill:#5b6573}.ar{stroke:#7a8aa0;stroke-width:1.4;marker-end:url(#d)}</style>
+      <defs><marker id="d" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7a8aa0"/></marker></defs>
+      <rect class="sys" x="500" y="22" width="320" height="120" rx="8"/>
+      <text class="tl" x="516" y="42">System location (per machine)</text>
+      <rect class="mark" x="516" y="52" width="288" height="34" rx="6"/><text class="tb" x="530" y="74">🏷 marker: config.json → model path</text>
+      <rect class="sys" x="516" y="96" width="288" height="34" rx="6" style="fill:#e3edfb"/><text class="tb" x="530" y="118">🧠 model (1.1 GB), one copy</text>
+      <rect class="kb" x="20" y="30" width="150" height="30" rx="6"/><text class="t" x="40" y="50">Knowledge base #1</text>
+      <rect class="kb" x="20" y="76" width="150" height="30" rx="6"/><text class="t" x="40" y="96">Knowledge base #2</text>
+      <rect class="kb" x="20" y="122" width="150" height="30" rx="6"/><text class="t" x="40" y="142">Knowledge base #3</text>
+      <line class="ar" x1="170" y1="45" x2="514" y2="66"/><line class="ar" x1="170" y1="91" x2="514" y2="68"/><line class="ar" x1="170" y1="137" x2="514" y2="70"/>
+      <text class="tl" x="250" y="40">read marker → use the one shared model</text>
+      <text class="tl" x="20" y="190" style="font-weight:700">Resolution order (first match wins):</text>
+      <rect class="kb" x="20" y="200" width="150" height="30" rx="6"/><text class="t" x="34" y="220">env variable</text>
+      <rect class="mark" x="200" y="200" width="120" height="30" rx="6"/><text class="t" x="214" y="220">🏷 marker</text>
+      <rect class="kb" x="350" y="200" width="170" height="30" rx="6"/><text class="t" x="364" y="220">repo-local fallback</text>
+      <rect class="kb" x="550" y="200" width="240" height="30" rx="6" style="fill:#fdeeee;stroke:#cf9a9a"/><text class="t" x="564" y="220">none → ask where to install</text>
+      <line class="ar" x1="170" y1="215" x2="198" y2="215"/><line class="ar" x1="320" y1="215" x2="348" y2="215"/><line class="ar" x1="520" y1="215" x2="548" y2="215"/>
+    </svg>
+  </div>
+  <div class="cap">Figure 3 — One machine-shared model resolved by every base through a marker; resolution order below</div>
+
+  <p>Deployment of a complete base is one command (or the equivalent agent skill) performing five steps: scaffold the layers and base pages, install the shared model and write the marker, install the agent rules, install the operating skills, and run a baseline validation (unit tests, linter, index build). The write path is closed end-to-end: ingesting a source places it under <code>raw/</code>, auto-creates a derived summary stub, lints, and finishes with vectorization, so new knowledge is immediately searchable.</p>
+
+  <h3>2.7 Evaluation metrics</h3>
   <p>For a set of relevant documents R and a ranked result list, standard metrics are used [6, 7]. Recall in the first k (3) is the fraction of relevant documents in the top-k [6]:</p>
   <div class="formula">recall@k = |R ∩ top-k| / |R| &nbsp;&nbsp;&nbsp;(3)</div>
   <p>Mean reciprocal rank (4) averages the reciprocal rank of the first relevant document over queries Q [6]:</p>
@@ -115,13 +194,21 @@
   <p>Normalized discounted cumulative gain (5)–(6) accounts for the position of a relevant result [7]:</p>
   <div class="formula">DCG@k = Σ<sub>i=1..k</sub> rel<sub>i</sub> / log<sub>2</sub>(i+1); &nbsp; nDCG@k = DCG@k / IDCG@k &nbsp;&nbsp;&nbsp;(5)–(6)</div>
 
-  <h3>2.6 Experimental setup</h3>
-  <p>The evaluation corpus is the deployed KBPro base: 162 documents (kbpro-wiki and llm-wiki layers), 433 fragments, 2 shards; the full corpus has 6 layers and 343 indexable documents. The query set comprises 15 labeled questions with required-source annotations. The model is jinaai/jina-embeddings-v3 (fp16, 1024 dimensions). The parameter top-k = 5; the threshold is adaptive (α = 0.85, φ = 0.35). The retrievers compared are <code>semantic</code> (dense multi-probe only), <code>hybrid</code> (symbols and semantics with unified ranking), <code>flat</code> (exhaustive flat cosine), and <code>lexical</code> (term overlap over the files — the "agent reads the files directly" model). The harness reuses the engine's own core functions and therefore evaluates the real engine, not a re-implementation. Embedding runs on a GPU via the DirectML provider with fallback to the CPU [9].</p>
+  <h3>2.8 Experimental setup</h3>
+  <p>The evaluation corpus is the deployed KBPro base; its composition is given in table&nbsp;1. The query set comprises 15 labeled questions with required-source annotations. The model is jinaai/jina-embeddings-v3 (fp16, 1024 dimensions). The parameter top-k = 5; the threshold is adaptive (α = 0.85, φ = 0.35). The retrievers compared are <code>semantic</code> (dense multi-probe only), <code>hybrid</code> (symbols and semantics with unified ranking), <code>flat</code> (exhaustive flat cosine), and <code>lexical</code> (term overlap over the files — the "agent reads the files directly" model). The harness reuses the engine's own core functions and therefore evaluates the real engine, not a re-implementation. Embedding runs on a GPU via the DirectML provider with fallback to the CPU [9].</p>
+
+  <div class="tabnum">Table 1 — Evaluation corpus composition</div>
+  <table>
+    <tr><th>Scope</th><th class="n">layers</th><th class="n">documents</th><th class="n">fragments</th><th class="n">shards</th></tr>
+    <tr class="best"><td><b>evaluation subset</b> (kbpro-wiki, llm-wiki)</td><td class="n">2</td><td class="n">162</td><td class="n">433</td><td class="n">2</td></tr>
+    <tr><td>full deployment</td><td class="n">6</td><td class="n">343</td><td class="n">—</td><td class="n">6</td></tr>
+  </table>
+  <div class="cap">With 2 shards, multi-probe equals exhaustive search; clustering matters only across many layers</div>
 
   <h2>3. Results</h2>
-  <p>The main results are given in table&nbsp;1 and figure&nbsp;2. On the real corpus the retrieval layer roughly doubles recall (0.633 against 0.333) and improves first-relevant ranking by 65% in MRR (0.718 against 0.435) relative to the lexical baseline.</p>
+  <p>The main results are given in table&nbsp;2 and figure&nbsp;4. On the real corpus the retrieval layer roughly doubles recall (0.633 against 0.333) and improves first-relevant ranking by 65% in MRR (0.718 against 0.435) relative to the lexical baseline.</p>
 
-  <div class="tabnum">Table 1 — Main retrieval results (162 documents, 15 queries, top-k = 5)</div>
+  <div class="tabnum">Table 2 — Main retrieval results (162 documents, 15 queries, top-k = 5)</div>
   <table>
     <tr><th>Retriever</th><th class="n">recall@5</th><th class="n">MRR</th><th class="n">nDCG@5</th></tr>
     <tr class="best"><td><b>semantic</b> (proposed engine)</td><td class="n win">0.633</td><td class="n win">0.718</td><td class="n win">0.626</td></tr>
@@ -149,14 +236,14 @@
       <rect x="600" y="276" width="14" height="12" fill="#9bb4e0"/><text class="cap2" x="618" y="286">lexical (grep)</text>
     </svg>
   </div>
-  <div class="cap">Figure 2 — Dense retrieval versus the lexical baseline across three metrics</div>
+  <div class="cap">Figure 4 — Dense retrieval versus the lexical baseline across three metrics</div>
 
   <h2>4. Result Discussion and Method Refinement</h2>
 
   <h3>4.1 Hybrid ranking</h3>
-  <p>The first run revealed a defect: under the original merge all symbolic matches were placed above semantic ones, whereby tangential exact matches displaced the best semantic results and the hybrid ranked worse than pure semantics (MRR 0.641 against 0.718). Two refinements, measured on the same index, removed the gap (table&nbsp;2): a switch to unified score-based ranking and a tightening of symbol extraction that excludes generic acronyms. The diagnosis was localized to a single query in which the acronym "JSON" was treated as a code identifier.</p>
+  <p>The first run revealed a defect: under the original merge all symbolic matches were placed above semantic ones, whereby tangential exact matches displaced the best semantic results and the hybrid ranked worse than pure semantics (MRR 0.641 against 0.718). Two refinements, measured on the same index, removed the gap (table&nbsp;3, figure&nbsp;5): a switch to unified score-based ranking and a tightening of symbol extraction that excludes generic acronyms. The diagnosis was localized to a single query in which the acronym "JSON" was treated as a code identifier.</p>
 
-  <div class="tabnum">Table 2 — Ranking refinement (hybrid-retriever metrics)</div>
+  <div class="tabnum">Table 3 — Ranking refinement (hybrid-retriever metrics)</div>
   <table>
     <tr><th>Configuration</th><th class="n">MRR</th><th class="n">nDCG@5</th></tr>
     <tr><td>original (hard symbol precedence)</td><td class="n">0.641</td><td class="n">0.577</td></tr>
@@ -165,10 +252,28 @@
   </table>
   <div class="cap">Total gain — 12% MRR with no change in recall</div>
 
-  <h3>4.2 Comparison of chunking strategies</h3>
-  <p>With all else equal, the index was rebuilt under each strategy. Structure-aware chunking surpassed the fixed-window one in ranking at equal recall (table&nbsp;3), which confirms on this corpus the common qualitative observation on the benefit of structural splitting [1].</p>
+  <div class="fig">
+    <svg viewBox="0 0 760 270" width="100%" role="img" aria-label="Ranking refinement progression">
+      <style>.ax{stroke:#c2c9d4}.gl{stroke:#eef1f6}.lbl{font:11px Helvetica,Arial;fill:#1a1f2b}.vl{font:12px Helvetica,Arial;fill:#fff;font-weight:700}.cap2{font:11px Helvetica,Arial;fill:#5b6573}</style>
+      <line class="ax" x1="70" y1="20" x2="70" y2="220"/><line class="ax" x1="70" y1="220" x2="730" y2="220"/>
+      <line class="gl" x1="70" y1="170" x2="730" y2="170"/><text class="cap2" x="44" y="174">0.2</text>
+      <line class="gl" x1="70" y1="120" x2="730" y2="120"/><text class="cap2" x="44" y="124">0.4</text>
+      <line class="gl" x1="70" y1="70" x2="730" y2="70"/><text class="cap2" x="44" y="74">0.6</text>
+      <line class="gl" x1="70" y1="20" x2="730" y2="20"/><text class="cap2" x="44" y="24">0.8</text><text class="cap2" x="50" y="224">0</text>
+      <rect x="135" y="44" width="90" height="176" fill="#9bb4e0"/><text class="vl" x="156" y="62" fill="#1a1f2b">.641</text>
+      <rect x="335" y="32" width="90" height="188" fill="#6f93cf"/><text class="vl" x="356" y="50">.685</text>
+      <rect x="535" y="23" width="90" height="197" fill="#2456b8"/><text class="vl" x="556" y="41">.718</text>
+      <text class="lbl" x="130" y="238">original</text><text class="lbl" x="120" y="252">(symbols first)</text>
+      <text class="lbl" x="330" y="238">+ unified</text><text class="lbl" x="330" y="252">score ranking</text>
+      <text class="lbl" x="530" y="238">+ strict symbol</text><text class="lbl" x="540" y="252">extraction</text>
+    </svg>
+  </div>
+  <div class="cap">Figure 5 — Measurement-driven progression of hybrid MRR (0.641 → 0.685 → 0.718)</div>
 
-  <div class="tabnum">Table 3 — Structure-aware chunking versus fixed window</div>
+  <h3>4.2 Comparison of chunking strategies</h3>
+  <p>With all else equal, the index was rebuilt under each strategy. Structure-aware chunking surpassed the fixed-window one in ranking at equal recall (table&nbsp;4, figure&nbsp;6), which confirms on this corpus the common qualitative observation on the benefit of structural splitting [1].</p>
+
+  <div class="tabnum">Table 4 — Structure-aware chunking versus fixed window</div>
   <table>
     <tr><th>Chunking</th><th class="n">recall@5</th><th class="n">MRR</th><th class="n">nDCG@5</th><th class="n">fragments</th></tr>
     <tr class="best"><td><b>structure-aware</b></td><td class="n">0.633</td><td class="n win">0.718</td><td class="n win">0.626</td><td class="n">433</td></tr>
@@ -176,10 +281,30 @@
   </table>
   <div class="cap">Gain of structure-aware chunking — 7.8% MRR and 7% nDCG</div>
 
-  <h3>4.3 Indexing speed</h3>
-  <p>The correctness of each speed-up was verified before time was measured. Batched embedding is provably equivalent to single-item embedding (minimum cosine 0.99999997), but on the CPU it gives only about 11% gain, since a forward pass of the model saturates the computation. Moving computation to a GPU via DirectML [9] gives an eight-fold speed-up while preserving numerical equivalence of the results (table&nbsp;4), reducing full-index time from about half an hour to a few minutes.</p>
+  <div class="fig">
+    <svg viewBox="0 0 760 280" width="100%" role="img" aria-label="Chunking comparison">
+      <style>.ax{stroke:#c2c9d4}.gl{stroke:#eef1f6}.lbl{font:12px Helvetica,Arial;fill:#1a1f2b}.vl{font:11px Helvetica,Arial;fill:#fff;font-weight:700}.cap2{font:11px Helvetica,Arial;fill:#5b6573}</style>
+      <line class="ax" x1="70" y1="20" x2="70" y2="220"/><line class="ax" x1="70" y1="220" x2="730" y2="220"/>
+      <line class="gl" x1="70" y1="170" x2="730" y2="170"/><text class="cap2" x="44" y="174">0.2</text>
+      <line class="gl" x1="70" y1="120" x2="730" y2="120"/><text class="cap2" x="44" y="124">0.4</text>
+      <line class="gl" x1="70" y1="70" x2="730" y2="70"/><text class="cap2" x="44" y="74">0.6</text>
+      <line class="gl" x1="70" y1="20" x2="730" y2="20"/><text class="cap2" x="44" y="24">0.8</text><text class="cap2" x="50" y="224">0</text>
+      <rect x="170" y="23" width="64" height="197" fill="#2456b8"/><text class="vl" x="182" y="39">.718</text>
+      <rect x="238" y="37" width="64" height="183" fill="#9bb4e0"/><text class="vl" x="250" y="53" fill="#1a1f2b">.666</text>
+      <text class="lbl" x="210" y="240">MRR</text>
+      <rect x="450" y="48" width="64" height="172" fill="#2456b8"/><text class="vl" x="462" y="64">.626</text>
+      <rect x="518" y="59" width="64" height="161" fill="#9bb4e0"/><text class="vl" x="530" y="75" fill="#1a1f2b">.585</text>
+      <text class="lbl" x="486" y="240">nDCG@5</text>
+      <rect x="250" y="258" width="14" height="12" fill="#2456b8"/><text class="cap2" x="268" y="268">structure-aware</text>
+      <rect x="430" y="258" width="14" height="12" fill="#9bb4e0"/><text class="cap2" x="448" y="268">fixed window</text>
+    </svg>
+  </div>
+  <div class="cap">Figure 6 — Structure-aware versus fixed-window chunking at equal recall</div>
 
-  <div class="tabnum">Table 4 — Embedding speed and result equivalence</div>
+  <h3>4.3 Indexing speed</h3>
+  <p>The correctness of each speed-up was verified before time was measured. Batched embedding is provably equivalent to single-item embedding (minimum cosine 0.99999997), but on the CPU it gives only about 11% gain, since a forward pass of the model saturates the computation. Moving computation to a GPU via DirectML [9] gives an eight-fold speed-up while preserving numerical equivalence of the results (table&nbsp;5, figure&nbsp;7), reducing full-index time from about half an hour to a few minutes.</p>
+
+  <div class="tabnum">Table 5 — Embedding speed and result equivalence</div>
   <table>
     <tr><th>Configuration</th><th class="n">time (12 emb.)</th><th class="n">speed-up</th><th class="n">cosine to CPU</th></tr>
     <tr><td>central processor (baseline)</td><td class="n">9657 ms</td><td class="n">1.0×</td><td class="n">—</td></tr>
@@ -188,8 +313,23 @@
   </table>
   <div class="cap">The dominant speed lever is the GPU; batching is a small free gain</div>
 
+  <div class="fig">
+    <svg viewBox="0 0 760 250" width="100%" role="img" aria-label="GPU speed-up">
+      <style>.ax{stroke:#c2c9d4}.gl{stroke:#eef1f6}.lbl{font:12px Helvetica,Arial;fill:#1a1f2b}.vl{font:12px Helvetica,Arial;fill:#fff;font-weight:700}.cap2{font:11px Helvetica,Arial;fill:#5b6573}</style>
+      <line class="ax" x1="70" y1="20" x2="70" y2="200"/><line class="ax" x1="70" y1="200" x2="730" y2="200"/>
+      <line class="gl" x1="70" y1="155" x2="730" y2="155"/><text class="cap2" x="48" y="159">2×</text>
+      <line class="gl" x1="70" y1="110" x2="730" y2="110"/><text class="cap2" x="48" y="114">4×</text>
+      <line class="gl" x1="70" y1="65" x2="730" y2="65"/><text class="cap2" x="48" y="69">6×</text>
+      <line class="gl" x1="70" y1="20" x2="730" y2="20"/><text class="cap2" x="48" y="24">8×</text><text class="cap2" x="56" y="204">0</text>
+      <rect x="150" y="177" width="80" height="23" fill="#9bb4e0"/><text class="lbl" x="150" y="218">CPU 1.0×</text>
+      <rect x="350" y="175" width="80" height="25" fill="#7f9fd0"/><text class="lbl" x="345" y="218">+batching 1.1×</text>
+      <rect x="550" y="20" width="80" height="180" fill="#0e7c6b"/><text class="vl" x="565" y="40">8.0×</text><text class="lbl" x="545" y="218">GPU (DirectML)</text>
+    </svg>
+  </div>
+  <div class="cap">Figure 7 — Relative embedding throughput; the GPU is the dominant lever (numerically equivalent, cosine 0.999984)</div>
+
   <h2>5. Discussion</h2>
-  <p>The obtained data show that the dense retrieval layer is not decorative: it substantially outperforms the lexical baseline in both recall and ranking. For natural-language questions semantic retrieval is the working tool; the symbolic stream is neutral on this set but is intended to raise precision on identifier queries not present in the set. Each method improvement (section&nbsp;4) was driven by measurement rather than by an a priori assumption, which illustrates the embedding of the evaluation harness into the engineering loop. With two shards the clustering mechanism does not affect the result and begins to matter only across many layers.</p>
+  <p>The obtained data show that the dense retrieval layer is not decorative: it substantially outperforms the lexical baseline in both recall and ranking. For natural-language questions semantic retrieval is the working tool; the symbolic stream is neutral on this set but is intended to raise precision on identifier queries not present in the set. Each method improvement (section&nbsp;4) was driven by measurement rather than by an a priori assumption, which illustrates the embedding of the evaluation harness into the engineering loop. With two shards the clustering mechanism does not affect the result and begins to matter only across many layers. The architectural choices (§2) target maintainability rather than benchmark scores: the source-vs-derived split with provenance keeps drift detectable, and the shared-model marker removes per-base duplication without changing retrieval behavior.</p>
 
   <h2>6. Limitations and Threats to Validity</h2>
   <p class="noind">The following limitations are established:</p>
@@ -204,9 +344,9 @@
   </ul>
 
   <h2>7. Conclusion</h2>
-  <p>In this work an often-asserted assumption about the effectiveness of a dedicated retrieval layer is turned into a measured fact: on a real deployed knowledge base a layered hybrid retrieval engine substantially outperforms the lexical baseline (recall@5 0.633 against 0.333, MRR 0.718 against 0.435). A measurement-driven refinement loop is demonstrated: two ranking corrections (+12% MRR) and the choice of chunking strategy (+7.8% MRR) were adopted after confirmation by data, and the speed optimizations (eight-fold GPU speed-up, batching) were introduced after proven numerical equivalence. The limitations are documented and mapped to concrete directions for further experiments. All results are reproducible with the accompanying harness.</p>
+  <p>In this work a layered, self-validating knowledge-base architecture is described in detail and an often-asserted assumption about the effectiveness of a dedicated retrieval layer is turned into a measured fact: on a real deployed knowledge base a layered hybrid retrieval engine substantially outperforms the lexical baseline (recall@5 0.633 against 0.333, MRR 0.718 against 0.435). A measurement-driven refinement loop is demonstrated: two ranking corrections (+12% MRR) and the choice of chunking strategy (+7.8% MRR) were adopted after confirmation by data, and the speed optimizations (eight-fold GPU speed-up, batching) were introduced after proven numerical equivalence. The architecture contributes a source-vs-derived split with content-hash provenance and a machine-shared, marker-resolved embedding model that eliminates per-base duplication. The limitations are documented and mapped to concrete directions for further experiments. All results are reproducible with the accompanying harness.</p>
 
-  <p class="small noind" style="margin-top:14px"><b>Reproducibility.</b> <code>node system/build-index.js --force</code> (build the index); <code>node system/scripts/eval-retrieval.js</code> (table 1, figure 2); <code>--sweep</code> (threshold calibration); <code>node system/scripts/check-embed-parity.mjs</code> (section 4.3); <code>npm test</code> (32 core unit tests). Exact values are written by the harness to <code>system/evals/retrieval-report.json</code>.</p>
+  <p class="small noind" style="margin-top:14px"><b>Reproducibility.</b> <code>node system/scripts/deploy-wiki.js --target &lt;path&gt;</code> (one-command deploy); <code>node system/build-index.js --force</code> (build the index); <code>node system/scripts/eval-retrieval.js</code> (table 2, figure 4); <code>--sweep</code> (threshold calibration); <code>node system/scripts/check-embed-parity.mjs</code> (section 4.3); <code>npm test</code> (32 core unit tests). Exact values are written by the harness to <code>system/evals/retrieval-report.json</code>.</p>
 
   <hr>
   <h2>References</h2>
