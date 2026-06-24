@@ -83,6 +83,29 @@ function copyTextFile(src, dest) {
   writeText(dest, content);
 }
 
+// CLAUDE.md / AGENTS.md / GEMINI.md are often user-owned project files. Instead of
+// overwriting them, write our content as a MANAGED BLOCK: replace the block in place
+// if it already exists, otherwise APPEND it to the end — preserving everything the
+// user already had above. Idempotent across re-syncs.
+const MANAGED_BEGIN = '<!-- BEGIN DavASkoLLMWiki (managed by sync-ai-rules — do not edit inside this block) -->';
+const MANAGED_END   = '<!-- END DavASkoLLMWiki (managed by sync-ai-rules) -->';
+
+function mergeManagedRule(srcPath, dstPath) {
+  const inner = readText(srcPath).trim();
+  const block = `${MANAGED_BEGIN}\n${inner}\n${MANAGED_END}`;
+  if (!fs.existsSync(dstPath)) { writeText(dstPath, block + '\n'); return 'created'; }
+  const existing = readText(dstPath);
+  const b = existing.indexOf(MANAGED_BEGIN);
+  const e = existing.indexOf(MANAGED_END);
+  if (b !== -1 && e > b) { // replace existing managed block in place
+    writeText(dstPath, existing.slice(0, b) + block + existing.slice(e + MANAGED_END.length));
+    return 'updated';
+  }
+  const sep = existing.endsWith('\n') ? '\n' : '\n\n'; // append, keep user content above
+  writeText(dstPath, existing + sep + block + '\n');
+  return 'appended';
+}
+
 // Helper to copy a directory recursively, applying the BOM policy to text files.
 function copyDirectory(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return;
@@ -177,12 +200,20 @@ if (rulesDir) {
     { src: 'CLAUDE.md', dst: 'CLAUDE.md' }
   ];
 
+  // CLAUDE/AGENTS/GEMINI: merge (append/replace managed block), preserving user content.
+  // IDE-specific rule files (.cursorrules etc.) are fully tool-managed → overwrite.
+  const APPEND_RULES = new Set(['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']);
   ruleTargets.forEach(t => {
     const srcPath = path.join(rulesDir, t.src);
     const dstPath = path.join(projectRoot, t.dst);
     if (fs.existsSync(srcPath)) {
-      copyTextFile(srcPath, dstPath);
-      console.log(`  [OK] Rule: ${t.src}  ->  ${t.dst}`);
+      if (APPEND_RULES.has(t.src)) {
+        const action = mergeManagedRule(srcPath, dstPath);
+        console.log(`  [OK] Rule (${action}, existing content preserved): ${t.src}  ->  ${t.dst}`);
+      } else {
+        copyTextFile(srcPath, dstPath);
+        console.log(`  [OK] Rule: ${t.src}  ->  ${t.dst}`);
+      }
     } else {
       console.log(`  [SKIP] Rule ${t.src} not found in rules directory.`);
     }
