@@ -35,6 +35,7 @@ Before answering any question about the knowledge base, architecture, code patte
 
 - Encoding: **`.md` → UTF-8 with BOM**; all other text (`.json`, `.js`, `.ps1`, IDE rules) → **UTF-8 without BOM** (a BOM breaks `JSON.parse`). See Data Standards §1; the linter enforces this.
 - Wiki pages require YAML frontmatter: `title`, `type`, `status`, `sources`, `last_updated`, `related`
+- Code symbols: any page documenting a class/service/module MUST be findable by an exact-identifier query. `build-index.js` auto-extracts code identifiers from content into the index; for entity/code-heavy pages also list the primary classes in frontmatter `symbols:`. Verify with `node system/query-wiki.js --query "<ClassName>"`. See Data Standards §2.
 - Use `[[page-name]]` Obsidian links between wiki pages
 - Plans go in `plans/` (never inside wiki layers)
 - New raw data goes into `NewData/<layer-name>/` for ingestion

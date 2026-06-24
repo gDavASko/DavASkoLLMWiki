@@ -62,6 +62,7 @@ The generated `<layer>/wiki/sources/<name>.md` is a **stub** and will FAIL the l
 - Read the moved raw file and write real **`## Key Claims`** (each with a `(source: <layer>/raw/<sub>/<file>)` citation).
 - Set a **non-empty `related:`** (link genuinely related pages with `[[page-name]]` from this layer or its dependencies) **or** add a `## Related` section.
 - Fill `**Summary**` / `## Details`; set an accurate `status`.
+- **Code symbols:** if the source documents classes/services/modules, ensure they are searchable by exact identifier. `build-index.js` auto-extracts identifiers from content, but for `entity` and code-heavy `source-summary` pages also list the 1–5 primary classes in frontmatter `symbols:` so the symbolic stream (Stream A) ranks them first. Verify: `node system/query-wiki.js --query "<ClassName>"` returns the page. See Data Standards §2.
 - Keep encoding: `.md` → UTF-8 **with** BOM.
 
 ### Step 4 — Re-validate and re-vectorize

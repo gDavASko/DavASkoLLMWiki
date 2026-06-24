@@ -174,6 +174,27 @@ function extractWikiLinks(body) {
   }
   return [...new Set(links)];
 }
+
+/**
+ * Авто-извлечение код-идентификаторов из текста для символьного потока (Stream A).
+ * ВАЖНО: без этого symbols берутся только из frontmatter, и у raw/код-документов
+ * symbols=[] → Stream A не находит классы по точному идентификатору (см. Data Standards §2).
+ * Извлекаем те же классы, что и query-сторона: PascalCase (≥2 горба), интерфейсы I*,
+ * поля m_*. Голые ALL-CAPS-аббревиатуры (JSON/API) не берём — это ранжирующий шум.
+ * Капим до `limit` самых частых идентификаторов документа, чтобы не раздувать индекс.
+ */
+function extractCodeSymbols(text, limit = 60) {
+  const freq = new Map();
+  for (const tok of String(text).split(/[^A-Za-z0-9_]+/)) {
+    if (!tok) continue;
+    const ok = /^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(tok)  // PascalCase ≥2 humps
+      || /^I[A-Z][A-Za-z0-9]+$/.test(tok)                        // I* interfaces
+      || /^m_[A-Za-z][A-Za-z0-9_]*$/.test(tok);                  // m_ fields
+    if (ok) freq.set(tok, (freq.get(tok) || 0) + 1);
+  }
+  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(e => e[0]);
+}
+
 /**
  * Подготовка текста для эмбеддинга: вырезание блоков кода (```...```),
  * так как они не несут прямой семантической нагрузки для векторного поиска.
@@ -492,7 +513,10 @@ async function main() {
     // ID: для raw-файлов используем префикс 'raw-<layer>-<basename>' чтобы
     // избежать коллизий с wiki-страницами при одинаковых именах файлов.
     const fileId     = meta.id || (sourceType === 'raw' ? `raw-${layer}-${basename}` : basename);
-    const symbols    = Array.isArray(meta.symbols) ? meta.symbols : [];
+    // symbols = объявленные во frontmatter + авто-извлечённые из тела (Data Standards §2).
+    // Без авто-извлечения raw/код-документы получают symbols=[] и невидимы для Stream A.
+    const fmSymbols  = Array.isArray(meta.symbols) ? meta.symbols.map(String) : [];
+    const symbols    = [...new Set([...fmSymbols, ...extractCodeSymbols(body)])];
     const tags       = Array.isArray(meta.tags) ? meta.tags : [];
     const extendsRef = meta.extends || '';
     const wikiLinks  = extractWikiLinks(body);

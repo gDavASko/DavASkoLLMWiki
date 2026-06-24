@@ -24,10 +24,13 @@ while (projectRoot) {
   projectRoot = parent;
 }
 
-// Dev mode: running inside the framework's own repository (submodule root == project
-// root). Here skills/ is already the live source the IDE loads, so writing compiled
-// copies into .claude/skills, .agents/skills, etc. would double-register every skill.
-const isDevRepo = path.resolve(submoduleRoot) === path.resolve(projectRoot);
+// Dev mode: running inside the framework's OWN repository — distinguished by a root
+// `skills/` directory (the live source the IDE loads). There, writing compiled copies
+// into .claude/skills, .agents/skills, etc. would double-register every skill. A
+// deployment whose submoduleRoot == projectRoot (e.g. a submodule with its own
+// package.json/.git) has NO root skills/ and therefore still needs the IDE copies.
+const isDevRepo = path.resolve(submoduleRoot) === path.resolve(projectRoot)
+  && fs.existsSync(path.join(submoduleRoot, 'skills'));
 
 console.log('=== sync-ai-rules ===');
 console.log(`Submodule Root: ${submoduleRoot}`);

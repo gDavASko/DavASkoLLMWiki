@@ -59,6 +59,11 @@ status: draft
 source_status: source-linked
 sources:
   - my-layer-name/raw/docs/source-doc.md
+symbols:
+  - EventBus
+  - IEvent
+tags:
+  - eventbus
 last_updated: YYYY-MM-DD HH:MM
 related:
   - "[[related-page-name]]"
@@ -73,6 +78,19 @@ related:
 - `runbook`: Practical step-by-step procedures.
 - `decision`: Architectural Decisions Records (ADRs) explaining choices and context.
 - `contradiction`: Explanations of conflicts between sources or code behaviors.
+
+<h3>Code symbols & the symbolic search stream (REQUIRED for code-heavy pages)</h3>
+
+Hybrid search has two streams: **Stream B** (semantic, by meaning) and **Stream A** (symbolic, exact match on code identifiers). Stream A matches a query's `PascalCase` / `I*` / `m_*` identifiers against each document's `symbols` field in the index. **If a page's code identifiers are not in the index, exact-identifier lookups (e.g. searching `ParentTimer` or `ObstacleModule`) fall back to weak semantic matching and frequently miss the right page.** This is the single most common reason "the wiki can't find a class that is clearly documented."
+
+To keep identifier search working, the index must contain the relevant code symbols. They enter the index from **two sources**, and `build-index.js` is the contract that fills both:
+
+1. **Auto-extraction from content (engine contract).** `build-index.js` MUST extract strict code identifiers (PascalCase with ≥2 humps, `I`-interfaces, `m_`-fields) from each page's body and code blocks into that document's `symbols`. This guarantees identifier search works even when frontmatter is sparse — do not rely on humans to list every class. Generic ALL-CAPS acronyms (JSON, API, URL) are intentionally excluded (ranking noise).
+2. **Frontmatter `symbols:` (curated emphasis).** For any **entity** page or code-heavy `source-summary`, list the 1–5 primary classes/interfaces the page is *about*. These are merged with the auto-extracted set and let authors boost the canonical identifiers for a page.
+
+**Rule of thumb:** if a page documents a class, service, or module, the class name MUST be findable by an exact-identifier query after `build-index.js`. Verify with `node system/query-wiki.js --query "<ClassName>"`; if the page is not returned, the index is missing that symbol — rebuild (`--force`) and, if still missing, add it to frontmatter `symbols:`.
+
+`tags:` are free-form lowercase keywords (also matched by Stream A at a lower weight) for topical grouping.
 
 ---
 
