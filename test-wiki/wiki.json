@@ -1,0 +1,5 @@
+{
+  "layer": "test-wiki",
+  "name": "Test Knowledge Layer",
+  "description": "Слой для стресс-тестирования RLM."
+}

@@ -33,6 +33,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
 import { resolveModelsCache } from './lib/model-locator.js';
+import { QueryRouter } from './lib/query-router.js';
+import { execSync } from 'child_process';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -134,6 +136,8 @@ function parseArgs() {
     query: get('--query'),       // обязательный
     outPath: get('--out'),       // --out <path>: писать дамп сюда (вместо дефолта)
     toStdout: args.includes('--stdout'), // --stdout: печатать дамп в stdout, файл не трогать
+    rlm: args.includes('--rlm'), // --rlm: запуск через RLM-агента вместо простого поиска
+    auto: args.includes('--auto'), // --auto: умная маршрутизация запроса
   };
 }
 
@@ -479,19 +483,80 @@ async function main() {
   const startTime = Date.now();
 
   // 1. Парсинг аргументов
-  const { query: rawQuery, outPath, toStdout } = parseArgs();
+  let { query: rawQuery, outPath, toStdout, rlm, auto } = parseArgs();
   if (!rawQuery) {
     console.error(`${C.red}[ERROR]${C.reset} Укажите запрос: --query "ваш запрос"`);
     console.error(`  Пример: node system/query-wiki.js --query "CowController, оптимизация"`);
-    console.error(`  Опции:  --out <path> (свой файл), --stdout (вывод в stdout)`);
+    console.error(`  Опции:  --out <path> (свой файл), --stdout (вывод в stdout), --rlm (RLM режим), --auto (Умный роутинг)`);
     process.exit(1);
   }
-  // Адресат дампа: --stdout > --out <path> > дефолтный .cursor-context-dump.md.
-  // Дефолт сохранён для обратной совместимости с CCP; --out снимает гонку
-  // при параллельных запросах (каждый пишет в свой файл).
+
   const destPath  = outPath ? path.resolve(outPath) : DUMP_FILE;
   const destLabel = toStdout ? 'stdout' : (outPath ? path.relative(ROOT_DIR, destPath).replace(/\\/g, '/') : '.cursor-context-dump.md');
 
+  // Умная маршрутизация
+  if (auto) {
+    console.error(`${C.cyan}[ROUTER]${C.reset} Анализ запроса умным маршрутизатором...`);
+    const router = new QueryRouter();
+    const route = await router.route(rawQuery);
+    console.error(`${C.cyan}[ROUTER]${C.reset} Выбранный путь: ${C.bold}${route}${C.reset}`);
+
+    if (route === 'GRAPHIFY') {
+      let graphifySuccess = false;
+      try {
+        console.error(`${C.cyan}[GRAPHIFY]${C.reset} Выполняем поиск по кодовому графу...`);
+        // Вызов graphify через child_process (требует, чтобы graphify был установлен и доступен в PATH)
+        const graphifyResult = execSync(`graphify query "${rawQuery.replace(/"/g, '\\"')}"`, { 
+            cwd: ROOT_DIR, 
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'] 
+        });
+        
+        const graphifyDump = `# Graphify Results\n\n> Query: \`${rawQuery}\`\n\n\`\`\`text\n${graphifyResult}\n\`\`\`\n`;
+        if (toStdout) {
+          process.stdout.write(graphifyDump);
+        } else {
+          writeTextBom(destPath, graphifyDump);
+          console.log(`WIKI_QUERY_RESULT: Graphify completed. Report: ${destLabel}`);
+        }
+        graphifySuccess = true;
+      } catch (err) {
+        console.error(`${C.red}[GRAPHIFY ERROR]${C.reset} Ошибка вызова graphify (возможно, не установлен). Фоллбэк на RAG.`);
+        // Фоллбэк на RAG (идем дальше по коду без process.exit)
+      }
+      if (graphifySuccess) {
+        process.exit(0);
+      }
+    } else if (route === 'RLM') {
+      rlm = true; // Переключаем флаг, чтобы сработал блок ниже
+    }
+    // Если RAG, просто идем дальше по пайплайну
+  }
+
+  if (rlm) {
+    console.error(`${C.cyan}[RLM]${C.reset} Запуск RLM-движка (Deep Research)...`);
+    try {
+      const { RLMManager } = await import('../rlm_mode/rlm_manager.js');
+      const manager = new RLMManager();
+      const answer = await manager.run(rawQuery);
+      
+      const rlmDump = `# RLM Analysis Report\n\n> Query: \`${rawQuery}\`\n\n${answer}\n`;
+      if (toStdout) {
+        process.stdout.write(rlmDump);
+      } else {
+        writeTextBom(destPath, rlmDump);
+        console.log(`WIKI_QUERY_RESULT: RLM Agent completed analysis. Report: ${destLabel}`);
+      }
+    } catch (err) {
+      console.error(`${C.red}[RLM ERROR]${C.reset} ${err.message}`);
+      process.exit(1);
+    }
+    process.exit(0);
+  }
+
+  // Адресат дампа: --stdout > --out <path> > дефолтный .cursor-context-dump.md.
+  // Дефолт сохранён для обратной совместимости с CCP; --out снимает гонку
+  // при параллельных запросах (каждый пишет в свой файл).
   // 2. Загрузка мета-индекса
   const index = loadIndex();
   const docCount = Object.keys(index.documents || {}).length;

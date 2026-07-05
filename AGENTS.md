@@ -1,18 +1,34 @@
-﻿# DavASko LLM Wiki — Agent Instructions
+# DavASko LLM Wiki — Agent Instructions
 
 ## Core Context Protocol (CCP)
 
 Before answering any question about the knowledge base, architecture, code patterns, or project specifics, you MUST:
 
-1. **Search the wiki first**:
-   ```bash
-   node system/query-wiki.js --query "RelevantSymbol, relevant topic phrase"
-   ```
+1. **Search First**: Перед ответом на вопрос или изменением кода используйте `query-wiki.js --auto` или укажите явный флаг:
+  - `node system/query-wiki.js --auto "<запрос>"` (Умный роутинг: автоматически выберет RAG, RLM или Graphify).
+  - Критерии ручного выбора:
+    - `RAG` (нет флага): быстрый поиск по терминам, API, стилям кода.
+    - `RLM` (`--rlm`): глубокий архитектурный анализ, комплексные вопросы по всему проекту.
+    - `Graphify`: поиск по C# связям, зависимостям префабов, иерархии вызовов.
 2. **Read the context dump**:
    ```bash
    cat .cursor-context-dump.md
    ```
 3. **Use the retrieved documents** as grounded context for your answer. Always cite source pages.
+
+## Data Source Selection Matrix (RAG vs RLM vs Graphify)
+
+Before requesting data, determine the correct tool based on the scope:
+
+1. **Graphify (`graphify-out/`)**: 
+   - *Use when:* You need direct code context (C# files, references, dependencies, call hierarchies, interfaces).
+   - *Query type:* Exact code symbol searches (`graphify path`, `graphify query`).
+2. **RAG (`system/query-wiki.js`)**: 
+   - *Use when:* You need quick lookup of architectural rules, quick guides, or specific concepts.
+   - *Query type:* Point-in-time retrieval (returns 3-5 relevant snippets).
+3. **RLM (`node system/query-wiki.js --rlm`)**: 
+   - *Use when:* You need Deep Research across the entire knowledge base, synthesis of dozens of documents, or a comprehensive architecture report.
+   - *Query type:* Multi-step agentic analysis bypassing context limits.
 
 ## Available Commands
 
@@ -41,3 +57,4 @@ Before answering any question about the knowledge base, architecture, code patte
 - New raw data goes into `NewData/<layer-name>/` for ingestion
 - Full-Text Search Gaps Policy: if you grep for code patterns not in the wiki, document your findings in the knowledge base
 - Source-of-Truth: code/`raw/` is the truth, `wiki/` is derived. Record `source_hashes` provenance; when `check-staleness.js` flags a page, use the **davasko-wiki-refresh** skill to actualize it (don't just re-stamp)
+- **Model Check (CRITICAL)**: At the very first access or query to the knowledge base, check if `system/rlm-config.json` exists. If missing, offer the user to run `node system/scripts/setup-model.js`. If the config specifies `backend: "local"`, verify if Ollama is running on port 11434. If not running or missing, the agent MUST run `node system/scripts/setup-local-llm.js`. If `backend: "remote"` is specified, do NOT touch local LLM setups.

@@ -1,4 +1,4 @@
-﻿# Maintenance and Automation Scripts
+# Maintenance and Automation Scripts
 
 To keep the DavASko LLM Wiki healthy, validate cross-references, search content, safely migrate paths, execute regression tests, and automatically process incoming documents, the automation scripts are placed under `system/scripts/` and `system/sync-ai-rules.js`.
 
@@ -22,9 +22,10 @@ Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE
 
 ---
 
-## 3. Query & Ingestion Utility: `system/scripts/query-wiki.js`
+## 3. Query & Ingestion Utility: `system/query-wiki.js`
 Handles CLI-based searching of wiki pages and single-file manual ingestion.
 - **Key Features**:
+  - Smart Query Routing via `--auto`: Uses a local LLM to dynamically route queries to RLM (deep research), Graphify (AST graphs), or RAG (hybrid search) based on intent.
   - Search matches return snippets with line numbers and ANSI-highlighted text.
   - Looks up core files (`index.md`, `contradictions.md`) directly in the root of the layer's `wiki/` directory.
   - Auto-detects the layer context based on current working directory (CWD).

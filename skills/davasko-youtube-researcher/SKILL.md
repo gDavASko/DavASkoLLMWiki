@@ -49,13 +49,24 @@ A complete step-by-step example of video analysis, implementation plan drafting,
 
 1. **Input Data**: Take the YouTube video URLs provided by the user.
 2. **Download Transcript**: Use Node.js scripts or `yt-dlp` to download the full subtitles of the video.
-3. **Analysis and Summarization**: Review the transcript, extract key claims, architectural conclusions, recommendations, and areas of application in the project.
+3. **Analysis and Summarization (Exhaustive Technical Documentation)**:
+   - Act as a **Senior Technical Writer** and **System Architect**. Your target is to transform conversational speech from the video into an exhaustive, deep technical documentation for the corporate knowledge base.
+   - The target audience is developers who have NOT watched the video, but must be able to reproduce the solution 1:1 without quality loss, understanding all architectural nuances and pitfalls.
+   - For long videos, strictly follow the **Automatic Chunking Protocol**:
+     1. Divide the video content into logical steps/parts based on development milestones.
+     2. Document each part sequentially to the deepest level without omissions. Do NOT pause to ask for user approval between parts. Produce the complete detailed sections for all parts. If token limits are reached, stop and ask the user to type "continue" to proceed, resuming from the same character.
+   - Apply **Strict No-Compression Rules**:
+     1. Never use code placeholders like `// your code here`, `// ... rest of the logic`, `/* and so on */`. Write all code, configs, and structures fully.
+     2. Never generalize steps. Document all configuration lines and endpoints.
+     3. Never cut context (errors made and fixed, tools choice reasons, performance considerations).
+     4. Depth and volume are prioritized over brevity. Stop and ask the user to type "continue" if you hit token limits.
+
 4. **Draft Ingestion Plan**:
    - Write an `implementation_plan.md` in the artifacts folder (in Russian) detailing which new source summaries or notes you plan to create and in which layers.
-   - Wait for explicit user approval in the chat ("Реализуем plan").
+   - Wait for explicit user approval in the chat ("Реализуй план").
 5. **Prepare Files**:
    - Create the target folder structure in `NewData/` based on layers (e.g., `NewData/engine-wiki/transcripts/my-video.md`).
-   - Write the structured research notes there.
+   - Write the structured, uncompressed research notes there.
 6. **Automate Ingestion** (delegates to the **davasko-wiki-ingest** pipeline):
    - Run: `node system/scripts/ingest-newdata.js`.
    - The pipeline moves each note into `<layer>/raw/<subfolder>/` (UTF-8 BOM), **auto-creates a wiki source-summary stub** in `<layer>/wiki/sources/`, generates the Unity `.meta`, deletes `NewData/`, lints, and **re-runs vectorization (build-index)**.

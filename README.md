@@ -1,4 +1,4 @@
-﻿# 📚 DavASko LLM Wiki
+# 📚 DavASko LLM Wiki
 
 **A knowledge base that AI agents can actually search — fully offline.**
 
@@ -191,22 +191,31 @@ flowchart TD
 
 ## 7. 🔎 Reading knowledge (the search pipeline)
 
-One command searches by **keyword and meaning at the same time**, then writes the best pages to a context file the agent reads.
+One command searches by **keyword and meaning at the same time**, then writes the best pages to a context file the agent reads. With the introduction of the **Query Router**, the engine can automatically pick the best tool for the job.
 
 ```mermaid
 flowchart TD
-    Q(["❓ node system/query-wiki.js --query '...'"]) --> P["Parse query →<br/>code symbols + meaning phrase"]
-    P --> A["🅰️ Stream A — Symbols<br/>exact match on ids/symbols/tags<br/>(instant, no model)"]
-    P --> B["🅱️ Stream B — Semantic<br/>embed query, cosine similarity<br/>over nearest clusters"]
-    B --> T["🎚️ Adaptive threshold<br/>keep only strong matches"]
-    A --> MERGE["🔗 Merge by score + Graph Lift<br/>(pull in linked / parent pages)"]
-    T --> MERGE
-    MERGE --> DUMP(["📝 .cursor-context-dump.md<br/>📄 SOURCE vs 📝 SUMMARY + scores"])
+    Q(["❓ node system/query-wiki.js --auto '...'"]) --> ROUTER{"🧠 Query Router<br/>(Local LLM)"}
+    
+    ROUTER -->|Code relations,<br/>Dependencies| G["🕸️ Graphify<br/>(AST Call Graph)"]
+    ROUTER -->|Deep synthesis,<br/>Architecture| RLM["🤖 RLM Agent<br/>(Deep Research)"]
+    ROUTER -->|Fact lookup,<br/>Guides| RAG["🗂️ Jina RAG<br/>(Hybrid Search)"]
+
+    RAG --> P["Parse query →<br/>symbols + meaning"]
+    P --> A["🅰️ Stream A — Symbols<br/>(instant, exact match)"]
+    P --> B["🅱️ Stream B — Semantic<br/>(vector similarity)"]
+    A & B --> MERGE["🔗 Merge & Graph Lift"]
+
+    G & RLM & MERGE --> DUMP(["📝 .cursor-context-dump.md<br/>(Agent Context)"])
 ```
 
-**Why two streams?** Code identifiers (`CowController`, `IEvent`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
+**The Three Search Paths:**
+1. **RAG (Hybrid Search):** Standard mode. Fast semantic + symbolic search using the Jina vector model. Best for quick lookups and documentation reads.
+2. **RLM (Research Language Model):** Deep research agent. Best for complex, multi-hop architectural questions. Uses a local LLM (like Ollama) to read, synthesize, and explore the wiki iteratively.
+3. **Graphify:** Codebase knowledge graph. Best for resolving C# class inheritance, component dependencies, and method call chains directly from the AST.
 
-**Adaptive threshold** — instead of a fragile fixed cutoff, the engine keeps matches scoring at least `α · (best score for this query)` (default α = 0.85, floor 0.35). Robust across languages and lengths. Tune it on labeled data with `eval-retrieval.js --sweep`, never by hand.
+**Why two streams in RAG?** Code identifiers (`CowController`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
+**Adaptive threshold** keeps only strong matches scoring at least `α · (best score for this query)`.
 
 ---
 
@@ -304,10 +313,13 @@ flowchart LR
 | Command | What it does |
 |---|---|
 | `node system/scripts/deploy-wiki.js --target <p>` | **One‑command full deploy** (scaffold + model + rules + skills + tests). |
-| `node system/scripts/setup-model.js` | Install the shared model into the system location + write the marker. |
+| `node system/scripts/setup-model.js` | Install the shared model into the system location + configure RLM backend. |
+| `node system/scripts/setup-local-llm.js` | Install and configure local Ollama for RLM and Query Routing. |
 | `node system/scripts/ingest-newdata.js` | Run the **write pipeline**: place sources, lint, **vectorize**. |
 | `node system/build-index.js [--force]` | Build / rebuild the vector index (incremental by default). |
-| `node system/query-wiki.js --query "..."` | **Hybrid search** → `.cursor-context-dump.md`. |
+| `node system/query-wiki.js --auto "..."` | **Smart Routed Search** (picks RAG, RLM, or Graphify) → context dump. |
+| `node system/query-wiki.js --query "..."` | Manual **Hybrid search** (RAG only). |
+| `node system/query-wiki.js --rlm "..."` | Manual **Deep Research** (RLM agent). |
 | `node system/sync-ai-rules.js [--global]` | Sync IDE rules (append‑safe) + compile skill adapters. |
 | `node system/scripts/lint-wiki.js` | Validate encoding, frontmatter, links (must be **0 errors**). |
 | `node system/scripts/validate-links.js` | Check every `[[wiki link]]` and file link. |

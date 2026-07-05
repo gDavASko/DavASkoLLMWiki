@@ -4,33 +4,64 @@ When integrating new knowledge from YouTube videos, the AI agent must strictly f
 
 ---
 
-## 1. Research Notes Schema (Transcript Summary)
+## 1. Research Notes Schema (Exhaustive Technical Documentation)
 
-Each video must be documented in a separate Markdown file with the following structure:
+Each video must be documented as an exhaustive, deep technical documentation for the corporate knowledge base. The final compiled document must adhere strictly to the following structure:
 
 ```markdown
-# Video Title (e.g. Beyond Vibe Coding — Addy Osmani)
+# [VIDEO TECHNOLOGY/SOLUTION NAME]
 
-**Source URL**: https://www.youtube.com/watch?v=...
-**Author/Channel**: Channel Name / Author Name
+**Source URL**: [Link to the video]
+**Author/Channel**: [Author Name / Channel Name]
 **Date Analyzed**: YYYY-MM-DD
 
-## Summary
-A brief overview (1-2 paragraphs) explaining the video topic and its direct value to the project.
+## 1. Context, Problem, and Stack
+* **Problem Solved**: What specific engineering or business pain does the video approach solve? Why do standard solutions fail?
+* **Technology Stack**: Full list of tools, languages, frameworks, and their versions.
+* **Selection Criteria**: What alternatives did the author mention and why were they rejected?
 
-## Key Claims
-- Key claim 1. (source: [timestamp, e.g., 03:15])
-- Key claim 2. (source: [12:40])
+## 2. Architecture and Conceptual Model
+* Describe architectural patterns, data flow logic, and component interactions in detail.
+* Draw an ASCII diagram or schema representing components interaction (e.g. Client -> API Gateway -> Server -> DB).
+* Define all specific terms and concepts introduced by the author.
 
-## Detailed Transcript Analysis
-Themed sections detailing the discussions, workflows, or technical concepts in the video.
+## 3. Step-by-Step Implementation Guide (Deep-Dive How-To by parts)
+* Break down the implementation process into steps (`Step 1: ...`, `Step 2: ...`).
+* Within each step specify:
+  - Command to run in the terminal (if any).
+  - Target file path and name being modified.
+  - Complete, functional code or configuration file.
+  - Detailed explanation: WHY this line of code/config is written and how it works under the hood.
 
-## Architectural Recommendations
-Concrete practical action items showing what and how we can apply in the Unity / DavASko codebase (e.g. "adopt TDD for LogicSystems", "write a custom prefab validator").
+## 4. Errors, Limitations, and Best Practices
+* **Development Pitfalls**: What bugs, side effects, or non-obvious behavior did the author encounter (or warn about)? How to solve them?
+* **Best Practices**: Author's recommendations for optimization, security, scaling, logging, or code style.
+* **Applicability Boundaries**: In which cases does this solution work perfectly, and where should it never be used?
 
-## Related Pages
-- [link-to-other-wiki-page]
+## 5. References
+* List all links, repositories, articles, documentation, or third-party services mentioned by the author.
 ```
+
+---
+
+## 1.1 Automatic Chunking Protocol & Strict Rules
+
+To prevent information loss and output compression when working with long videos, the AI agent MUST strictly follow these rules:
+
+### A. Automatic Chunking Workflow (No-Pause Generation)
+1. **Video Chunking Plan**: Divide the video content into logical steps/parts based on development milestones.
+2. **Sequential Generation**: Document each part sequentially to the deepest level without omissions. Do NOT pause to ask for user approval between parts. Produce the complete detailed sections for all parts. If token limits are reached, stop and ask the user to type "continue" to proceed, resuming from the same character.
+
+### B. Strict No-Compression Rules
+1. **No Code Placeholders**: Do not use placeholders like `// your code here`, `// ... rest of the logic`, `/* and so on */`. Write all code, configurations, and data structures fully as described or shown by the author.
+2. **No Generalization**: If the author configures a 10-line config or creates 5 endpoints, document all 10 lines and all 5 endpoints.
+3. **Preserve Context**: Document all errors made and fixed, reasons for tool choices, and performance considerations.
+4. **Volume & Accuracy Over Brevity**: Technical depth is the priority. If token limits are reached, stop immediately. The user will type "continue" to let you proceed from the same character.
+
+### C. Formatting Guidelines
+- Write the entire document in Markdown.
+- Highlight all technical terms, libraries, methods, variables, files, CLI commands, and database names as `inline code`.
+- Use syntax highlighting for code blocks (e.g. ```csharp, ```javascript, ```yaml, ```bash).
 
 ---
 
