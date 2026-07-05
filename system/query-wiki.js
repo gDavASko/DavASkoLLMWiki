@@ -132,8 +132,20 @@ function parseArgs() {
     const i = args.indexOf(flag);
     return i !== -1 && i + 1 < args.length ? args[i + 1] : null;
   };
+  let query = get('--query');
+  if (!query) {
+    for (let i = 0; i < args.length; i++) {
+      if (args[i].startsWith('--')) {
+        if (args[i] === '--out') i++; 
+        continue;
+      }
+      query = args[i];
+      break;
+    }
+  }
+
   return {
-    query: get('--query'),       // обязательный
+    query: query,                // обязательный
     outPath: get('--out'),       // --out <path>: писать дамп сюда (вместо дефолта)
     toStdout: args.includes('--stdout'), // --stdout: печатать дамп в stdout, файл не трогать
     rlm: args.includes('--rlm'), // --rlm: запуск через RLM-агента вместо простого поиска
