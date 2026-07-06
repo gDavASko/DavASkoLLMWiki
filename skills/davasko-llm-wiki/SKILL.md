@@ -1,4 +1,4 @@
-﻿---
+---
 name: davasko-llm-wiki
 description: Use this skill to DEPLOY a new DavASko LLM Wiki knowledge base into a target folder and keep it running. It (1) scaffolds the KB (layers, manifests, engine), (2) installs the shared vectorization model + toolkit into a single system-wide location referenced by a marker (never duplicated per-KB), (3) installs the agent rules, (4) installs the companion skills (search/ingest/refresh), and (5) installs a test environment for basic validation. Trigger on requests like "deploy/setup the wiki", "развернуть базу знаний", "install the wiki engine here".
 status: draft
@@ -10,11 +10,11 @@ allowed-tools:
   - Read
   - Bash
 required_reading:
-  - ../../system/docs/architecture-setup.md
-  - ../../system/docs/data-standards.md
-  - ../../system/docs/scripts-templates.md
-  - ../../system/docs/sync-integration.md
-  - ../../system/docs/setup-new-wiki.md
+  - references/architecture-setup.md
+  - references/data-standards.md
+  - references/scripts-templates.md
+  - references/sync-integration.md
+  - examples/setup-new-wiki.md
 known_risks:
   - Installing the 1.1GB vectorization model INTO the knowledge base instead of the shared system location — every KB then carries a duplicate. Always go through setup-model.js + the system marker.
   - Breaking dependency chains in wiki.json (must be a strictly descending DAG, no cycles).
@@ -41,7 +41,7 @@ When the user asks to deploy/set up the wiki into a target folder, perform these
 - Create `NewData/<layer>/` inbound folders for ingestion.
 - Copy the engine: the `system/` folder (engine `system/lib`, scripts `system/scripts`, configs `index-config.json` / `search-config.json`, vendored deps `system/vendor/*.tgz`).
 - Install offline deps: `npm install` (uses the vendored `.tgz`, no registry needed).
-- See [Architecture Setup](../../system/docs/architecture-setup.md) and [Setup Walkthrough](../../system/docs/setup-new-wiki.md).
+- See [Architecture Setup](references/architecture-setup.md) and [Setup Walkthrough](examples/setup-new-wiki.md).
 
 ### 2. Install the shared vectorization model + toolkit (system-wide, never per-KB)
 **The model (jinaai/jina-embeddings-v3, ~1.1GB) is installed ONCE per machine into a system location and shared by every knowledge base via a marker.** Do not copy it into the KB.
@@ -64,7 +64,7 @@ Behavior (implemented in `system/lib/model-locator.js` + `setup-model.js`):
 ### 3. Install the rules for working with the knowledge base
 - Generate the root agent-instruction files and the Core Context Protocol (`CLAUDE.md` / `AGENTS.md` / IDE rule files) that tell agents to query the wiki first.
 - Run the synchronizer: `node system/sync-ai-rules.js` — it compiles rule adapters for each IDE and bundles the portable skills.
-- See [Sync Integration](../../system/docs/sync-integration.md) and [Data Standards](../../system/docs/data-standards.md) (encoding, frontmatter, links).
+- See [Sync Integration](references/sync-integration.md) and [Data Standards](references/data-standards.md) (encoding, frontmatter, links).
 
 ### 4. Install the skills for working with the knowledge base
 Install/sync the companion skills alongside this one so agents can operate the KB:
