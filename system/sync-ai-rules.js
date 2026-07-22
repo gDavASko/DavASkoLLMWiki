@@ -10,26 +10,26 @@ const __dirname = path.dirname(__filename);
 const submoduleRoot = path.resolve(__dirname, '..'); // system/ parent is the submodule root
 
 let projectRoot = submoduleRoot;
-while (projectRoot) {
-  if (fs.existsSync(path.join(projectRoot, 'Assets')) || 
-      fs.existsSync(path.join(projectRoot, '.git')) || 
-      fs.existsSync(path.join(projectRoot, 'package.json'))) {
+function isUnityProjectRoot(candidate) {
+  return fs.existsSync(path.join(candidate, 'Assets')) &&
+    fs.existsSync(path.join(candidate, 'ProjectSettings', 'ProjectVersion.txt'));
+}
+
+while (true) {
+  if (isUnityProjectRoot(projectRoot)) {
     break;
   }
+
   const parent = path.dirname(projectRoot);
   if (parent === projectRoot) {
-    // Fallback: assume project root is 3 levels up from Assets/DavASko/davasko-ai-docs/system
-    projectRoot = path.resolve(submoduleRoot, '../../..');
+    const unityRootCandidate = path.resolve(submoduleRoot, '../../..');
+    projectRoot = isUnityProjectRoot(unityRootCandidate) ? unityRootCandidate : submoduleRoot;
     break;
   }
+
   projectRoot = parent;
 }
 
-// Dev mode: running inside the framework's OWN repository — distinguished by a root
-// `skills/` directory (the live source the IDE loads). There, writing compiled copies
-// into .claude/skills, .agents/skills, etc. would double-register every skill. A
-// deployment whose submoduleRoot == projectRoot (e.g. a submodule with its own
-// package.json/.git) has NO root skills/ and therefore still needs the IDE copies.
 const isDevRepo = path.resolve(submoduleRoot) === path.resolve(projectRoot)
   && fs.existsSync(path.join(submoduleRoot, 'skills'));
 
@@ -53,22 +53,18 @@ for (const c of rulesCandidates) {
   }
 }
 
-// Encoding policy (Data Standards §1): BOM only for .md; everything else no BOM.
 function shouldHaveBom(filePath) {
   return path.extname(filePath).toLowerCase() === '.md';
 }
 
-// Wrapper to use fs-utf8.js
 function writeText(filePath, content) {
   writeSafe(filePath, content, shouldHaveBom(filePath));
 }
 
-// Wrapper to use fs-utf8.js
 function readText(filePath) {
   return readSafe(filePath);
 }
 
-// Wrapper to use fs-utf8.js
 function copyTextFile(src, dest) {
   if (!fs.existsSync(src)) return;
   copyTextSafe(src, dest, shouldHaveBom(dest));
@@ -82,7 +78,6 @@ function mergeManagedRule(srcPath, dstPath) {
   return existing === '' ? 'created' : 'merged';
 }
 
-// Helper to copy a directory recursively, applying the BOM policy to text files.
 function copyDirectory(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return;
   if (!fs.existsSync(destDir)) {
@@ -90,7 +85,7 @@ function copyDirectory(srcDir, destDir) {
   }
   const items = fs.readdirSync(srcDir);
   items.forEach(item => {
-    if (item.endsWith('.meta')) return; // skip Unity meta files
+    if (item.endsWith('.meta')) return; 
     const srcPath = path.join(srcDir, item);
     const destPath = path.join(destDir, item);
     const stat = fs.statSync(srcPath);
@@ -108,9 +103,6 @@ function copyDirectory(srcDir, destDir) {
   });
 }
 
-// Bundle any ../../system/docs|scripts files a skill references into the skill
-// itself (references/, examples/, scripts/) and rewrite the paths, so the synced
-// SKILL.md is self-contained in every IDE destination. Generic for all skills.
 function bundleSkillSystemRefs(dest) {
   const destSkillMd = path.join(dest, 'SKILL.md');
   if (!fs.existsSync(destSkillMd)) return;
@@ -126,12 +118,10 @@ function bundleSkillSystemRefs(dest) {
     return names;
   };
 
-  // Docs: setup-new-wiki.md \u2192 examples/, the rest \u2192 references/
   collect(/\.\.\/\.\.\/system\/docs\/([A-Za-z0-9._-]+)/g).forEach(file => {
     const sub = (file === 'setup-new-wiki.md') ? 'examples' : 'references';
     copyTextFile(path.join(systemDocsDir, file), path.join(dest, sub, file));
   });
-  // Scripts \u2192 scripts/
   collect(/\.\.\/\.\.\/system\/scripts\/([A-Za-z0-9._-]+)/g).forEach(file => {
     copyTextFile(path.join(systemScriptsDir, file), path.join(dest, 'scripts', file));
   });
@@ -140,7 +130,6 @@ function bundleSkillSystemRefs(dest) {
   writeText(destSkillMd, content);
 }
 
-// Rewrite ../../system/... references to the bundled, self-contained locations.
 function rewriteSystemRefs(content) {
   return content
     .replace(/\.\.\/\.\.\/system\/docs\/setup-new-wiki\.md/g, 'examples/setup-new-wiki.md')
@@ -148,7 +137,6 @@ function rewriteSystemRefs(content) {
     .replace(/\.\.\/\.\.\/system\/scripts\//g, 'scripts/');
 }
 
-// Helper to delete directory recursively
 function deleteFolderRecursive(dirPath) {
   if (fs.existsSync(dirPath)) {
     fs.readdirSync(dirPath).forEach(file => {
@@ -166,40 +154,36 @@ function deleteFolderRecursive(dirPath) {
 // 3. Synchronize main rule files
 if (rulesDir) {
   console.log(`Source rules dir found: ${rulesDir}`);
-  const ruleTargets = [
-    { src: '.cursorrules', dst: '.cursorrules' },
-    { src: 'GEMINI.md', dst: 'GEMINI.md' },
-    { src: '.windsurfrules', dst: '.windsurfrules' },
-    { src: '.clinerules', dst: '.clinerules' },
-    { src: 'copilot-instructions.md', dst: path.join('.github', 'copilot-instructions.md') },
-    { src: 'AGENTS.md', dst: 'AGENTS.md' },
-    { src: 'CLAUDE.md', dst: 'CLAUDE.md' }
-  ];
+  
+  // Rule #1: AGENTS.md is the only source of truth.
+  const srcAgents = path.join(rulesDir, 'AGENTS.md');
+  const dstAgents = path.join(projectRoot, 'AGENTS.md');
+  if (fs.existsSync(srcAgents)) {
+    mergeManagedRule(srcAgents, dstAgents);
+    console.log(`  [OK] Rule: AGENTS.md  ->  AGENTS.md`);
+  }
 
-  // CLAUDE/AGENTS/GEMINI: merge (append/replace managed block), preserving user content.
-  // IDE-specific rule files (.cursorrules etc.) are fully tool-managed → overwrite.
-  const APPEND_RULES = new Set(['AGENTS.md', 'CLAUDE.md', 'GEMINI.md']);
-  ruleTargets.forEach(t => {
-    const srcPath = path.join(rulesDir, t.src);
+  // Generate reference files for other environments
+  const referenceContent = "Please follow the core agent rules defined in: [AGENTS.md](AGENTS.md)\n";
+  const refTargets = [
+    { dst: '.cursorrules' },
+    { dst: 'GEMINI.md' },
+    { dst: '.windsurfrules' },
+    { dst: '.clinerules' },
+    { dst: 'CLAUDE.md' }
+  ];
+  
+  refTargets.forEach(t => {
     const dstPath = path.join(projectRoot, t.dst);
-    if (fs.existsSync(srcPath)) {
-      if (APPEND_RULES.has(t.src)) {
-        const action = mergeManagedRule(srcPath, dstPath);
-        console.log(`  [OK] Rule (${action}, existing content preserved): ${t.src}  ->  ${t.dst}`);
-      } else {
-        copyTextFile(srcPath, dstPath);
-        console.log(`  [OK] Rule: ${t.src}  ->  ${t.dst}`);
-      }
-    } else {
-      console.log(`  [SKIP] Rule ${t.src} not found in rules directory.`);
-    }
+    writeText(dstPath, referenceContent);
+    console.log(`  [OK] Link Generated: ${t.dst} -> AGENTS.md`);
   });
 } else {
   console.log('Rules directory (ide-rules) not found. Skipping main rules synchronization.');
 }
 
 // 4. Synchronize Claude Commands
-const claudeCmdsSource = path.join(projectRoot, 'Assets', 'DavASko', 'davasko-ai-docs', 'llm-wiki', 'raw', 'claude-commands');
+const claudeCmdsSource = path.join(submoduleRoot, 'llm-wiki', 'raw', 'claude-commands');
 const claudeCmdsDest = path.join(projectRoot, '.claude', 'commands');
 if (fs.existsSync(claudeCmdsSource)) {
   if (!fs.existsSync(claudeCmdsDest)) {
@@ -213,73 +197,91 @@ if (fs.existsSync(claudeCmdsSource)) {
   });
 }
 
-// 5. Gather and sync skills dynamically
+// 5. Gather skills from all-skills
 const args = process.argv.slice(2);
 const isGlobal = args.includes('--global') || args.includes('-g');
 
-const layers = [];
-fs.readdirSync(submoduleRoot).forEach(file => {
-  if (file === 'plans' || file === 'system') return;
-  const fullPath = path.join(submoduleRoot, file);
-  if (fs.statSync(fullPath).isDirectory()) {
-    if (fs.existsSync(path.join(fullPath, 'wiki.json'))) {
-      layers.push(file);
-    }
-  }
-});
+const allSkillsDir = path.join(submoduleRoot, 'all-skills~');
+let activeSkillNames = null;
+let allSkillData = [];
 
-const activeSkills = [];
-const activeSkillNames = [];
 
-layers.forEach(layer => {
-  const layerSkillsDir = path.join(submoduleRoot, layer, 'raw', 'ai-skills~');
-  // Also scan workspace layers if they exist outside the submodule root
-  const workspaceLayerSkillsDir = path.join(projectRoot, 'Assets', 'DavASko', 'davasko-ai-docs', layer, 'raw', 'ai-skills~');
-  
-  [layerSkillsDir, workspaceLayerSkillsDir].forEach(sDir => {
-    if (fs.existsSync(sDir)) {
-      fs.readdirSync(sDir).forEach(file => {
-        if (file.endsWith('.meta')) return;
-        const skillPath = path.join(sDir, file);
-        if (fs.statSync(skillPath).isDirectory() && fs.existsSync(path.join(skillPath, 'SKILL.md'))) {
-          if (!activeSkillNames.includes(file)) {
-            activeSkillNames.push(file);
-            activeSkills.push({ name: file, path: skillPath });
-          }
+
+function parseSkillFrontmatter(content) {
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    let name = '';
+    let description = '';
+    let isMcp = false;
+    
+    if (fmMatch) {
+        const fmText = fmMatch[1];
+        const nameMatch = fmText.match(/^name:\s*(.+)$/m);
+        if (nameMatch) name = nameMatch[1].trim();
+        
+        const descMatch = fmText.match(/^description:\s*(.+)$/m);
+        if (descMatch) description = descMatch[1].trim();
+        
+        const mcpMatch = fmText.match(/^mcp:\s*(true|false)$/im);
+        if (mcpMatch && mcpMatch[1].toLowerCase() === 'true') {
+            isMcp = true;
         }
-      });
     }
-  });
-});
 
-// Also scan the root repository's skills directory (useful for direct framework development)
-const rootSkillsDir = path.join(submoduleRoot, 'skills');
-if (fs.existsSync(rootSkillsDir)) {
-  fs.readdirSync(rootSkillsDir).forEach(file => {
-    if (file.endsWith('.meta')) return;
-    const skillPath = path.join(rootSkillsDir, file);
-    if (fs.statSync(skillPath).isDirectory() && fs.existsSync(path.join(skillPath, 'SKILL.md'))) {
-      if (!activeSkillNames.includes(file)) {
-        activeSkillNames.push(file);
-        activeSkills.push({ name: file, path: skillPath });
-      }
+    if (!description) {
+        const lines = content.split('\n');
+        for (let line of lines) {
+            line = line.trim();
+            if (line && !line.startsWith('#') && !line.startsWith('---') && !line.startsWith('name:') && !line.startsWith('description:') && !line.startsWith('*') && !line.startsWith('>')) {
+                description = line;
+                break;
+            }
+        }
     }
-  });
+    
+    return { name, description, isMcp };
 }
 
-console.log(`\nActive skills found: ${activeSkillNames.join(', ')}`);
-console.log(`Synchronizing ${activeSkills.length} skills...`);
+if (fs.existsSync(allSkillsDir)) {
+    fs.readdirSync(allSkillsDir).forEach(file => {
+        if (file.endsWith('.meta')) return;
+        const skillPath = path.join(allSkillsDir, file);
+        if (fs.statSync(skillPath).isDirectory() && fs.existsSync(path.join(skillPath, 'SKILL.md'))) {
 
-// 5a. Clean up obsolete skills in local destinations
+            
+            const skillContent = readText(path.join(skillPath, 'SKILL.md'));
+            const metadata = parseSkillFrontmatter(skillContent) || { name: file, description: 'No description', isMcp: false };
+            
+            allSkillData.push({
+                folderName: file,
+                path: skillPath,
+                name: metadata.name || file,
+                description: metadata.description,
+                isMcp: metadata.isMcp
+            });
+        }
+    });
+}
+
+// (Removed Harness dispatcher forced logic per user request)
+
+const hardSkills = allSkillData.filter(s => s.isMcp);
+const softSkills = allSkillData.filter(s => !s.isMcp);
+
+console.log(`\nFound ${hardSkills.length} MCP/Hard skills and ${softSkills.length} Soft skills.`);
+
+// Add Orchestrator to the list of required IDE folders
+const requiredIdeFolders = hardSkills.map(s => s.folderName).concat(['davasko-skill-orchestrator']);
+
+// 5a. Total cleanup of root IDE folders
 const skillDestFolders = ['.agents/skills', '.codex/skills', '.claude/skills', '.gemini/skills'];
 skillDestFolders.forEach(folder => {
   const targetFolder = path.join(projectRoot, folder);
   if (fs.existsSync(targetFolder)) {
     fs.readdirSync(targetFolder).forEach(file => {
       const fullPath = path.join(targetFolder, file);
-      if (fs.statSync(fullPath).isDirectory() && !activeSkillNames.includes(file)) {
+      if (fs.statSync(fullPath).isDirectory() && !requiredIdeFolders.includes(file)) {
         deleteFolderRecursive(fullPath);
-        console.log(`  [CLEAN] Removed obsolete skill folder: ${folder}/${file}`);
+        console.log(`  [CLEAN] Removed soft skill / obsolete folder from root: ${folder}/${file}`);
       }
     });
   }
@@ -319,7 +321,7 @@ singleRuleDestinations.forEach(fd => {
       }
 
       if (ext === fd.ext || (fd.ext === '.instructions.md' && file.endsWith('.instructions.md'))) {
-        if (!activeSkillNames.includes(baseName)) {
+        if (!requiredIdeFolders.includes(baseName)) {
           fs.unlinkSync(path.join(targetDir, file));
           console.log(`  [CLEAN] Removed obsolete rule file: ${fd.dir}/${file}`);
         }
@@ -328,14 +330,12 @@ singleRuleDestinations.forEach(fd => {
   }
 });
 
-// 6. Compile and Sync Active Skills
-activeSkills.forEach(skill => {
-  const skillName = skill.name;
+// 6. Sync Hard Skills (MCP) to IDE
+hardSkills.forEach(skill => {
+  const skillName = skill.folderName;
   const skillSourceDir = skill.path;
   const skillMdPath = path.join(skillSourceDir, 'SKILL.md');
 
-  // Define local IDE folder destinations. In dev mode these are skipped so the
-  // framework repo does not double-register its own skills.
   const dirDestinations = isDevRepo ? [] : [
     path.join(projectRoot, '.agents', 'skills', skillName),
     path.join(projectRoot, '.codex', 'skills', skillName),
@@ -343,24 +343,24 @@ activeSkills.forEach(skill => {
     path.join(projectRoot, '.gemini', 'skills', skillName)
   ];
 
-  // If --global flag is set, add global .gemini config folder (allowed even in dev mode)
   if (isGlobal) {
     const homeDir = process.env.USERPROFILE || process.env.HOME || process.env.HOMEPATH;
     if (homeDir) {
-      const globalSkillsDir = path.join(homeDir, '.gemini', 'config', 'skills', skillName);
-      dirDestinations.push(globalSkillsDir);
-      console.log(`  [GLOBAL] Target: ${globalSkillsDir}`);
+      const globalSkillDirs = [
+        path.join(homeDir, '.codex', 'skills', skillName),
+        path.join(homeDir, '.agents', 'skills', skillName),
+        path.join(homeDir, '.claude', 'skills', skillName),
+        path.join(homeDir, '.gemini', 'config', 'skills', skillName)
+      ];
+      globalSkillDirs.forEach(globalSkillsDir => dirDestinations.push(globalSkillsDir));
     }
   }
 
-  // Sync skill directory recursively to all target folders, then bundle any
-  // ../../system/docs|scripts the SKILL.md references so it is self-contained.
   dirDestinations.forEach(dest => {
     copyDirectory(skillSourceDir, dest);
     bundleSkillSystemRefs(dest);
   });
 
-  // Compile and sync SKILL.md to single rule file destinations (same path rewrite).
   const originalSkillMdContent = readText(skillMdPath);
   const compiledSkillMdContent = rewriteSystemRefs(originalSkillMdContent);
 
@@ -373,11 +373,57 @@ activeSkills.forEach(skill => {
     { path: path.join(projectRoot, '.github', 'instructions', `${skillName}.instructions.md`) }
   ];
 
-  singleTargets.forEach(t => {
-    writeText(t.path, compiledSkillMdContent);
+  singleTargets.forEach(t => writeText(t.path, compiledSkillMdContent));
+
+  console.log(`  [OK] MCP Skill '${skillName}' synced.`);
+});
+
+// 7. Generate Orchestrator
+if (softSkills.length > 0) {
+  let orchestratorContent = `---
+name: davasko-skill-orchestrator
+description: Главный маршрутизатор (Orchestrator). Используй этот скил ВСЕГДА, когда пользователь просит выполнить специализированную задачу.
+---
+# Skill Orchestrator
+CRITICAL INSTRUCTION: Ниже представлен каталог доступных проектных софт-скилов. Если задача пользователя совпадает с триггером (Description), вы ОБЯЗАНЫ использовать инструмент \`view_file\`, чтобы прочитать относительный путь к \`SKILL.md\` выбранного скила ДО начала выполнения задачи. Указанные пути отсчитываются от корня проекта. Если ваш инструмент чтения файлов требует абсолютный путь, сформируйте его, добавив корень проекта (workspace root) к указанному относительному пути.
+
+| Skill Name | Triggers (Description) | Relative Path |
+|---|---|---|
+`;
+
+  softSkills.forEach(s => {
+    const relativePath = path.relative(projectRoot, s.path).replace(/\\/g, '/');
+    const uriPath = `${relativePath}/SKILL.md`;
+    orchestratorContent += `| ${s.name} | ${s.description} | ${uriPath} |\n`;
   });
 
-  console.log(`  [OK] Skill '${skillName}' ${isDevRepo ? 'compiled (dev mode: local IDE copies skipped)' : 'synced and compiled'}.`);
-});
+  const orchestratorName = 'davasko-skill-orchestrator';
+  const dirDestinations = isDevRepo ? [] : [
+    path.join(projectRoot, '.agents', 'skills', orchestratorName),
+    path.join(projectRoot, '.codex', 'skills', orchestratorName),
+    path.join(projectRoot, '.claude', 'skills', orchestratorName),
+    path.join(projectRoot, '.gemini', 'skills', orchestratorName)
+  ];
+  
+  if (isGlobal) {
+    const homeDir = process.env.USERPROFILE || process.env.HOME || process.env.HOMEPATH;
+    if (homeDir) {
+      const globalSkillDirs = [
+        path.join(homeDir, '.codex', 'skills', orchestratorName),
+        path.join(homeDir, '.agents', 'skills', orchestratorName),
+        path.join(homeDir, '.claude', 'skills', orchestratorName),
+        path.join(homeDir, '.gemini', 'config', 'skills', orchestratorName)
+      ];
+      globalSkillDirs.forEach(globalSkillsDir => dirDestinations.push(globalSkillsDir));
+    }
+  }
+
+  dirDestinations.forEach(dest => {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    writeText(path.join(dest, 'SKILL.md'), orchestratorContent);
+  });
+
+  console.log(`  [OK] Orchestrator generated with ${softSkills.length} soft skills.`);
+}
 
 console.log('\nDone! All files and skills synced.\n');

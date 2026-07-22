@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "b24-dev-mcp": {
+      "url": "https://mcp-dev.bitrix24.tech/mcp"
+    },
+    "context7": {
+      "command": "npx.cmd",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    }
+  }
+}
