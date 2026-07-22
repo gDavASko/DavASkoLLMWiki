@@ -1,0 +1,110 @@
+[
+  {
+    "query": "How should an agent ingest a new source into the KBPro LLM Wiki?",
+    "relevant": [
+      "LLM-WIKI.md",
+      "llm-wiki/wiki/runbooks/raw-data-ingest-workflow.md"
+    ]
+  },
+  {
+    "query": "How should the KBPro LLM Wiki be checked after documentation changes?",
+    "relevant": [
+      "system/scripts/lint-wiki.js",
+      "llm-wiki/wiki/maps/operations-map.md"
+    ]
+  },
+  {
+    "query": "Which knowledge-base pages should agents read first?",
+    "relevant": [
+      "kbpro-wiki/wiki/maps/architecture-map.md",
+      "kbpro-wiki/wiki/maps/gameplay-product-map.md",
+      "llm-wiki/wiki/maps/operations-map.md",
+      "llm-wiki/raw/ide-rules/GEMINI.md"
+    ]
+  },
+  {
+    "query": "How should Plombir Building task JSON be imported into Bitrix24?",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/bitrix-task-import.md",
+      "llm-wiki/wiki/sources/llm-rules-and-skills.md"
+    ]
+  },
+  {
+    "query": "What should an agent do with hardcoded Bitrix webhook URLs in raw scripts?",
+    "relevant": [
+      "dentistry-cow-wiki/wiki/contradictions.md",
+      "kbpro-wiki/wiki/runbooks/bitrix-task-import.md",
+      "kbpro-wiki/wiki/decisions/security-redaction-over-raw-immutability.md"
+    ]
+  },
+  {
+    "query": "How should gameplay code send analytics?",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/analytics-system.md",
+      "kbpro-wiki/raw/Architecture/Meta/Analytic.md"
+    ]
+  },
+  {
+    "query": "How should game code start a tutorial?",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/tutor-system.md",
+      "kbpro-wiki/raw/Architecture/Meta/TutorSystem.md"
+    ]
+  },
+  {
+    "query": "What is the safe first rollout for Scenario Graph?",
+    "relevant": [
+      "kbpro-wiki/wiki/concepts/scenario-graph.md",
+      "kbpro-wiki/raw/Architecture/DESIGN_ModuleStateMachine.md"
+    ]
+  },
+  {
+    "query": "How is the Scenario Graph test environment created?",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/scenario-graph-test-environment.md",
+      "kbpro-wiki/raw/Architecture/ScenarioGraphTestEnvironment.md"
+    ]
+  },
+  {
+    "query": "How should gameplay code trigger sound variants without repeating the last sample?",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/audio-system.md",
+      "kbpro-wiki/raw/Architecture/Presentation/AudioSystem.md"
+    ]
+  },
+  {
+    "query": "What Spine sequence limitation must be remembered?",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/spine-integration.md",
+      "kbpro-wiki/raw/Architecture/Presentation/SpineIntegration.md"
+    ]
+  },
+  {
+    "query": "What should be used instead of hardcoded UI or audio strings?",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/const-selector.md",
+      "kbpro-wiki/wiki/entities/ui-system.md"
+    ]
+  },
+  {
+    "query": "Are existing KBPro AI Docs files moved into raw?",
+    "relevant": [
+      "LLM-WIKI.md",
+      "kbpro-wiki/wiki/decisions/legacy-documents-as-raw-sources.md"
+    ]
+  },
+  {
+    "query": "What must a new KBPro gameplay module include?",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/create-game-module.md",
+      "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToCreateModule.md"
+    ]
+  },
+  {
+    "query": "Can an AI hand-write Unity prefab YAML for a generated module?",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/auto-generate-module.md",
+      "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToAutoGenerateModule_ForAI.md"
+    ]
+  }
+]

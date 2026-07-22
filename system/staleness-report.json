@@ -1,0 +1,2380 @@
+{
+  "generatedAt": "2026-06-24T07:16:38.514Z",
+  "mode": "check",
+  "summary": {
+    "layers": 6,
+    "pagesChecked": 130,
+    "stalePages": 0,
+    "unstamped": 130
+  },
+  "stale": [
+    {
+      "page": "dentistry-cow-wiki/wiki/runbooks/device-build-smoke.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "dentistry-cow-wiki/raw/ExecPlan_ModuleIO_MVP.md",
+          "present": false
+        },
+        {
+          "source": "kbpro-wiki/raw/ModuleIO_AI_AgentGuide.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "dentistry-cow-wiki/wiki/sources/codex-skill-frontmatter.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": ".codex/skills/kbpro-code-navigator/SKILL.md",
+          "present": true
+        },
+        {
+          "source": ".codex/skills/kbpro-lifecycle-auditor/SKILL.md",
+          "present": true
+        },
+        {
+          "source": ".codex/skills/unity-console-error-triage/SKILL.md",
+          "present": true
+        },
+        {
+          "source": ".codex/skills/bitrix-task-importer/SKILL.md",
+          "present": true
+        },
+        {
+          "source": ".codex/skills/kbpro-mr-reviewer/SKILL.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/concepts/kbpro-architecture-overview.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/architecture.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/ServiceLocator.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/concepts/kbpro-code-style.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/concepts/kbpro-module-lifecycle.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/concepts/scenario-graph.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\concepts\\scenario-graph.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/DESIGN_ModuleStateMachine.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/decisions/legacy-documents-as-raw-sources.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/decisions/security-redaction-over-raw-immutability.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\decisions\\security-redaction-over-raw-immutability.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/wiki/contradictions.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/create-plombir-tasks.js",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/test-bitrix-webhook.js",
+          "present": true
+        },
+        {
+          "source": "system/scripts/lint-wiki.js",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/ai-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/AISystem.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/analytics-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/Analytic.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/audio-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/AudioSystem.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Tools/ConstSelector.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/component-provider-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro-datasystem/Runtime/Pool/ComponentProviderSystem.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/config-and-data.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ConfigAndData.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/config-ingestion.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro.configsystem/Runtime/TableParserToConfig/TableLoader.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro.configsystem/Runtime/TableParserToConfig/LoadFoamTable.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/const-selector.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Tools/ConstSelector.md",
+          "present": true
+        },
+        {
+          "source": "Assets/KBPro/kbpro-constselector/Runtime/Scripts/ConstSelectorAttribute.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/Service/ConstantsService.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/conveyor-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Logic/Conveyer/ConveyorSystemBase.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Logic/Conveyer/ConveyorDraggableSystem.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Logic/Conveyer/ConveyorElement.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/data-tree.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/ScenarioGraph/DataTree.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/description-service.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro.configsystem/Runtime/DescriptionService/DescriptionService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro.configsystem/Runtime/DescriptionService/DescriptorsLoadConfig.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/drag-and-drop-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Logic/Draggable/Draggable/DragLogicSystem.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Logic/Draggable/Draggable/DragComponent.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Components/DraggingToTargetsComponent/DragAndDropComponent.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/event-bus.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/EventBus.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/id-processors.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/ScenarioGraph/IDProcessors.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/input-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/Core/Scripts/Core/Service/InputService/InputContainerService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/Service/InputService/InputJoystick.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/Service/InputService/InputButton.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/localization-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro-plugins/Runtime/LocalizationService/ILocalizationService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-plugins/Runtime/LocalizationService/LocalizationI2Service.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-plugins/Runtime/LocalizationService/LabelLocaliser.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-plugins/Runtime/LocalizationService/SpriteLocaliser.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/logic-and-modules.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/architecture.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/modifier-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/ModifierSystem.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/module-orchestrator.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ModuleOrchestrator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/parallax-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/Parallax.md",
+          "present": true
+        },
+        {
+          "source": "Assets/KBPro/kbpro-parallax/Runtime/Scripts/Configs/ParallaxProjectSettingsConfig.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/parent-timer.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/ParentTimer.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/architecture.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/play-asset-delivery.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro-builder/Editor/Builder.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-builder/Editor/AddressablesPadBuilder.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/AssetDelivery/Scripts/Common/Service/AddressableAssetService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/AssetDelivery/Scripts/Common/Service/AndroidAssetPackChecker.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/rustore-sdk.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/RuStoreSDK.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/save-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro-datasystem/Runtime/BinaryStoreService/BinaryStoreService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-datasystem/Runtime/SaveService/Saves.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/service-locator.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/ServiceLocator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/spine-integration.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/SpineIntegration.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/AnimationVisualsExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/TutorSystem.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/statistic-service.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/KBPro/kbpro-datasystem/Runtime/StatisticService/StatisticService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-datasystem/Runtime/StatisticService/StorableStatisticService.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/timers.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/Timers.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/tutor-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/TutorSystem.md",
+          "present": true
+        },
+        {
+          "source": "Assets/KBPro/kbpro-tutorsystem/Runtime/TutorSystem.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-tutorsystem/Runtime/IdleEffects/AbstractIdleEffect.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/ui-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Core.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Game.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Orthodox.md",
+          "present": true
+        },
+        {
+          "source": "Assets/KBPro/kbpro-uisystem/Runtime/UIComponentService.cs",
+          "present": false
+        },
+        {
+          "source": "Assets/Core/Scripts/Core/ResolutionScaler.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/entities/voice-system.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Assets/Core/Scripts/Core/ScriptSourses/Modules/Components/CommonVoiceComponent/VoiceComponent.cs",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/maps/architecture-map.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "dentistry-cow-wiki/wiki/index.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/wiki/concepts/kbpro-architecture-overview.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/maps/gameplay-product-map.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "dentistry-cow-wiki/wiki/index.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/wiki/concepts/plombir-building-game-design.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/architecture-challenge-protocol.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/wiki/concepts/unity-ai-skill-validation.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/auto-generate-module.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToAutoGenerateModule_ForAI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToCreateModule.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/bitrix-task-import.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\runbooks\\bitrix-task-import.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/create-plombir-tasks.js",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/GDDDocs/plombir_buildings_tasks.json",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/GEMINI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/test-bitrix-webhook.js",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/create-game-module.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToCreateModule.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/create-module-with-io.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "dentistry-cow-wiki/raw/ExecPlan_ModuleIO_MVP.md",
+          "present": false
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ModuleIO.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/decompose-task-to-backlog.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\runbooks\\decompose-task-to-backlog.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDecomposeTask_ForAI.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/create-plombir-tasks.js",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/document-game-module.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDescribeModule.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/README.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/runbooks/scenario-graph-test-environment.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/ScenarioGraphTestEnvironment.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/core-framework-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/EventBus.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/ScenarioGraph/DataTree.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ConfigAndData.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/Timers.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ModuleOrchestrator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/ParentTimer.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/ScenarioGraph/IDProcessors.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Modules/LogicAndModules.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Infrastructure/ServiceLocator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/architecture.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/current-kbpro-ai-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\sources\\current-kbpro-ai-docs.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/architecture.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/PLANS.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/README.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/gameplay-systems-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/AISystem.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/ModifierSystem.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/Runner.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Gameplay/PassengerSystem.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/kbpro-automation-and-tasks.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\sources\\kbpro-automation-and-tasks.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/test-bitrix-webhook.js",
+          "present": true
+        },
+        {
+          "source": "all-skills~/bitrix-task-importer/SKILL.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/meta-systems-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/Analytic.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/RuStoreSDK.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Meta/TutorSystem.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/module-creation-guides.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToCreateModule.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDescribeModule.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDecomposeTask_ForAI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToAutoGenerateModule_ForAI.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/module-examples.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/README.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/README.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoadModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoad_CraneStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoad_HammerStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HomeBuilding_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HousesDestroy_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HousesFoundation_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/RailWayRoad_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/water_restoration/WaterRestorationModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/water_restoration/WaterRestoration_CloseAndPumpStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/water_restoration/WaterRestoration_WaterFinishStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/water_restoration/WaterRestoration_WeldingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricityModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_GroovingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_ScanningStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_WireFixStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_FinalStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouseModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouse_SawingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouse_StyleSelectStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouse_FasteningStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouse_BuildingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuildingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuilding_DiggingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuilding_FoundationStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuilding_BrickStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuilding_DesignStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPoolBuildingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPool_DiggingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPool_FoundationStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPool_DesignStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPool_FillingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/playground/PlaygroundModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/playground/Playground_DrillingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/playground/Playground_BuildStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/SimpleHouseBuildingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/SimpleHouseBuilding_DiggingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/SimpleHouseBuilding_DesignStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuildingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuilding_DiggingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuilding_FoundationStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuilding_BuildingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuilding_DesignStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/README.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/station_tasks/CargoTransportationModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/station_tasks/CargoUnloadingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/way_tasks/ChangeRailsDirectionModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/station_tasks/DiningCarHandwashingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/way_tasks/LowerBridgeModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/core_runner/ObstacleModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/station_tasks/PassengerBoardingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/PreparingTrainModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/way_tasks/RestoreRailwayModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/core_runner/RunnerModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/TrainCoupling_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/TrainRefuelingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/TrainScannerModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/TrainWashingModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/core_runner/WinModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownGlueStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownInstallStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownPrintingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownShapingStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/PatientSelectionModule_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisAirPistolStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisDentalMirrorStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisXRayScannerStage_reference.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDescribeModule.md",
+          "present": true
+        },
+        {
+          "source": "railway-wiki/raw/ModuleExamples/train_maintenance/TrainCleaningModule_reference.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/presentation-systems-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/AudioSystem.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/Parallax.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/SpineIntegration.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Core.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Game.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Presentation/UISystem_Orthodox.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/scenario-graph-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/DESIGN_ModuleStateMachine.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/ScenarioGraphTestEnvironment.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/source-inventory.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki\\wiki\\sources\\source-inventory.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/sources/tools-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Tools/ConstSelector.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Tools/FigmaToUnity.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "kbpro-wiki/wiki/syntheses/module-creation-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToCreateModule.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDescribeModule.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToDecomposeTask_ForAI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/CoreFramework/Guides/HowToAutoGenerateModule_ForAI.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/concepts/execplans.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "llm-wiki/raw/PLANS.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/maps/operations-map.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "llm-wiki\\wiki\\maps\\operations-map.md",
+          "present": true
+        },
+        {
+          "source": "dentistry-cow-wiki/wiki/index.md",
+          "present": true
+        },
+        {
+          "source": "system/scripts/lint-wiki.js",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/runbooks/ai-command-playbooks.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "llm-wiki/raw/claude-commands/execplan.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/claude-commands/kbpro-event.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/claude-commands/kbpro-module.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/claude-commands/kbpro-review.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/claude-commands/unity-perf.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/runbooks/raw-data-ingest-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/wiki/sources/current-kbpro-ai-docs.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/runbooks/setup-ai-project-rules.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/SETUP_NEW_PROJECT.md",
+          "present": true
+        },
+        {
+          "source": "all-skills~/kbpro-code-navigator/SKILL.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/GEMINI.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "llm-wiki/wiki/sources/llm-rules-and-skills.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "llm-wiki/raw/ide-rules/README.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/.clinerules",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/.cursorrules",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/.windsurfrules",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/ide-rules/GEMINI.md",
+          "present": true
+        },
+        {
+          "source": "llm-wiki/raw/claude-commands/execplan.md",
+          "present": true
+        },
+        {
+          "source": "all-skills~/davasko-youtube-researcher/SKILL.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "plombir-buildings-wiki/wiki/concepts/plombir-building-game-design.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "plombir-buildings-wiki/raw/GDDDocs/GDD_cat_plombir_buildings.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/GDDDocs/00_MasterCatalog.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "plombir-buildings-wiki/wiki/sources/gdd-plombir-building.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "plombir-buildings-wiki/raw/GDDDocs/GDD_cat_plombir_buildings.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/GDDDocs/00_MasterCatalog.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/GDDDocs/MainArchitectures.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "plombir-buildings-wiki/wiki/sources/plombir-tasks.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "plombir-buildings-wiki\\wiki\\sources\\plombir-tasks.md",
+          "present": true
+        },
+        {
+          "source": "plombir-buildings-wiki/raw/create-plombir-tasks.js",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/ai-code-architecture-and-complexity.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/humanlayer-no-vibes-allowed.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/ai-code-security-production-readiness.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/thoughtworks-we-need-to-talk-about-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/ai-code-testing-and-tdd.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents-and-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/ai-learning-loop.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/ai-source-confidence.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/source-data.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/unity-agent-skill-set.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/AnimationVisualsExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/AsyncReactiveExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/DependencyInjectionExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/ResourcePhysicsExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityBoilerplateGenerator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityLifecycleAuditor.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityMathHelper.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/unity-ai-agent-validation.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/06-validation-and-safety.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        },
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/source-data.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/concepts/unity-ai-skill-validation.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "LLM-WIKI.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/code_style.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/principals.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityLifecycleAuditor.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/ResourcePhysicsExpert.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/shader-ai-guidelines.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/wiki/concepts/unity-ai-agent-validation.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/wiki/runbooks/architecture-challenge-protocol.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityLifecycleAuditor.md;\r\n  kbpro-wiki/raw/Architecture/Skills/ResourcePhysicsExpert.md",
+          "present": false
+        },
+        {
+          "source": "AGENTS.md; kbpro-wiki/raw/principals.md",
+          "present": false
+        },
+        {
+          "source": "wiki/runbooks/unity-ai-agent-validation.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/entities/figma-to-unity.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Tools/FigmaToUnity.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/ai-agent-ready-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/humanlayer-no-vibes-allowed.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents-and-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/ai-code-cleaning.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/humanlayer-no-vibes-allowed.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/ai-generated-code-review.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents-and-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/thoughtworks-we-need-to-talk-about-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/wiki/sources/ai-vibe-code-review-video-sources.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/local-unity-ai-skill-library.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki\\wiki\\runbooks\\local-unity-ai-skill-library.md",
+          "present": true
+        },
+        {
+          "source": "AGENTS.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/wiki/concepts/unity-ai-skill-validation.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/wiki/runbooks/unity-ai-agent-rules-and-prompts.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/wiki/runbooks/architecture-challenge-protocol.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-inventory.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-systematization.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-coverage-audit.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-ai-agent-environment-setup.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/01-environment-setup.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-ai-agent-rules-and-prompts.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/02-agent-rules-and-prompts.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-ai-prefab-scene-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/04-prefabs-scenes-components-workflow.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-ai-vfx-shader-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/05-shaders-vfx-materials-workflow.md",
+          "present": false
+        },
+        {
+          "source": "unity-wiki/raw/shader-ai-guidelines.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-editor-automation-with-ai.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/03-unity-editor-automation-scope.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-shader-ai-guidelines.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/shader-ai-guidelines.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/runbooks/unity-skills-besty-workflow.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "Packages/com.besty.unity-skills/package.json",
+          "present": false
+        },
+        {
+          "source": "Assets/KBPro/kbpro-ai-docs/incomeResources~/setup-unity-skills.ps1",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/agent-skills-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/AnimationVisualsExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/AsyncReactiveExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/DependencyInjectionExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/ResourcePhysicsExpert.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityBoilerplateGenerator.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityLifecycleAuditor.md",
+          "present": true
+        },
+        {
+          "source": "kbpro-wiki/raw/Architecture/Skills/UnityMathHelper.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/ai-engineer-eno-reyes-making-codebases-agent-ready.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/ai-engineer-eno-reyes-making-codebases-agent-ready.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/ai-vibe-code-review-transcripts-2.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/ai-vibe-code-review-transcripts.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/martin-fowler-ai-software-engineering.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/thoughtworks-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/ai-vibe-code-review-video-sources.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/source-data.md",
+          "present": true
+        },
+        {
+          "source": "raw/transcripts/ai-vibe-code-review/humanlayer-no-vibes-allowed.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents-and-coding.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/thoughtworks-we-need-to-talk-about-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/author-map.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/author-map.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/beyond-coding-testing-at-scale.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/beyond-coding-testing-at-scale.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/beyond-coding-what-is-vibe-coding.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/beyond-coding-what-is-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/boris-cherny-building-claude-code.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/boris-cherny-building-claude-code.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/boris-cherny-head-of-claude-code.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/boris-cherny-head-of-claude-code.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/code-monkey-ai-is-creating-illiterate-programmers.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/code-monkey-ai-is-creating-illiterate-programmers.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/code-monkey-vibe-coding-is-the-future.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/code-monkey-vibe-coding-is-the-future.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/humanlayer-no-vibes-allowed.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/humanlayer-no-vibes-allowed.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/jeremy-howard-dangerous-illusion-ai-coding.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/jeremy-howard-dangerous-illusion-ai-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/john-ousterhout-philosophy-of-software-design.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/john-ousterhout-philosophy-of-software-design.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/kent-beck-tdd-ai-agents-and-coding.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kent-beck-tdd-ai-agents-and-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/kitze-from-vibe-coding-to-vibe-engineering.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/kitze-from-vibe-coding-to-vibe-engineering.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/matt-pocock-commands-mcp-skills.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/matt-pocock-commands-mcp-skills.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/peter-steinberger-i-ship-code-i-dont-read.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/peter-steinberger-i-ship-code-i-dont-read.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-addy-osmani-beyond-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/pragmatic-engineer-llms-2025-reality-check.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-llms-2025-reality-check.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-martin-fowler-ai-software-engineering.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/README.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/README.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/simon-willison-engineering-practices-coding-agents.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/simon-willison-engineering-practices-coding-agents.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/source-data.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/source-data.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/source-setup-ai-project-rules.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/ide-rules/setup-ai-project-rules.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/source-unity-ai-skill-coverage-audit.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-coverage-audit.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/source-unity-ai-skill-donor-analysis.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-analysis.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/source-unity-ai-skill-systematization.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-systematization.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/thoughtworks-we-need-to-talk-about-vibe-coding.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/thoughtworks-we-need-to-talk-about-vibe-coding.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/unity-ai-skill-donor-inventory.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-inventory.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/unity-ai-workflow-video-sources.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "raw/transcripts/unity-ai-workflow-video-sources/source-data.md",
+          "present": false
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/unity-optimization-docs.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/audio.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/camera.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/code.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/physics.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/README.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/rendering.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/textures.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/OptimizationDocs/ui.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/v2-curation-backlog.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/v2-curation-backlog.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/v3-transcript-audit.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/v3-transcript-audit.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/zen-code-review-workflow-for-ai-generated-code.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/zen-code-review-workflow-for-ai-generated-code.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/sources/zen-why-ai-code-breaks-in-production.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/transcripts/ai-vibe-code-review/zen-why-ai-code-breaks-in-production.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/syntheses/unity-ai-skill-coverage-audit.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-coverage-audit.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-systematization.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/syntheses/unity-ai-skill-donor-analysis.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-inventory.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-analysis.md",
+          "present": true
+        }
+      ]
+    },
+    {
+      "page": "unity-wiki/wiki/syntheses/unity-ai-skill-systematization.md",
+      "status": "needs-stamp",
+      "sources": [
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-systematization.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-inventory.md",
+          "present": true
+        },
+        {
+          "source": "unity-wiki/raw/external-skills/unity-ai-skill-donor-analysis.md",
+          "present": true
+        }
+      ]
+    }
+  ]
+}

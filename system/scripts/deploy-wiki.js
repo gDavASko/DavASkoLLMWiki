@@ -67,11 +67,8 @@ function copyDir(src, dest, { exclude = [] } = {}) {
     else fs.copyFileSync(s, d);
   }
 }
-const guid = () => Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-// Unity .meta для текстового ассета (линтер требует .meta у каждой wiki-страницы).
-const writeMeta = (mdPath) => fs.writeFileSync(`${mdPath}.meta`,
-  `fileFormatVersion: 2\nguid: ${guid()}\nTextScriptImporter:\n  externalObjects: {}\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n`, 'utf8');
-const writeMd = (p, body) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, Buffer.concat([BOM, Buffer.from(body, 'utf8')])); writeMeta(p); };
+// .meta не создаём — Unity генерирует его сам при импорте ассета.
+const writeMd = (p, body) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, Buffer.concat([BOM, Buffer.from(body, 'utf8')])); };
 const writeJson = (p, obj) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf8'); }; // JSON без BOM
 const sh = (cmd, cwd) => execSync(cmd, { stdio: 'inherit', cwd });
 

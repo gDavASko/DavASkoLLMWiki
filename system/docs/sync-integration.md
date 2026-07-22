@@ -1,4 +1,4 @@
-﻿# Rules & Skill Synchronizer
+﻿ Rules & Skill Synchronizer
 
 To guide AI agents (like Cursor, Windsurf, Claude Code, Cline, Roo, Gemini, and Copilot) according to the project's architecture, we distribute master rules and skills into IDE-specific paths.
 
@@ -22,7 +22,7 @@ The synchronizer script takes master files from `llm-wiki/raw/ide-rules/` and co
 
 ## 2. Skill Synchronization and Formatting
 
-The synchronizer scans `raw/ai-skills~/` folders across all layers, extracts their `SKILL.md` manifests, and generates IDE adapters:
+The synchronizer scans the root `all-skills~/` directory, extracts its `SKILL.md` manifests, and generates IDE adapters:
 
 - **Folders copy**: Copies the skill folder recursively (excluding `.meta` files) to `.agents/skills/<skill-name>/`, `.codex/skills/...`, `.claude/skills/...`, and `.gemini/skills/...`.
 - **Cursor Rules**: Copies the `SKILL.md` content to `.cursor/rules/<skill-name>.mdc`.

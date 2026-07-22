@@ -1,4 +1,4 @@
-# Maintenance and Automation Scripts
+﻿ Maintenance and Automation Scripts
 
 To keep the DavASko LLM Wiki healthy, validate cross-references, search content, safely migrate paths, execute regression tests, and automatically process incoming documents, the automation scripts are placed under `system/scripts/` and `system/sync-ai-rules.js`.
 
@@ -12,7 +12,6 @@ Validates the integrity, format, and dependencies of the knowledge base.
   - DFS (Depth-First Search) cycle detection for `wiki.json` dependency hierarchies.
   - Deduplicates stub error reporting to keep console logs clean.
   - Checks page encoding (must be UTF-8 with BOM) and ensures every page has mandatory fields (`**Summary**:`, etc.).
-  - Generates `.meta` file checks inside Unity projects.
   - Validates if raw documents are older than 365 days, warning if they are stale unless they have a `.validated` companion file or `last_validated` field.
 
 ---
@@ -22,10 +21,9 @@ Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE
 
 ---
 
-## 3. Query & Ingestion Utility: `system/query-wiki.js`
+## 3. Query & Ingestion Utility: `system/scripts/query-wiki.js`
 Handles CLI-based searching of wiki pages and single-file manual ingestion.
 - **Key Features**:
-  - Smart Query Routing via `--auto`: Uses a local LLM to dynamically route queries to RLM (deep research), Graphify (AST graphs), or RAG (hybrid search) based on intent.
   - Search matches return snippets with line numbers and ANSI-highlighted text.
   - Looks up core files (`index.md`, `contradictions.md`) directly in the root of the layer's `wiki/` directory.
   - Auto-detects the layer context based on current working directory (CWD).
@@ -43,12 +41,11 @@ Safely migrates paths, files, and wiki links across all workspace files using pa
 
 ---
 
-## 6. Source Citation Check: `system/scripts/check-sources.js`
-A **citation sanity check**, not a quality measure. Verifies that the source files cited by the Q&A set in `system/evals/questions.md` exist and are non-empty.
+## 6. Regression Q&A Runner: `system/scripts/run-evals.js`
+Runs a suite of regression test queries against the search engine to verify that the AI can answer key architectural questions accurately.
 - **Features**:
   - Consumes Q&A pairs from `system/evals/questions.md`.
-  - For each question, checks that every `required source` file is present.
-- For real retrieval-quality measurement (recall@k / MRR / nDCG, baselines, threshold calibration) use `system/scripts/eval-retrieval.js`.
+  - Simulates agent queries via `query-wiki.js` and evaluates the presence of key terms in the output.
 
 ---
 
@@ -66,6 +63,5 @@ The active source code of these scripts is located inside the submodule:
 3. **`query-wiki.js`**: [query-wiki.js](../scripts/query-wiki.js)
 4. **`ingest-newdata.js`**: [ingest-newdata.js](../scripts/ingest-newdata.js)
 5. **`update-links.js`**: [update-links.js](../scripts/update-links.js)
-6. **`check-sources.js`**: [check-sources.js](../scripts/check-sources.js)
-7. **`eval-retrieval.js`**: [eval-retrieval.js](../scripts/eval-retrieval.js)
-8. **`sync-ai-rules.js`**: [sync-ai-rules.js](../sync-ai-rules.js)
+6. **`run-evals.js`**: [run-evals.js](../scripts/run-evals.js)
+7. **`sync-ai-rules.js`**: [sync-ai-rules.js](../sync-ai-rules.js)

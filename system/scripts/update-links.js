@@ -88,8 +88,8 @@ function main() {
     'raw/project-docs/test_bitrix_webhook.ps1.meta': 'davasko-wiki/raw/test_bitrix_webhook.ps1.meta',
     'raw/project-docs/claude-commands': 'llm-wiki/raw/claude-commands',
     'raw/project-docs/ide-rules': 'llm-wiki/raw/ide-rules',
-    'raw/project-docs/ai-skills': 'llm-wiki/raw/ai-skills~',
-    'raw/project-docs/ai-skills~': 'llm-wiki/raw/ai-skills~',
+    'raw/project-docs/ai-skills': 'all-skills~',
+    'raw/project-docs/ai-skills~': 'all-skills~',
 
     // execution plans (pattern search will also be done, but let's list the known stabilization plans)
     'raw/project-docs/ExecPlan_ModuleSystem_Stabilization.md': 'davasko-wiki/raw/ExecPlan_ModuleSystem_Stabilization.md',
@@ -175,20 +175,19 @@ function main() {
     'system/AI-Docs-Refactoring_plan.md.meta': 'plans/AI-Docs-Refactoring_plan.md.meta'
   };
 
-  // 1a. Dynamically scan target layers for skills to map from dentistry-cow-wiki
-  const skillLayers = ['llm-wiki', 'davasko-wiki', 'unity-wiki'];
-  skillLayers.forEach(layer => {
-    const skillsDir = path.join(submoduleRoot, layer, 'raw/ai-skills~');
-    if (fs.existsSync(skillsDir)) {
-      fs.readdirSync(skillsDir).forEach(skill => {
-        if (skill.endsWith('.meta')) return;
-        const oldPath = `dentistry-cow-wiki/raw/ai-skills~/${skill}`;
-        const newPath = `${layer}/raw/ai-skills~/${skill}`;
+  // 1a. Skills are stored only at the submodule root, never inside wiki raw layers.
+  const skillsDir = path.join(submoduleRoot, 'all-skills~');
+  if (fs.existsSync(skillsDir)) {
+    fs.readdirSync(skillsDir).forEach(skill => {
+      if (skill.endsWith('.meta')) return;
+      ['dentistry-cow-wiki', 'kbpro-wiki', 'llm-wiki', 'unity-wiki', 'davasko-wiki'].forEach(layer => {
+        const oldPath = `${layer}/raw/ai-skills~/${skill}`;
+        const newPath = `all-skills~/${skill}`;
         rawMappings[oldPath] = newPath;
         rawMappings[`${oldPath}.meta`] = `${newPath}.meta`;
       });
-    }
-  });
+    });
+  }
 
   const dynamicMappings = {};
 
@@ -353,21 +352,9 @@ function main() {
       changed = true;
     }
 
-    // Ensure all ai-skills references use the tilde directory name 'ai-skills~'
-    if (content.includes('dentistry-cow-wiki/raw/ai-skills') && !content.includes('dentistry-cow-wiki/raw/ai-skills~')) {
-      content = content.split('dentistry-cow-wiki/raw/ai-skills').join('dentistry-cow-wiki/raw/ai-skills~');
-      changed = true;
-    }
-    if (content.includes('llm-wiki/raw/ai-skills') && !content.includes('llm-wiki/raw/ai-skills~')) {
-      content = content.split('llm-wiki/raw/ai-skills').join('llm-wiki/raw/ai-skills~');
-      changed = true;
-    }
-    if (content.includes('davasko-wiki/raw/ai-skills') && !content.includes('davasko-wiki/raw/ai-skills~')) {
-      content = content.split('davasko-wiki/raw/ai-skills').join('davasko-wiki/raw/ai-skills~');
-      changed = true;
-    }
-    if (content.includes('unity-wiki/raw/ai-skills') && !content.includes('unity-wiki/raw/ai-skills~')) {
-      content = content.split('unity-wiki/raw/ai-skills').join('unity-wiki/raw/ai-skills~');
+    const legacySkillPath = /(?:dentistry-cow|kbpro|llm|unity|davasko)-wiki\/raw\/ai-skills~?/g;
+    if (legacySkillPath.test(content)) {
+      content = content.replace(legacySkillPath, 'all-skills~');
       changed = true;
     }
 

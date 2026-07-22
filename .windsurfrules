@@ -1,1 +1,46 @@
-Please follow the core agent rules defined in: [AGENTS.md](AGENTS.md)
+ Expert C# & Unity Development Rules for KBPro
+
+You are an expert in C#, Unity, and scalable game development. Prioritize readability, performance, and modularity.
+
+## Key Principles
+- Write clear, technical responses with precise C# and Unity examples.
+- Use Unity's built-in features (Prefabs, ScriptableObjects, Animator) wherever possible.
+- Prioritize performance optimization and memory management in every stage.
+- Maintain a clear and logical project structure.
+
+## KBPro Knowledge Base Flow
+- AI knowledge base lives in `Assets/KBPro/kbpro-ai-docs`.
+- If the project is not configured for AI according to [SETUP_NEW_PROJECT.md](file:///Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/SETUP_NEW_PROJECT.md), you must perform the setup according to this document before starting any other tasks.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/architecture-map.md` first for architecture work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/gameplay-product-map.md` first for gameplay, product, UI, audio, analytics, tutorial, and presentation work.
+- Use `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/wiki/maps/operations-map.md` first for AI rules, wiki maintenance, Bitrix import, and operational guardrails.
+- Use `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-generated-code-review.md`, `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/runbooks/ai-code-cleaning.md`, and `Assets/KBPro/kbpro-ai-docs/unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md` for AI-generated code review and vibe-code cleanup.
+- Treat `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/` as source evidence after choosing the relevant wiki path.
+- **Model Check (CRITICAL)**: At the very first access or query to the knowledge base, check if the vectorization model is locally installed. If it is missing or fails to load (e.g., `tokenizer.json` not found, `local_files_only` errors), the agent MUST immediately stop and offer to deploy the model itself using the `davasko-llm-wiki` skill (which runs `node system/scripts/setup-model.js`), pointing out the repository link: https://github.com/gDavASko/DavASkoLLMWiki.git.
+- Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Assets\KBPro\kbpro-ai-docs\system/lint-wiki.ps1` after wiki or raw documentation changes.
+- **Grep Search Gaps**: If you have to search the codebase using grep, ripgrep, or full-text search because the topic, convention, or code pattern was not directly found in the knowledge base maps or concepts, you must document your findings. You must add the description, links, and code symbols/examples to the knowledge base (under either `kbpro-wiki` or `dentistry-cow-wiki`, depending on the domain). If the topic already exists in the knowledge base but lacks links or specific details, you must supplement/update it with the missing references so that future searches can be done directly via the wiki query system without needing generic grep searches.
+
+## C# & Unity Technical Standards
+- **Architecture:** Strictly follow the Component pattern and KBPro's modular structure.
+- **Access:** Cache references in `Awake`. Use `TryGetComponent<T>(out var comp)`.
+- **Prohibited:** `GameObject.Find`, `Transform.Find`, `FindObjectOfType`, and standard `UnityEngine.UI.Text` (use TextMeshPro).
+- **Optimization:** 
+    - Physics strictly in `FixedUpdate`.
+    - No allocations in `Update`/`FixedUpdate`. No LINQ or `foreach` on Lists in hot paths.
+    - Use Object Pooling for frequent Instantiate/Destroy.
+- **Async:** Use `UniTask` for time-based operations and asynchronous tasks.
+
+## Error Handling & Debugging
+- Implement `try-catch` blocks for I/O and network operations.
+- Use `Debug.Assert` for logical assertions during development.
+- Utilize Unity's Profiler and Frame Debugger for performance issues.
+
+## Bitrix24 Task Creation
+- JSON files must be **UTF-8 with BOM** for platform-independent Windows, Unity, Obsidian, and Russian-language text handling.
+- Tags MUST be in the `"TAGS": []` array field, NOT in the description text.
+
+## Documentation Reference
+- Start from the relevant wiki map before reading raw source files.
+- Respect all 23 principles in `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/principals.md`.
+- Follow naming conventions in `Assets/KBPro/kbpro-ai-docs/kbpro-wiki/raw/code_style.md`.
+- Never proceed to implement work (making code changes, running synchronizations, etc.) until the user explicitly says the phrase: "Реализуй план" (and exactly like that).

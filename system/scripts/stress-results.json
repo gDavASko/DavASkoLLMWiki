@@ -1,0 +1,272 @@
+[
+  {
+    "query": "Что такое Harness Protocol и как его запустить?",
+    "baseline_time": 362,
+    "baseline_score": 0,
+    "rag_time": 4612,
+    "rag_score": 3,
+    "rlm_time": 2253,
+    "rlm_score": 2
+  },
+  {
+    "query": "Какие слои зависят от kbpro-eventbus?",
+    "baseline_time": 876,
+    "baseline_score": 2,
+    "rag_time": 4710,
+    "rag_score": 8,
+    "rlm_time": 1803,
+    "rlm_score": 0
+  },
+  {
+    "query": "В чем суть архитектурного принципа ModuleScope?",
+    "baseline_time": 867,
+    "baseline_score": 2,
+    "rag_time": 4537,
+    "rag_score": 9,
+    "rlm_time": 24907,
+    "rlm_score": 3
+  },
+  {
+    "query": "Как работает InjectSystems для зависимостей?",
+    "baseline_time": 911,
+    "baseline_score": 4,
+    "rag_time": 4339,
+    "rag_score": 8,
+    "rlm_time": 95859,
+    "rlm_score": 3
+  },
+  {
+    "query": "Можно ли использовать GameObject.Find в коде?",
+    "baseline_time": 891,
+    "baseline_score": 0,
+    "rag_time": 4680,
+    "rag_score": 2,
+    "rlm_time": 36102,
+    "rlm_score": 2
+  },
+  {
+    "query": "В чем отличие ServiceLocator от InjectSystems?",
+    "baseline_time": 327,
+    "baseline_score": 0,
+    "rag_time": 4625,
+    "rag_score": 5,
+    "rlm_time": 155356,
+    "rlm_score": 2
+  },
+  {
+    "query": "Как правильно писать теги (TAGS) в задачах Bitrix24?",
+    "baseline_time": 849,
+    "baseline_score": 0,
+    "rag_time": 4625,
+    "rag_score": 0,
+    "rlm_time": 12115,
+    "rlm_score": 9
+  },
+  {
+    "query": "Где должны храниться скрипты навыков (skills)?",
+    "baseline_time": 887,
+    "baseline_score": 0,
+    "rag_time": 4398,
+    "rag_score": 2,
+    "rlm_time": 288667,
+    "rlm_score": 0
+  },
+  {
+    "query": "Что делает команда node system/scripts/lint-wiki.js?",
+    "baseline_time": 878,
+    "baseline_score": 2,
+    "rag_time": 4570,
+    "rag_score": 2,
+    "rlm_time": 10801,
+    "rlm_score": 8
+  },
+  {
+    "query": "Какие требования к написанию кода для физики в Unity?",
+    "baseline_time": 856,
+    "baseline_score": 2,
+    "rag_time": 4426,
+    "rag_score": 8,
+    "rlm_time": 25406,
+    "rlm_score": 2
+  },
+  {
+    "query": "В каком методе нужно кэшировать ссылки (Awake или Start)?",
+    "baseline_time": 887,
+    "baseline_score": 0,
+    "rag_time": 4564,
+    "rag_score": 2,
+    "rlm_time": 14871,
+    "rlm_score": 9
+  },
+  {
+    "query": "Как добавить новую модель в базу Graphify?",
+    "baseline_time": 868,
+    "baseline_score": 0,
+    "rag_time": 4311,
+    "rag_score": 2,
+    "rlm_time": 13513,
+    "rlm_score": 9
+  },
+  {
+    "query": "Что такое Graphify и для чего он нужен?",
+    "baseline_time": 856,
+    "baseline_score": 0,
+    "rag_time": 4244,
+    "rag_score": 2,
+    "rlm_time": 2561,
+    "rlm_score": 7
+  },
+  {
+    "query": "Что такое RLM (Research Language Model)?",
+    "baseline_time": 329,
+    "baseline_score": 0,
+    "rag_time": 4189,
+    "rag_score": 8,
+    "rlm_time": 3153,
+    "rlm_score": 7
+  },
+  {
+    "query": "Какие правила языка действуют для общения ИИ с пользователем?",
+    "baseline_time": 854,
+    "baseline_score": 3,
+    "rag_time": 4418,
+    "rag_score": 0,
+    "rlm_time": 12711,
+    "rlm_score": 2
+  },
+  {
+    "query": "Как правильно использовать класс LazySrv<T>?",
+    "baseline_time": 886,
+    "baseline_score": 0,
+    "rag_time": 4304,
+    "rag_score": 3,
+    "rlm_time": 12526,
+    "rlm_score": 8
+  },
+  {
+    "query": "Разрешено ли использовать LINQ в методах Update?",
+    "baseline_time": 869,
+    "baseline_score": 0,
+    "rag_time": 4275,
+    "rag_score": 2,
+    "rlm_time": 209994,
+    "rlm_score": 0
+  },
+  {
+    "query": "Как использовать UniTask вместо корутин?",
+    "baseline_time": 878,
+    "baseline_score": 4,
+    "rag_time": 4467,
+    "rag_score": 3,
+    "rlm_time": 2941,
+    "rlm_score": 8
+  },
+  {
+    "query": "Какой слой в KBPro занимается загрузкой ассетов?",
+    "baseline_time": 836,
+    "baseline_score": 3,
+    "rag_time": 4608,
+    "rag_score": 5,
+    "rlm_time": 1346,
+    "rlm_score": 2
+  },
+  {
+    "query": "Как использовать namespace KBP.{CATEGORY}?",
+    "baseline_time": 533,
+    "baseline_score": 0,
+    "rag_time": 4341,
+    "rag_score": 7,
+    "rlm_time": 3936,
+    "rlm_score": 7
+  },
+  {
+    "query": "В каком формате и кодировке нужно сохранять JSON файлы?",
+    "baseline_time": 837,
+    "baseline_score": 0,
+    "rag_time": 4357,
+    "rag_score": 2,
+    "rlm_time": 3685,
+    "rlm_score": 9
+  },
+  {
+    "query": "Можно ли менять .meta файлы Unity напрямую?",
+    "baseline_time": 849,
+    "baseline_score": 0,
+    "rag_time": 4378,
+    "rag_score": 0,
+    "rlm_time": 9958,
+    "rlm_score": 8
+  },
+  {
+    "query": "Где должны храниться временные scratch файлы при работе ИИ?",
+    "baseline_time": 840,
+    "baseline_score": 0,
+    "rag_time": 4464,
+    "rag_score": 0,
+    "rlm_time": 12374,
+    "rlm_score": 8
+  },
+  {
+    "query": "Что такое архитектура UIPBase и UIVBase?",
+    "baseline_time": 844,
+    "baseline_score": 2,
+    "rag_time": 4509,
+    "rag_score": 8,
+    "rlm_time": 13121,
+    "rlm_score": 2
+  },
+  {
+    "query": "Можно ли использовать UnityEngine.UI.Text в UI коров?",
+    "baseline_time": 851,
+    "baseline_score": 2,
+    "rag_time": 4807,
+    "rag_score": 0,
+    "rlm_time": 3207,
+    "rlm_score": 0
+  },
+  {
+    "query": "В чем заключается протокол перекрестной валидации (CROSS-VALIDATION)?",
+    "baseline_time": 866,
+    "baseline_score": 0,
+    "rag_time": 4485,
+    "rag_score": 0,
+    "rlm_time": 12110,
+    "rlm_score": 8
+  },
+  {
+    "query": "Зачем нужен навык davasko-harness-dispatcher?",
+    "baseline_time": 835,
+    "baseline_score": 0,
+    "rag_time": 4497,
+    "rag_score": 5,
+    "rlm_time": 18504,
+    "rlm_score": 0
+  },
+  {
+    "query": "Какая версия Unity используется в текущем проекте?",
+    "baseline_time": 859,
+    "baseline_score": 2,
+    "rag_time": 4447,
+    "rag_score": 2,
+    "rlm_time": 12594,
+    "rlm_score": 0
+  },
+  {
+    "query": "Как работают генераторы констант и [ConstSelector]?",
+    "baseline_time": 856,
+    "baseline_score": 0,
+    "rag_time": 4721,
+    "rag_score": 8,
+    "rlm_time": 11152,
+    "rlm_score": 8
+  },
+  {
+    "query": "Какие обязательные поля при создании задачи Bitrix (GROUP_ID, RESPONSIBLE_ID)?",
+    "baseline_time": 857,
+    "baseline_score": 0,
+    "rag_time": 4091,
+    "rag_score": 0,
+    "rlm_time": 28227,
+    "rlm_score": 2
+  }
+]

@@ -1,0 +1,602 @@
+[
+  {
+    "query": "Execplan",
+    "relevant": [
+      "llm-wiki/raw/claude-commands/execplan.md"
+    ]
+  },
+  {
+    "query": "The Dangerous Illusion of AI Coding?",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/jeremy-howard-dangerous-illusion-ai-coding.md"
+    ]
+  },
+  {
+    "query": "Create Module With I/O",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/create-module-with-io.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Мытье рук в вагоне-ресторане (DiningCarHandwashingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/station_tasks/DiningCarHandwashingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Укладка гравия для железной дороги (RailWayRoad)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/RailWayRoad_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Этап нанесения клея (ChippedCrownGlueStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownGlueStage_reference.md"
+    ]
+  },
+  {
+    "query": "IDE Rules — Мастер-копии настроек ИИ-ассистентов",
+    "relevant": [
+      "llm-wiki/raw/ide-rules/README.md"
+    ]
+  },
+  {
+    "query": "Оптимизация рендеринга и освещения",
+    "relevant": [
+      "unity-wiki/raw/OptimizationDocs/rendering.md"
+    ]
+  },
+  {
+    "query": "security-redaction-over-raw-immutability.md",
+    "relevant": [
+      "kbpro-wiki/wiki/decisions/security-redaction-over-raw-immutability.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Перевод стрелок (ChangeRailsDirectionModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/way_tasks/ChangeRailsDirectionModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Электропроводка — Подача питания и финал (Electricity Final Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_FinalStage_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Выбор пациента и генерация болезней (PatientSelectionModule)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/PatientSelectionModule_reference.md"
+    ]
+  },
+  {
+    "query": "Правила агента и промпты для Unity",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/02-agent-rules-and-prompts.md"
+    ]
+  },
+  {
+    "query": "Unity AI Skill Donor Analysis",
+    "relevant": [
+      "unity-wiki/wiki/syntheses/unity-ai-skill-donor-analysis.md"
+    ]
+  },
+  {
+    "query": "Parent Timer",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/parent-timer.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Опускание моста (LowerBridgeModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/way_tasks/LowerBridgeModule_reference.md"
+    ]
+  },
+  {
+    "query": "Master Catalog: Кот Пломбир - Стройка",
+    "relevant": [
+      "plombir-buildings-wiki/raw/GDDDocs/00_MasterCatalog.md"
+    ]
+  },
+  {
+    "query": "Device Build Smoke",
+    "relevant": [
+      "dentistry-cow-wiki/wiki/runbooks/device-build-smoke.md"
+    ]
+  },
+  {
+    "query": "ExecPlans",
+    "relevant": [
+      "llm-wiki/wiki/concepts/execplans.md"
+    ]
+  },
+  {
+    "query": "Author Map: AI/Vibe Code Review And Cleaning",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/author-map.md"
+    ]
+  },
+  {
+    "query": "Module Creation Workflow",
+    "relevant": [
+      "kbpro-wiki/wiki/syntheses/module-creation-workflow.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Посадка и высадка пассажиров (PassengerBoardingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/station_tasks/PassengerBoardingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Укладка элементов железной дороги (BuildRailRoad_CraneStage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoad_CraneStage_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Экран диагностики (DiagnosisModule)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisModule_reference.md"
+    ]
+  },
+  {
+    "query": "Kbpro Module",
+    "relevant": [
+      "llm-wiki/raw/claude-commands/kbpro-module.md"
+    ]
+  },
+  {
+    "query": "Source Data Manifest",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/source-data.md"
+    ]
+  },
+  {
+    "query": "Auto Generate Module",
+    "relevant": [
+      "kbpro-wiki/wiki/runbooks/auto-generate-module.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Экран победы и награды",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/core_runner/WinModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Восстановление водопровода — Завершение и запуск воды (Water Finish Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/water_restoration/WaterRestoration_WaterFinishStage_reference.md"
+    ]
+  },
+  {
+    "query": "Raw Data Ingest Workflow",
+    "relevant": [
+      "llm-wiki/wiki/runbooks/raw-data-ingest-workflow.md"
+    ]
+  },
+  {
+    "query": "Summary of author-map",
+    "relevant": [
+      "unity-wiki/wiki/sources/author-map.md"
+    ]
+  },
+  {
+    "query": "ID Processors",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/id-processors.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Чистка поезда (TrainCleaningModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/TrainCleaningModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Бассейн — Заливка чаши (Foundation Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPool_FoundationStage_reference.md"
+    ]
+  },
+  {
+    "query": "Codex Skill Frontmatter Compatibility",
+    "relevant": [
+      "dentistry-cow-wiki/wiki/sources/codex-skill-frontmatter.md"
+    ]
+  },
+  {
+    "query": "Настройка среды для Unity AI Workflow",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/01-environment-setup.md"
+    ]
+  },
+  {
+    "query": "Head of Claude Code: What happens after coding is solved",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/boris-cherny-head-of-claude-code.md"
+    ]
+  },
+  {
+    "query": "AI Architecture Reference: Module I/O",
+    "relevant": [
+      "kbpro-wiki/raw/Architecture/CoreFramework/Modules/ModuleIO.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Разгрузка вагонов (CargoUnloadingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/station_tasks/CargoUnloadingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Игровая площадка (Playground Overview)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/playground/PlaygroundModule_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Этап установки коронки (ChippedCrownInstallStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownInstallStage_reference.md"
+    ]
+  },
+  {
+    "query": "Что AI-агент может делать в Unity Editor",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/03-unity-editor-automation-scope.md"
+    ]
+  },
+  {
+    "query": "Summary of zen-why-ai-code-breaks-in-production",
+    "relevant": [
+      "unity-wiki/wiki/sources/zen-why-ai-code-breaks-in-production.md"
+    ]
+  },
+  {
+    "query": "Node: Complete Node",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/nodes/node-complete.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Поезд-бегун (RunnerModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/core_runner/RunnerModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Бассейн (Swimming Pool Building Overview)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/swimming_pool/SwimmingPoolBuildingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Установка коронок на обломанные зубы (ChippedCrownModule)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownModule_reference.md"
+    ]
+  },
+  {
+    "query": "Kbpro Review",
+    "relevant": [
+      "llm-wiki/raw/claude-commands/kbpro-review.md"
+    ]
+  },
+  {
+    "query": "Summary of README",
+    "relevant": [
+      "unity-wiki/wiki/sources/README.md"
+    ]
+  },
+  {
+    "query": "Save System",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/save-system.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Сканер поезда (TrainScannerModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/TrainScannerModule_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Забивание костылей железной дороги (BuildRailRoad_HammerStage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoad_HammerStage_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Диагностика — Воздушный пистолет (DiagnosisAirPistolStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisAirPistolStage_reference.md"
+    ]
+  },
+  {
+    "query": "Kbpro Event",
+    "relevant": [
+      "llm-wiki/raw/claude-commands/kbpro-event.md"
+    ]
+  },
+  {
+    "query": "Оптимизация камер в Unity",
+    "relevant": [
+      "unity-wiki/raw/OptimizationDocs/camera.md"
+    ]
+  },
+  {
+    "query": "KBPro Architecture Overview",
+    "relevant": [
+      "kbpro-wiki/wiki/concepts/kbpro-architecture-overview.md"
+    ]
+  },
+  {
+    "query": "Модули проекта Rail Cow (Железная дорога)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/README.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Строительство забора — Выкапывание траншеи (Digging Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/fence_building/FenceBuilding_DiggingStage_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Этап стачивания зубов (ChippedCrownShapingStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownShapingStage_reference.md"
+    ]
+  },
+  {
+    "query": "operations-map.md",
+    "relevant": [
+      "llm-wiki/wiki/maps/operations-map.md"
+    ]
+  },
+  {
+    "query": "Summary of simon-willison-engineering-practices-coding-agents",
+    "relevant": [
+      "unity-wiki/wiki/sources/simon-willison-engineering-practices-coding-agents.md"
+    ]
+  },
+  {
+    "query": "Passenger System",
+    "relevant": [
+      "kbpro-wiki/raw/Architecture/Gameplay/PassengerSystem.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Перевозка грузов (CargoTransportationModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/station_tasks/CargoTransportationModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Строительство многоэтажного дома — Заливка фундамента (Foundation Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/construction/HighRiseBuilding_FoundationStage_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Диагностика — Рентген-сканер (DiagnosisXRayScannerStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisXRayScannerStage_reference.md"
+    ]
+  },
+  {
+    "query": "Source Data: Unity AI Workflow Videos and Expert Sources",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/source-data.md"
+    ]
+  },
+  {
+    "query": "Software engineering with LLMs in 2025: reality check",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-engineer-llms-2025-reality-check.md"
+    ]
+  },
+  {
+    "query": "Entity: Component Injector",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/component-injector.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Восстановление железной дороги (RestoreRailwayModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/way_tasks/RestoreRailwayModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Будка для питомца — Скрепление гвоздями (Fastening Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/pet_house_building/PetHouse_FasteningStage_reference.md"
+    ]
+  },
+  {
+    "query": "☁️ Проектные ссылки",
+    "relevant": [
+      "dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/GDD_Dentistry_cow.md"
+    ]
+  },
+  {
+    "query": "Unity Perf",
+    "relevant": [
+      "llm-wiki/raw/claude-commands/unity-perf.md"
+    ]
+  },
+  {
+    "query": "Summary of unity-ai-skill-systematization",
+    "relevant": [
+      "unity-wiki/wiki/sources/source-unity-ai-skill-systematization.md"
+    ]
+  },
+  {
+    "query": "Service Locator",
+    "relevant": [
+      "kbpro-wiki/wiki/entities/service-locator.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Мойка поезда (TrainWashingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/TrainWashingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Электропроводка — Сканирование стены (Scanning Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_ScanningStage_reference.md"
+    ]
+  },
+  {
+    "query": "Architecture: Кот Пломбир - Стройка",
+    "relevant": [
+      "dentistry-cow-wiki/raw/GDDDocs/MainArchitectures.md"
+    ]
+  },
+  {
+    "query": "Сцены, компоненты и сложные префабы",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/04-prefabs-scenes-components-workflow.md"
+    ]
+  },
+  {
+    "query": "Summary of zen-code-review-workflow-for-ai-generated-code",
+    "relevant": [
+      "unity-wiki/wiki/sources/zen-code-review-workflow-for-ai-generated-code.md"
+    ]
+  },
+  {
+    "query": "Meta Systems Docs",
+    "relevant": [
+      "kbpro-wiki/wiki/sources/meta-systems-docs.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Сборка поезда (PreparingTrainModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/PreparingTrainModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Неисправная электропроводка (Restoring Electricity Overview)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricityModule_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Этап 3D-печати коронки (ChippedCrownPrintingStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/ChippedCrownPrintingStage_reference.md"
+    ]
+  },
+  {
+    "query": "Шейдеры, материалы и VFX в AI Workflow",
+    "relevant": [
+      "llm-wiki/raw/transcripts/unity-ai-workflow-video-sources/05-shaders-vfx-materials-workflow.md"
+    ]
+  },
+  {
+    "query": "Testing at Scale: What Every Developer Needs to Know",
+    "relevant": [
+      "unity-wiki/raw/transcripts/ai-vibe-code-review/beyond-coding-testing-at-scale.md"
+    ]
+  },
+  {
+    "query": "Module: DataTree (Branching Progress Graph)",
+    "relevant": [
+      "kbpro-wiki/raw/Architecture/CoreFramework/ScenarioGraph/DataTree.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Маршрутизатор препятствий (ObstacleModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/core_runner/ObstacleModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Игровая площадка — Бурение и цементирование (Drilling Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/playground/Playground_DrillingStage_reference.md"
+    ]
+  },
+  {
+    "query": "Stage Reference: Диагностика — Стоматологическое зеркало (DiagnosisDentalMirrorStage)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/DiagnosisDentalMirrorStage_reference.md"
+    ]
+  },
+  {
+    "query": "Codex Execution Plans (ExecPlans):",
+    "relevant": [
+      "llm-wiki/raw/PLANS.md"
+    ]
+  },
+  {
+    "query": "Unity Optimization Docs",
+    "relevant": [
+      "unity-wiki/wiki/sources/unity-optimization-docs.md"
+    ]
+  },
+  {
+    "query": "AI Architecture Reference: UISystem_Orthodox",
+    "relevant": [
+      "kbpro-wiki/raw/Architecture/Presentation/UISystem_Orthodox.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Заправка поезда углем (TrainRefuelingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/TrainRefuelingModule_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Координатор строительства железной дороги (BuildRailRoadModule)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/railway_laying/BuildRailRoadModule_reference.md"
+    ]
+  },
+  {
+    "query": "Модули проекта Dentistry Cow (Стоматология)",
+    "relevant": [
+      "dentistry-cow-wiki/raw/ModuleExamples/README.md"
+    ]
+  },
+  {
+    "query": "LLM Rules And Skills",
+    "relevant": [
+      "llm-wiki/wiki/sources/llm-rules-and-skills.md"
+    ]
+  },
+  {
+    "query": "AI Code Architecture And Complexity",
+    "relevant": [
+      "unity-wiki/wiki/concepts/ai-code-architecture-and-complexity.md"
+    ]
+  },
+  {
+    "query": "SKILL: Unity Math & Shader Helper",
+    "relevant": [
+      "kbpro-wiki/raw/Architecture/Skills/UnityMathHelper.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Сцепка вагонов (TrainCouplingModule)",
+    "relevant": [
+      "railway-wiki/raw/ModuleExamples/train_maintenance/TrainCoupling_reference.md"
+    ]
+  },
+  {
+    "query": "Module Reference: Электропроводка — Соединение контактов (Wire Fix Stage)",
+    "relevant": [
+      "plombir-buildings-wiki/raw/ModuleExamples/electricity_restoration/RestoringElectricity_WireFixStage_reference.md"
+    ]
+  }
+]

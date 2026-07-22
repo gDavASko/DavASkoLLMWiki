@@ -1,90 +1,2081 @@
 {
-  "warnings": [],
-  "errors": [
+  "warnings": [
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\architecture-setup.md",
-      "line": 30,
-      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\system\\davasko-wiki)"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\contradictions.md",
+      "line": 73,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\architecture-setup.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\index.md",
+      "line": 48,
+      "msg": "Link points to a stub/placeholder [[gdd-plombir-building]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\index.md",
+      "line": 50,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\index.md",
+      "line": 62,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\index.md",
+      "line": 181,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\index.md",
+      "line": 184,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\architecture-map.md",
+      "line": 75,
+      "msg": "Link points to a stub/placeholder [[device-build-smoke]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\architecture-map.md",
+      "line": 93,
+      "msg": "Link points to a stub/placeholder [[device-build-smoke]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\gameplay-product-map.md",
+      "line": 11,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\gameplay-product-map.md",
+      "line": 32,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\gameplay-product-map.md",
+      "line": 35,
+      "msg": "Link points to a stub/placeholder [[gdd-plombir-building]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\gameplay-product-map.md",
+      "line": 74,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\maps\\gameplay-product-map.md",
+      "line": 75,
+      "msg": "Link points to a stub/placeholder [[gdd-plombir-building]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\runbooks\\bitrix-task-import.md",
+      "line": 24,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\runbooks\\bitrix-task-import.md",
+      "line": 26,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\runbooks\\bitrix-task-import.md",
+      "line": 81,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\runbooks\\bitrix-task-import.md",
+      "line": 83,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\stubs.md",
+      "line": 16,
+      "msg": "Link points to a stub/placeholder [[device-build-smoke]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\stubs.md",
+      "line": 18,
+      "msg": "Link points to a stub/placeholder [[gdd-plombir-building]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\wiki\\stubs.md",
+      "line": 20,
+      "msg": "Link points to a stub/placeholder [[plombir-building-game-design]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\concepts\\execplans.md",
+      "line": 11,
+      "msg": "Link points to a stub/placeholder [[current-kbpro-ai-docs]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\concepts\\execplans.md",
+      "line": 53,
+      "msg": "Link points to a stub/placeholder [[current-kbpro-ai-docs]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 24,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 25,
+      "msg": "Link points to a stub/placeholder [[bitrix-task-import]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 26,
+      "msg": "Link points to a stub/placeholder [[ai-generated-code-review]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 27,
+      "msg": "Link points to a stub/placeholder [[ai-agent-ready-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 28,
+      "msg": "Link points to a stub/placeholder [[unity-ai-workflow-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 56,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 57,
+      "msg": "Link points to a stub/placeholder [[unity-agent-skill-set]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 58,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-inventory]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 60,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-analysis]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 62,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-systematization]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 64,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-coverage-audit]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 66,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 68,
+      "msg": "Link points to a stub/placeholder [[ai-vibe-code-review-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 69,
+      "msg": "Link points to a stub/placeholder [[unity-ai-workflow-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 71,
+      "msg": "Link points to a stub/placeholder [[ai-generated-code-review]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 72,
+      "msg": "Link points to a stub/placeholder [[ai-code-cleaning]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 73,
+      "msg": "Link points to a stub/placeholder [[ai-agent-ready-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 74,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-environment-setup]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 75,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-rules-and-prompts]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 76,
+      "msg": "Link points to a stub/placeholder [[local-unity-ai-skill-library]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 78,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 80,
+      "msg": "Link points to a stub/placeholder [[unity-editor-automation-with-ai]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 81,
+      "msg": "Link points to a stub/placeholder [[unity-ai-prefab-scene-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 82,
+      "msg": "Link points to a stub/placeholder [[unity-ai-vfx-shader-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 83,
+      "msg": "Link points to a stub/placeholder [[unity-shader-ai-guidelines]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 85,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 86,
+      "msg": "Link points to a stub/placeholder [[unity-skills-besty-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 87,
+      "msg": "Link points to a stub/placeholder [[ai-source-confidence]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 88,
+      "msg": "Link points to a stub/placeholder [[security-redaction-over-raw-immutability]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 93,
+      "msg": "Link points to a stub/placeholder [[decompose-task-to-backlog]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 94,
+      "msg": "Link points to a stub/placeholder [[bitrix-task-import]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 106,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 107,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-inventory]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 108,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-analysis]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 109,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-systematization]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 110,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-coverage-audit]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 111,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 112,
+      "msg": "Link points to a stub/placeholder [[bitrix-task-import]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 114,
+      "msg": "Link points to a stub/placeholder [[security-redaction-over-raw-immutability]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 115,
+      "msg": "Link points to a stub/placeholder [[ai-generated-code-review]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 116,
+      "msg": "Link points to a stub/placeholder [[ai-code-cleaning]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 117,
+      "msg": "Link points to a stub/placeholder [[ai-agent-ready-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 118,
+      "msg": "Link points to a stub/placeholder [[unity-ai-workflow-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 119,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-environment-setup]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 120,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-rules-and-prompts]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 121,
+      "msg": "Link points to a stub/placeholder [[local-unity-ai-skill-library]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 122,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 123,
+      "msg": "Link points to a stub/placeholder [[unity-editor-automation-with-ai]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 124,
+      "msg": "Link points to a stub/placeholder [[unity-ai-prefab-scene-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 125,
+      "msg": "Link points to a stub/placeholder [[unity-ai-vfx-shader-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 126,
+      "msg": "Link points to a stub/placeholder [[unity-shader-ai-guidelines]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 127,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\maps\\operations-map.md",
+      "line": 128,
+      "msg": "Link points to a stub/placeholder [[ai-source-confidence]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 15,
+      "msg": "Link points to a stub/placeholder [[create-game-module]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 16,
+      "msg": "Link points to a stub/placeholder [[event-bus]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 17,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 41,
+      "msg": "Link points to a stub/placeholder [[architecture-map]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 51,
+      "msg": "Link points to a stub/placeholder [[architecture-map]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 52,
+      "msg": "Link points to a stub/placeholder [[module-creation-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 76,
+      "msg": "Link points to a stub/placeholder [[create-game-module]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 77,
+      "msg": "Link points to a stub/placeholder [[event-bus]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 78,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 79,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 80,
+      "msg": "Link points to a stub/placeholder [[architecture-map]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\ai-command-playbooks.md",
+      "line": 81,
+      "msg": "Link points to a stub/placeholder [[module-creation-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\raw-data-ingest-workflow.md",
+      "line": 11,
+      "msg": "Link points to a stub/placeholder [[current-kbpro-ai-docs]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\raw-data-ingest-workflow.md",
+      "line": 12,
+      "msg": "Link points to a stub/placeholder [[legacy-documents-as-raw-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\raw-data-ingest-workflow.md",
+      "line": 53,
+      "msg": "Link points to a stub/placeholder [[current-kbpro-ai-docs]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\runbooks\\raw-data-ingest-workflow.md",
+      "line": 54,
+      "msg": "Link points to a stub/placeholder [[legacy-documents-as-raw-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 18,
+      "msg": "Link points to a stub/placeholder [[current-kbpro-ai-docs]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 19,
+      "msg": "Link points to a stub/placeholder [[legacy-documents-as-raw-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 21,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 22,
+      "msg": "Link points to a stub/placeholder [[bitrix-task-import]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 23,
+      "msg": "Link points to a stub/placeholder [[ai-generated-code-review]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 24,
+      "msg": "Link points to a stub/placeholder [[ai-agent-ready-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 25,
+      "msg": "Link points to a stub/placeholder [[unity-ai-workflow-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 26,
+      "msg": "Link points to a stub/placeholder [[unity-agent-skill-set]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 27,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-inventory]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 28,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-donor-analysis]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 29,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-systematization]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 30,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-coverage-audit]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 31,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 32,
+      "msg": "Link points to a stub/placeholder [[ai-vibe-code-review-video-sources]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 33,
+      "msg": "Link points to a stub/placeholder [[ai-code-cleaning]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 34,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-environment-setup]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 35,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-rules-and-prompts]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 36,
+      "msg": "Link points to a stub/placeholder [[local-unity-ai-skill-library]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 37,
+      "msg": "Link points to a stub/placeholder [[unity-ai-skill-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 38,
+      "msg": "Link points to a stub/placeholder [[unity-editor-automation-with-ai]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 39,
+      "msg": "Link points to a stub/placeholder [[unity-ai-prefab-scene-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 40,
+      "msg": "Link points to a stub/placeholder [[unity-ai-vfx-shader-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 41,
+      "msg": "Link points to a stub/placeholder [[unity-shader-ai-guidelines]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 42,
+      "msg": "Link points to a stub/placeholder [[unity-ai-agent-validation]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 43,
+      "msg": "Link points to a stub/placeholder [[unity-skills-besty-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 44,
+      "msg": "Link points to a stub/placeholder [[ai-source-confidence]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 45,
+      "msg": "Link points to a stub/placeholder [[security-redaction-over-raw-immutability]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 46,
+      "msg": "Link points to a stub/placeholder [[decompose-task-to-backlog]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 47,
+      "msg": "Link points to a stub/placeholder [[create-game-module]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 48,
+      "msg": "Link points to a stub/placeholder [[event-bus]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 49,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 50,
+      "msg": "Link points to a stub/placeholder [[architecture-map]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\stubs.md",
+      "line": 51,
+      "msg": "Link points to a stub/placeholder [[module-creation-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 16,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 17,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 18,
+      "msg": "Link points to a stub/placeholder [[spine-integration]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 19,
+      "msg": "Link points to a stub/placeholder [[config-and-data]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 81,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 82,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 83,
+      "msg": "Link points to a stub/placeholder [[spine-integration]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-agent-skill-set.md",
+      "line": 84,
+      "msg": "Link points to a stub/placeholder [[config-and-data]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-code-review-checklist.md",
+      "line": 13,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-code-review-checklist.md",
+      "line": 14,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-code-review-checklist.md",
+      "line": 61,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-code-review-checklist.md",
+      "line": 62,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-skill-validation.md",
+      "line": 17,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-skill-validation.md",
+      "line": 20,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-skill-validation.md",
+      "line": 21,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\concepts\\unity-ai-skill-validation.md",
+      "line": 111,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\entities\\figma-to-unity.md",
+      "line": 10,
+      "msg": "Link points to a stub/placeholder [[ui-system]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\entities\\figma-to-unity.md",
+      "line": 48,
+      "msg": "Link points to a stub/placeholder [[ui-system]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\runbooks\\local-unity-ai-skill-library.md",
+      "line": 27,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\runbooks\\local-unity-ai-skill-library.md",
+      "line": 61,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\runbooks\\local-unity-ai-skill-library.md",
+      "line": 108,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\runbooks\\local-unity-ai-skill-library.md",
+      "line": 213,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\sources\\agent-skills-docs.md",
+      "line": 17,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\sources\\agent-skills-docs.md",
+      "line": 18,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\sources\\agent-skills-docs.md",
+      "line": 47,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\sources\\agent-skills-docs.md",
+      "line": 48,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 15,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 16,
+      "msg": "Link points to a stub/placeholder [[architecture-map]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 17,
+      "msg": "Link points to a stub/placeholder [[automation-scripts-and-rules]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 18,
+      "msg": "Link points to a stub/placeholder [[config-and-data]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 19,
+      "msg": "Link points to a stub/placeholder [[create-game-module]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 20,
+      "msg": "Link points to a stub/placeholder [[event-bus]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 22,
+      "msg": "Link points to a stub/placeholder [[kbpro-code-style]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 23,
+      "msg": "Link points to a stub/placeholder [[kbpro-module-lifecycle]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 24,
+      "msg": "Link points to a stub/placeholder [[module-creation-workflow]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 25,
+      "msg": "Link points to a stub/placeholder [[spine-integration]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\stubs.md",
+      "line": 26,
+      "msg": "Link points to a stub/placeholder [[ui-system]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\syntheses\\unity-ai-skill-donor-analysis.md",
+      "line": 14,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\syntheses\\unity-ai-skill-donor-analysis.md",
+      "line": 85,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\syntheses\\unity-ai-skill-systematization.md",
+      "line": 16,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\wiki\\syntheses\\unity-ai-skill-systematization.md",
+      "line": 117,
+      "msg": "Link points to a stub/placeholder [[architecture-challenge-protocol]]"
+    }
+  ],
+  "errors": [
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\LLM-WIKI.md",
+      "line": 137,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer dentistry-cow-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\LLM-WIKI.md",
+      "line": 137,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer dentistry-cow-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\airgun-true-system.md",
+      "line": 15,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/DiagnosisModule/AirPistolStage/AirGunTrueSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\DiagnosisModule\\AirPistolStage\\AirGunTrueSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\airgun-true-system.md",
+      "line": 18,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/PatientSelectionMenu/TeethProblemGenerator/Generators/OptionalCleaningScenarioType.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\PatientSelectionMenu\\TeethProblemGenerator\\Generators\\OptionalCleaningScenarioType.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\airgun-true-system.md",
+      "line": 24,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/DiagnosisModule/AirPistolStage/Models/AirGunDirtModel.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\DiagnosisModule\\AirPistolStage\\Models\\AirGunDirtModel.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\airgun-true-system.md",
+      "line": 32,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/DiagnosisModule/AirPistolStage/AirGunTrueSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\DiagnosisModule\\AirPistolStage\\AirGunTrueSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-bacteria-irrigator.md",
+      "line": 14,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/MouthCleaningToothCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\MouthCleaningToothCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-bacteria-irrigator.md",
+      "line": 14,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/Models/BacteriaIrrigator.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\Models\\BacteriaIrrigator.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-bacteria-irrigator.md",
+      "line": 36,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/MouthCleaningToothCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\MouthCleaningToothCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-tongue-clean-stage.md",
+      "line": 15,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/TongueCleaningStage/MouthCleaningTongueCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\TongueCleaningStage\\MouthCleaningTongueCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-tongue-clean-stage.md",
+      "line": 15,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/TongueCleaningStage/Models/ScrapperModel.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\TongueCleaningStage\\Models\\ScrapperModel.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-tongue-clean-stage.md",
+      "line": 19,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/TongueCleaningStage/Models/TongueZoomDirtElement.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\TongueCleaningStage\\Models\\TongueZoomDirtElement.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\raw\\concepts\\mouth-cleaning-tongue-clean-stage.md",
+      "line": 40,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/TongueCleaningStage/MouthCleaningTongueCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\TongueCleaningStage\\MouthCleaningTongueCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\instrument-drag-system.md",
+      "line": 26,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/ChippedCrownModule/Models/ToothInstrumentModelBase.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\ChippedCrownModule\\Models\\ToothInstrumentModelBase.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 42,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/TreatmentTypeGeneralModule.cs:40\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\TreatmentTypeGeneralModule.cs:40)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 43,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/CariesTreatmentModule/CariesTreatmentModule.cs:21\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\CariesTreatmentModule\\CariesTreatmentModule.cs:21)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 49,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/ExtractionImplantModule/ExtractionImplantModule.cs:73\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\ExtractionImplantModule\\ExtractionImplantModule.cs:73)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 53,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/ExtractionImplantModule/ExtractionImplantFlowSystem.cs:33\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\ExtractionImplantModule\\ExtractionImplantFlowSystem.cs:33)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 60,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/DiagnosisModule/_General/Models/TreatmentPatientBase.cs:62\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\DiagnosisModule\\_General\\Models\\TreatmentPatientBase.cs:62)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\dentistry-cow-wiki\\wiki\\concepts\\reusable-treatment-entry-handoff.md",
+      "line": 82,
+      "msg": "Broken file link: \"/D:/Work/KB/dentistry-cow/Assets/Configs/SO/Modules/ExtractionImplantModule_ScenarioGraph.asset:69\" (resolved to: E:\\D:\\Work\\KB\\dentistry-cow\\Assets\\Configs\\SO\\Modules\\ExtractionImplantModule_ScenarioGraph.asset:69)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 16,
+      "msg": "Broken file link: \"Workflows/agent-process-flow.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\Workflows\\agent-process-flow.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 19,
+      "msg": "Broken file link: \"Workflows/workflows-map.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\Workflows\\workflows-map.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 22,
+      "msg": "Broken file link: \"Environments/sandbox-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\Environments\\sandbox-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 25,
+      "msg": "Broken file link: \"Evaluations/evals-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\Evaluations\\evals-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 28,
+      "msg": "Broken file link: \"memory-protocol.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\memory-protocol.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 30,
+      "msg": "Broken file link: \"operational-memory-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\operational-memory-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\README.md",
+      "line": 31,
+      "msg": "Broken file link: \"tactical-memory-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\tactical-memory-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\wiki\\index.md",
+      "line": 33,
+      "msg": "Broken file link: \"Scripts/\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\HarnessProtocol\\wiki\\Scripts)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\LLM-WIKI.md",
+      "line": 134,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer kbpro-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\LLM-WIKI.md",
+      "line": 134,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer kbpro-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\raw\\ai-skills~\\bitrix-task-importer\\references\\api-contract.md",
+      "line": 3,
+      "msg": "Broken file link: \"../../../../../llm-wiki/raw/ide-rules/GEMINI.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ide-rules\\GEMINI.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\kbpro-wiki\\raw\\ai-skills~\\bitrix-task-json-builder\\references\\field-contract.md",
+      "line": 3,
+      "msg": "Broken file link: \"../../../../../llm-wiki/raw/ide-rules/GEMINI.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ide-rules\\GEMINI.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 44,
+      "msg": "Broken file link: \"../../system/docs/architecture-setup.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\architecture-setup.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 44,
+      "msg": "Broken file link: \"../../system/docs/setup-new-wiki.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\setup-new-wiki.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 67,
+      "msg": "Broken file link: \"../../system/docs/sync-integration.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\sync-integration.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 67,
+      "msg": "Broken file link: \"../../system/docs/data-standards.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\data-standards.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 82,
+      "msg": "Missing wiki page [[link]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-llm-wiki\\SKILL.md",
+      "line": 91,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-ingest\\SKILL.md",
+      "line": 52,
+      "msg": "Broken file link: \"../../system/docs/data-standards.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\data-standards.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-ingest\\SKILL.md",
+      "line": 58,
+      "msg": "Broken file link: \"../../system/lib/model-locator.js\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\lib\\model-locator.js)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-ingest\\SKILL.md",
+      "line": 63,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-ingest\\SKILL.md",
+      "line": 71,
+      "msg": "Missing wiki page [[links]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-refresh\\SKILL.md",
+      "line": 42,
+      "msg": "Broken file link: \"../../system/docs/data-standards.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\data-standards.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-refresh\\SKILL.md",
+      "line": 71,
+      "msg": "Broken file link: \"../../system/docs/data-standards.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\system\\docs\\data-standards.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-wiki-search\\SKILL.md",
+      "line": 67,
+      "msg": "Missing wiki page [[WikiLinks]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ai-skills~\\davasko-youtube-researcher\\SKILL.md",
+      "line": 73,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer llm-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\wiki\\index.md",
+      "line": 35,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/llm-wiki/raw/ide-rules/CLAUDE.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\Assets\\KBPro\\kbpro-ai-docs\\llm-wiki\\raw\\ide-rules\\CLAUDE.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\LLM-WIKI.md",
+      "line": 134,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer unity-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\LLM-WIKI.md",
+      "line": 134,
+      "msg": "Missing wiki page [[page-name]] (referenced from layer unity-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\bootstrap-runners-scriptable-objects.md",
+      "line": 446,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\bootstrap-runners-scriptable-objects.md",
+      "line": 451,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-ui-mvp-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-ui-mvp-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\bootstrap-runners-scriptable-objects.md",
+      "line": 451,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-module-components-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-module-components-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\shader-csharp-variables-control.md",
+      "line": 315,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-vfx-particle-author/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-vfx-particle-author\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\shader-csharp-variables-control.md",
+      "line": 315,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-shadergraph-author/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-shadergraph-author\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\unity-csharp-optimizations.md",
+      "line": 376,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\urp-gpu-instancing.md",
+      "line": 300,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-resource-physics-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-resource-physics-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\urp-gpu-instancing.md",
+      "line": 300,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-vfx-particle-author/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-vfx-particle-author\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\urp-shadergraph-basics.md",
+      "line": 179,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-shadergraph-author/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-shadergraph-author\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\urp-shadergraph-basics.md",
+      "line": 179,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-vfx-particle-author/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-vfx-particle-author\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\zenject-advanced-lifecycle.md",
+      "line": 250,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-lifecycle-auditor/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-lifecycle-auditor\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\zenject-advanced-lifecycle.md",
+      "line": 250,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\zenject-di-basics.md",
+      "line": 243,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-di-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-di-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\transcripts\\sharp-gamedev\\zenject-di-basics.md",
+      "line": 243,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-lifecycle-auditor/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-lifecycle-auditor\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\architecture-setup.md",
+      "line": 30,
+      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\davasko-wiki)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\architecture-setup.md",
       "line": 101,
       "msg": "Global reference to missing wiki page [[my-project-specific-module]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 44,
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 53,
       "msg": "Global reference to missing wiki page [[related-page-name]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 80,
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 89,
       "msg": "Global reference to missing wiki page [[page-name]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 88,
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 97,
       "msg": "Global reference to missing wiki page [[related-page-name]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 95,
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 104,
       "msg": "Global reference to missing wiki page [[page-name]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 95,
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 104,
       "msg": "Global reference to missing wiki page [[module-lifecycle]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 97,
-      "msg": "Broken file link: \"../../plans/task.md\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\plans\\task.md)"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 106,
+      "msg": "Broken file link: \"../../plans/task.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\plans\\task.md)"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\data-standards.md",
-      "line": 101,
-      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\Projects\\DavASkoLLMWiki\\system\\davasko-wiki)"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\data-standards.md",
+      "line": 110,
+      "msg": "Broken file link: \"../davasko-wiki\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\davasko-wiki)"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\scripts-templates.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\scripts-templates.md",
       "line": 21,
       "msg": "Doubled system directory path detected in line: \"Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE rule files like `.cursorrules`, `.clinerules`, etc.) for broken links, old directory mappings, and doubled system paths (`system/system/`).\""
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\scripts-templates.md",
+      "line": 64,
+      "msg": "Broken file link: \"../scripts/query-wiki.js\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\query-wiki.js)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\scripts-templates.md",
+      "line": 67,
+      "msg": "Broken file link: \"../scripts/run-evals.js\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\run-evals.js)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\setup-new-wiki.md",
       "line": 66,
       "msg": "Global reference to missing wiki page [[auth-workflow]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\setup-new-wiki.md",
       "line": 69,
       "msg": "Global reference to missing wiki page [[readme-synthesis]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\setup-new-wiki.md",
       "line": 72,
       "msg": "Global reference to missing wiki page [[llm-wiki/wiki/index]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\system\\docs\\setup-new-wiki.md",
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\docs\\setup-new-wiki.md",
       "line": 106,
       "msg": "Global reference to missing wiki page [[app-readme]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\AGENTS.md",
-      "line": 34,
-      "msg": "Global reference to missing wiki page [[page-name]]"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\evals\\retrieval-report.json",
+      "line": 26,
+      "msg": "Global reference to missing wiki page [[ссылки]]"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\CLAUDE.md",
-      "line": 34,
-      "msg": "Global reference to missing wiki page [[page-name]]"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 6,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
     },
     {
-      "file": "Projects\\DavASkoLLMWiki\\README.md",
-      "line": 141,
-      "msg": "Global reference to missing wiki page [[WikiLinks]]"
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 6,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 6,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 6,
+      "msg": "Broken file link: \"agent-process-flow.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\agent-process-flow.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 13,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-ui-mvp-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-ui-mvp-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-module-components-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-module-components-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"file:///Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\code_style.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 20,
+      "msg": "Broken file link: \"agent-process-flow.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\agent-process-flow.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"ARCHITECTURE.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\ARCHITECTURE.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ServiceLocator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ServiceLocator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ConfigAndData.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ConfigAndData.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/EventBus.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\EventBus.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/LogicAndModules.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\LogicAndModules.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/Timers.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\Timers.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/IDProcessors.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\IDProcessors.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ModuleOrchestrator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ModuleOrchestrator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/DataTree.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\DataTree.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToCreateModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToCreateModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToDescribeModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToDescribeModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"../wiki/sources/source-inventory.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\wiki\\sources\\source-inventory.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Core.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Core.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Orthodox.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Orthodox.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Game.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Game.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/SpineIntegration.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\SpineIntegration.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/AudioSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\AudioSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Presentation/Parallax.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\Parallax.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Gameplay/Runner.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\Runner.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Gameplay/PassengerSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\PassengerSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Gameplay/ModifierSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\ModifierSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Gameplay/AISystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\AISystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Meta/TutorSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\TutorSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Meta/Analytic.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\Analytic.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Meta/RuStoreSDK.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\RuStoreSDK.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Meta/NotificationsSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\NotificationsSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Tools/ConstSelector.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\ConstSelector.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 27,
+      "msg": "Broken file link: \"Architecture/Tools/FigmaToUnity.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\FigmaToUnity.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 41,
+      "msg": "Broken file link: \"current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 55,
+      "msg": "Broken file link: \"current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 55,
+      "msg": "Broken file link: \"operational-memory-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\operational-memory-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 55,
+      "msg": "Broken file link: \"tactical-memory-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\tactical-memory-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 55,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 60,
+      "msg": "Broken file link: \"TZ.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\TZ.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 69,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-async-reactive-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-async-reactive-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 69,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/unity-ui-mvp-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\unity-ui-mvp-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 69,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-module-components-builder/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-module-components-builder\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 69,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 74,
+      "msg": "Broken file link: \"protocol-spec.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\protocol-spec.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\gemini-prep-results.json",
+      "line": 83,
+      "msg": "Broken file link: \"current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 6,
+      "msg": "Broken file link: \"current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"ARCHITECTURE.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\ARCHITECTURE.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ServiceLocator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ServiceLocator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ConfigAndData.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ConfigAndData.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/EventBus.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\EventBus.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/LogicAndModules.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\LogicAndModules.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/Timers.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\Timers.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/IDProcessors.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\IDProcessors.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ModuleOrchestrator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ModuleOrchestrator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/DataTree.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\DataTree.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToCreateModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToCreateModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToDescribeModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToDescribeModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"../wiki/sources/source-inventory.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\wiki\\sources\\source-inventory.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Core.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Core.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Orthodox.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Orthodox.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Game.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Game.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/SpineIntegration.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\SpineIntegration.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/AudioSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\AudioSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Presentation/Parallax.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\Parallax.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Gameplay/Runner.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\Runner.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Gameplay/PassengerSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\PassengerSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Gameplay/ModifierSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\ModifierSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Gameplay/AISystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\AISystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Meta/TutorSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\TutorSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Meta/Analytic.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\Analytic.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Meta/RuStoreSDK.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\RuStoreSDK.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Meta/NotificationsSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\NotificationsSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Tools/ConstSelector.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\ConstSelector.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 15,
+      "msg": "Broken file link: \"Architecture/Tools/FigmaToUnity.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\FigmaToUnity.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-di-expert/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-di-expert\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"file:///e:/UnityProjects/IRI/dentistry-cow/.agents/skills/kbpro-lifecycle-auditor/SKILL.md\" (resolved to: e:\\UnityProjects\\IRI\\dentistry-cow\\.agents\\skills\\kbpro-lifecycle-auditor\\SKILL.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"ARCHITECTURE.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\ARCHITECTURE.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ServiceLocator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ServiceLocator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ConfigAndData.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ConfigAndData.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/EventBus.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\EventBus.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/LogicAndModules.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\LogicAndModules.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/Timers.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\Timers.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/IDProcessors.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\IDProcessors.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ModuleOrchestrator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ModuleOrchestrator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/DataTree.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\DataTree.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToCreateModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToCreateModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToDescribeModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToDescribeModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"../wiki/sources/source-inventory.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\wiki\\sources\\source-inventory.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Core.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Core.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Orthodox.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Orthodox.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Game.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Game.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/SpineIntegration.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\SpineIntegration.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/AudioSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\AudioSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Presentation/Parallax.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\Parallax.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Gameplay/Runner.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\Runner.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Gameplay/PassengerSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\PassengerSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Gameplay/ModifierSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\ModifierSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Gameplay/AISystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\AISystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Meta/TutorSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\TutorSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Meta/Analytic.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\Analytic.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Meta/RuStoreSDK.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\RuStoreSDK.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Meta/NotificationsSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\NotificationsSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Tools/ConstSelector.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\ConstSelector.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 33,
+      "msg": "Broken file link: \"Architecture/Tools/FigmaToUnity.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\FigmaToUnity.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 42,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 42,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/MouthCleaningToothCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\MouthCleaningToothCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 42,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/Models/BacteriaIrrigator.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\Models\\BacteriaIrrigator.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 42,
+      "msg": "Broken file link: \"file:///c:/Projects/dentistry-cow/Assets/Dentistry-cow/Scripts/Modules/MouthCleaningModule/ToothCleaningStage/MouthCleaningToothCleaningStageFlowSystem.cs\" (resolved to: c:\\Projects\\dentistry-cow\\Assets\\Dentistry-cow\\Scripts\\Modules\\MouthCleaningModule\\ToothCleaningStage\\MouthCleaningToothCleaningStageFlowSystem.cs)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"ARCHITECTURE.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\ARCHITECTURE.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ServiceLocator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ServiceLocator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ConfigAndData.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ConfigAndData.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/EventBus.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\EventBus.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/LogicAndModules.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\LogicAndModules.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/Timers.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\Timers.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/IDProcessors.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\IDProcessors.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Modules/ModuleOrchestrator.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Modules\\ModuleOrchestrator.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/ScenarioGraph/DataTree.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\ScenarioGraph\\DataTree.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToCreateModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToCreateModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Guides/HowToDescribeModule.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Guides\\HowToDescribeModule.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"../wiki/sources/source-inventory.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\wiki\\sources\\source-inventory.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Core.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Core.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Orthodox.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Orthodox.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/UISystem_Game.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\UISystem_Game.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/SpineIntegration.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\SpineIntegration.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/AudioSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\AudioSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Presentation/Parallax.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Presentation\\Parallax.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Gameplay/Runner.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\Runner.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Gameplay/PassengerSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\PassengerSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Gameplay/ModifierSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\ModifierSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Gameplay/AISystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Gameplay\\AISystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Meta/TutorSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\TutorSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Meta/Analytic.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\Analytic.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Meta/RuStoreSDK.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\RuStoreSDK.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/CoreFramework/Infrastructure/ParentTimer.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\CoreFramework\\Infrastructure\\ParentTimer.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Meta/NotificationsSystem.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Meta\\NotificationsSystem.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Tools/ConstSelector.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\ConstSelector.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 51,
+      "msg": "Broken file link: \"Architecture/Tools/FigmaToUnity.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\Architecture\\Tools\\FigmaToUnity.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"file:///Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\code_style.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"../current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"RalphLoopPrinciples.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\RalphLoopPrinciples.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"agent-process-flow.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\agent-process-flow.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"current-implementation.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\current-implementation.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"token-economy.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\token-economy.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"../Scripts/tacticalTools.js\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\Scripts\\tacticalTools.js)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 78,
+      "msg": "Broken file link: \"../Scripts/reindexTactical.js\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\Scripts\\reindexTactical.js)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 85,
+      "msg": "Broken file link: \"TZ.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\TZ.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 130,
+      "msg": "Broken file link: \"04-dynamic-object-lifecycle.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\04-dynamic-object-lifecycle.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 130,
+      "msg": "Broken file link: \"05-addressing-and-handles.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\05-addressing-and-handles.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 130,
+      "msg": "Broken file link: \"05-addressing-and-handles.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\05-addressing-and-handles.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\local-results.json",
+      "line": 130,
+      "msg": "Broken file link: \"test-authoring-guide.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\system\\scripts\\test-authoring-guide.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\system\\search-config.json",
+      "line": 23,
+      "msg": "Global reference to missing wiki page [[ссылки]]"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\CLAUDE.md",
+      "line": 16,
+      "msg": "Broken file link: \"file:///Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\code_style.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\CLAUDE.md",
+      "line": 119,
+      "msg": "Broken file link: \"file:///Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\code_style.md)"
+    },
+    {
+      "file": "Assets\\KBPro\\kbpro-ai-docs\\CLAUDE.md",
+      "line": 221,
+      "msg": "Broken file link: \"file:///Assets/KBPro/kbpro-ai-docs/unity-wiki/raw/code_style.md\" (resolved to: E:\\UnityProjects\\IRI\\iri_robots\\Assets\\KBPro\\kbpro-ai-docs\\unity-wiki\\raw\\code_style.md)"
     }
   ]
 }
