@@ -31,10 +31,11 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel as libInitModel, embed as libEmbed } from './lib/retrieval.js';
+import { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel as libInitModel, embed as libEmbed, initReranker as libInitReranker, rerank as libRerank } from './lib/retrieval.js';
 import { resolveModelsCache } from './lib/model-locator.js';
 import { QueryRouter } from './lib/query-router.js';
 import { execSync } from 'child_process';
+import * as lancedb from 'vectordb';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -50,7 +51,7 @@ const MODELS_CACHE = (() => {
   return r.dir || r.hint;
 })();
 const INDEX_FILE   = path.join(SYSTEM_DIR, 'wiki-index.json');
-const SHARDS_DIR   = path.join(SYSTEM_DIR, 'index-shards');
+const LANCEDB_DIR  = path.join(SYSTEM_DIR, '.lancedb');
 const DUMP_FILE    = path.join(ROOT_DIR, '.cursor-context-dump.md');
 const CONFIG_FILE  = path.join(SYSTEM_DIR, 'search-config.json');
 
@@ -211,18 +212,54 @@ function cleanMarkdownForDump(content) {
 //  INDEX AND MODEL LOADING
 // ═══════════════════════════════════════════════════════════════════════
 
-function loadIndex() {
-  if (!fs.existsSync(INDEX_FILE)) {
-    console.error(`${C.red}[FATAL]${C.reset} wiki-index.json не найден.`);
-    console.error(`  Сначала постройте индекс: node system/build-index.js`);
-    process.exit(1);
+async function loadLanceIndex(autoRebuild = true) {
+  if (!fs.existsSync(LANCEDB_DIR)) {
+    if (autoRebuild) {
+      console.error(`${C.yellow}[WARN]${C.reset} Локальная база данных .lancedb не найдена. Запускаю автоматическую переиндексацию...`);
+      execSync(`node "${path.join(SYSTEM_DIR, 'build-index.js')}"`, { stdio: 'inherit' });
+    } else {
+      console.error(`${C.red}[FATAL]${C.reset} База данных .lancedb не найдена даже после сборки.`);
+      process.exit(1);
+    }
   }
-  try {
-    return JSON.parse(readText(INDEX_FILE));
-  } catch (err) {
-    console.error(`${C.red}[FATAL]${C.reset} wiki-index.json повреждён: ${err.message}`);
-    process.exit(1);
+
+  const db = await lancedb.connect(LANCEDB_DIR);
+  const tableNames = await db.tableNames();
+  
+  if (!tableNames.includes('wiki_chunks')) {
+    if (autoRebuild) {
+      console.error(`${C.yellow}[WARN]${C.reset} Таблица wiki_chunks не найдена. Запускаю автоматическую переиндексацию...`);
+      execSync(`node "${path.join(SYSTEM_DIR, 'build-index.js')}"`, { stdio: 'inherit' });
+      return await loadLanceIndex(false);
+    } else {
+      console.error(`${C.red}[FATAL]${C.reset} Таблица wiki_chunks не найдена даже после сборки.`);
+      process.exit(1);
+    }
   }
+
+  const tbl = await db.openTable('wiki_chunks');
+  const rows = await tbl.search()
+    .select(['fileId', 'path', 'layer', 'sourceType', 'symbols', 'tags', 'wikilinks', 'extendsRef'])
+    .limit(100000)
+    .execute();
+
+  const documents = {};
+  for (const r of rows) {
+    if (!documents[r.fileId]) {
+      documents[r.fileId] = {
+        id: r.fileId,
+        path: r.path,
+        layer: r.layer,
+        sourceType: r.sourceType,
+        symbols: JSON.parse(r.symbols),
+        tags: JSON.parse(r.tags),
+        wikilinks: JSON.parse(r.wikilinks),
+        extends: r.extendsRef || '',
+        cluster: r.layer
+      };
+    }
+  }
+  return { documents };
 }
 
 // Тонкая обёртка над ядром ./lib/retrieval.js (логирование + общие константы).
@@ -295,21 +332,22 @@ async function runStreamB(semanticQuery, index, extractor) {
   // 1. Векторизация запроса с prefix
   const queryVec = await embed(extractor, `query: ${semanticQuery}`);
 
-  // 2. Multi-probe: ранжируем кластеры по центроиду, берём top-NPROBE
-  const centroids = index.clusters_centroids || {};
-  const clusterNames = Object.keys(centroids);
-  const { clusters: probeClusters, exhaustive } = selectProbeClusters(queryVec, centroids, NPROBE);
-  console.error(`${C.dim}  [B] Multi-probe: ${probeClusters.length}/${clusterNames.length} кластеров${exhaustive ? ' (исчерпывающий)' : ` (nprobe=${NPROBE})`}${C.reset}`);
+  // 2. Поиск в LanceDB
+  let queryResult = [];
+  try {
+    const db = await lancedb.connect(LANCEDB_DIR);
+    const tbl = await db.openTable('wiki_chunks');
+    // Ищем топ 300 чанков
+    queryResult = await tbl.search(queryVec).metricType('cosine').limit(300).execute();
+  } catch(e) {
+    console.error(`${C.red}[ERROR] LanceDB search failed: ${e.message}${C.reset}`);
+    return results;
+  }
 
-  /** Все полученные score (для порога и диагностики) */
   const allScores = [];
-  for (const clName of probeClusters) {
-    const shardPath = path.join(SHARDS_DIR, `embeddings-${clName}.json`);
-    if (!fs.existsSync(shardPath)) continue;
-    const shard = JSON.parse(readText(shardPath));
-    for (const entry of shard) {
-      allScores.push([entry.fileId, cosineSimilarity(queryVec, entry.embedding)]);
-    }
+  for (const row of queryResult) {
+    const sim = 1 - row._distance; // LanceDB cosine distance = 1 - similarity
+    allScores.push([row.fileId, sim]);
   }
 
   // 3. Диагностика: top-5 score независимо от порога
@@ -426,11 +464,27 @@ function assembleAndDump(mergedResults, index, rawQuery) {
   const tier = (src) => (src === 'graphLift' ? 1 : 0);
   const eff = (fileId, score) =>
     score + (docs[fileId] && docs[fileId].sourceType === 'raw' ? GROUND_TRUTH_BOOST : 0);
-  const ordered = [...mergedResults.entries()].sort((a, b) => {
+    
+  // 1. Сортируем по убыванию эффективного score
+  const sortedDesc = [...mergedResults.entries()].sort((a, b) => {
     const ta = tier(a[1].source), tb = tier(b[1].source);
     if (ta !== tb) return ta - tb;
     return eff(b[0], b[1].score) - eff(a[0], a[1].score);
   });
+
+  // 2. U-образная упаковка (Primacy-Recency Effect)
+  // Самые релевантные документы помещаются в начало и в конец контекста, 
+  // а наименее релевантные - в середину ("Lost in the middle").
+  const ordered = new Array(sortedDesc.length);
+  let head = 0;
+  let tail = sortedDesc.length - 1;
+  for (let i = 0; i < sortedDesc.length; i++) {
+      if (i % 2 === 0) {
+          ordered[head++] = sortedDesc[i];
+      } else {
+          ordered[tail--] = sortedDesc[i];
+      }
+  }
 
   for (const [fileId, info] of ordered) {
     const doc = docs[fileId];
@@ -569,12 +623,10 @@ async function main() {
   // Адресат дампа: --stdout > --out <path> > дефолтный .cursor-context-dump.md.
   // Дефолт сохранён для обратной совместимости с CCP; --out снимает гонку
   // при параллельных запросах (каждый пишет в свой файл).
-  // 2. Загрузка мета-индекса
-  const index = loadIndex();
+  // 2. Загрузка мета-индекса из LanceDB
+  const index = await loadLanceIndex(true);
   const docCount = Object.keys(index.documents || {}).length;
-  const clusterCount = Object.keys(index.clusters_centroids || {}).length;
-
-  console.error(`${C.dim}[*] Индекс: ${docCount} документов, ${clusterCount} кластеров${C.reset}`);
+  console.error(`${C.dim}[*] Индекс: ${docCount} документов${C.reset}`);
 
   // 3. Разбор запроса
   const queryParts = parseQuery(rawQuery);
@@ -605,6 +657,47 @@ async function main() {
   for (const [id, info] of streamBResults.entries()) {
     if (!merged.has(id)) {
       merged.set(id, info);
+    }
+  }
+
+  // 6.5. Reranking (опционально) переоценка топ-кандидатов через кросс-энкодер
+  if (merged.size > 0 && queryParts.semantic) {
+    try {
+      console.error(`${C.cyan}[R]${C.reset} Инициализация Reranker...`);
+      const reranker = await libInitReranker({ modelsCache: MODELS_CACHE, device: CFG.device });
+      
+      const docIds = Array.from(merged.keys());
+      const docsTexts = docIds.map(id => {
+         const doc = index.documents[id];
+         if (!doc) return "";
+         const filePath = path.join(ROOT_DIR, doc.path);
+         if (!fs.existsSync(filePath)) return "";
+         const rawContent = readText(filePath);
+         // Берем начало документа (до 1500 символов), чтобы уложиться в лимит токенов реранкера
+         return cleanMarkdownForDump(rawContent).substring(0, 1500);
+      });
+      
+      console.error(`${C.cyan}[R]${C.reset} Выполнение переоценки (Reranking)...`);
+      const rerankScores = await libRerank(reranker, rawQuery, docsTexts);
+      
+      // Обновляем score 
+      for (let i = 0; i < docIds.length; i++) {
+         const id = docIds[i];
+         const info = merged.get(id);
+         const rScore = rerankScores[i];
+         
+         // Нормализация логита через сигмоиду (0..1)
+         const sigmoid = 1 / (1 + Math.exp(-rScore));
+         
+         if (info.source === 'streamB') {
+             info.score = (info.score * 0.3) + (sigmoid * 0.7); 
+         }
+         if (info.source === 'streamA') {
+             info.score = (info.score * 0.8) + (sigmoid * 0.2); // Меньше доверия реранкеру, так как точное совпадение важнее
+         }
+      }
+    } catch (e) {
+       console.error(`${C.red}[R ERROR]${C.reset} Ошибка Reranker: ${e.message}`);
     }
   }
 

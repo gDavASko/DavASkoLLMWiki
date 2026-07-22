@@ -30,8 +30,9 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
 import { chunkMarkdown } from './lib/chunker.js';
-import { initModel as libInitModel, embedBatch as libEmbedBatch } from './lib/retrieval.js';
+import { initModel as libInitModel, embedBatch as libEmbedBatch, embedLateChunking as libEmbedLateChunking } from './lib/retrieval.js';
 import { resolveModelsCache } from './lib/model-locator.js';
+import * as lancedb from 'vectordb';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -46,8 +47,7 @@ const MODELS_CACHE = (() => {
   const r = resolveModelsCache({ localFallback: path.join(SYSTEM_DIR, 'models-cache') });
   return r.dir || r.hint;
 })();
-const INDEX_FILE   = path.join(SYSTEM_DIR, 'wiki-index.json');
-const SHARDS_DIR   = path.join(SYSTEM_DIR, 'index-shards');
+const LANCEDB_DIR  = path.join(SYSTEM_DIR, '.lancedb');
 
 // ─── Model Configuration ────────────────────────────────────────────
 const MODEL_ID       = 'jinaai/jina-embeddings-v3';
@@ -263,51 +263,36 @@ function getFilesRecursively(dir, extensions) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  INDEX DATA STRUCTURES
+//  MD5 CACHE FROM LANCEDB
 // ═══════════════════════════════════════════════════════════════════════
 
-function createEmptyIndex() {
-  return {
-    version: '3.0',
-    model: MODEL_ID,
-    revision: MODEL_REVISION,
-    vectorDim: VECTOR_DIM,
-    chunkWords: CHUNK_SIZE_WORDS,
-    overlapWords: CHUNK_OVERLAP_WORDS,
-    updatedAt: new Date().toISOString(),
-    clusters_centroids: {},
-    documents: {},
-  };
-}
-
-function loadIndex() {
-  if (fs.existsSync(INDEX_FILE)) {
-    try {
-      const raw = readText(INDEX_FILE);
-      return JSON.parse(raw);
-    } catch {
-      console.log(`${C.yellow}[WARN]${C.reset} wiki-index.json повреждён, создаём новый.`);
+async function loadMd5Cache(forceRebuild) {
+  const cache = {}; // fileId -> md5
+  if (forceRebuild) return cache;
+  try {
+    const db = await lancedb.connect(LANCEDB_DIR);
+    const tableNames = await db.tableNames();
+    if (tableNames.includes('wiki_chunks')) {
+      const tbl = await db.openTable('wiki_chunks');
+      const rows = await tbl.search().select(['fileId', 'md5']).limit(100000).execute();
+      for (const row of rows) {
+        if (row.md5) cache[row.fileId] = row.md5;
+      }
     }
+  } catch (err) {
+    // ВАЖНО: не глушить молча. Пустой кэш => ВСЕ документы считаются новыми =>
+    // полная переэмбеддинг-сборка (~минуты). Чаще всего это ПОРЧА .lancedb
+    // (манифест ссылается на отсутствующий data-фрагмент, напр. после git
+    // pull/checkout, если .lancedb трекается в git). Делаем причину видимой.
+    console.warn(
+      `${C.yellow}[WARN]${C.reset} Не удалось прочитать MD5-кэш из LanceDB — ` +
+      `инкрементальность отключена, будет ПОЛНАЯ пересборка.\n` +
+      `${C.dim}  Причина: ${err.message}\n` +
+      `  Если это \"Not found: ...data/*.lance\" — .lancedb рассогласована; ` +
+      `почините \`--force\` и НЕ коммитьте .lancedb в git.${C.reset}`
+    );
   }
-  return createEmptyIndex();
-}
-
-function loadShard(clusterName) {
-  const shardPath = path.join(SHARDS_DIR, `embeddings-${clusterName}.json`);
-  if (fs.existsSync(shardPath)) {
-    try {
-      return JSON.parse(readText(shardPath));
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
-function saveShard(clusterName, data) {
-  if (!fs.existsSync(SHARDS_DIR)) fs.mkdirSync(SHARDS_DIR, { recursive: true });
-  const shardPath = path.join(SHARDS_DIR, `embeddings-${clusterName}.json`);
-  fs.writeFileSync(shardPath, JSON.stringify(data));
+  return cache;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -405,12 +390,33 @@ function getRawFilesRecursively(dir, extensions) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  CENTROID COMPUTATION
+//  LANCEDB HELPER
 // ═══════════════════════════════════════════════════════════════════════
-
-// Центроиды теперь вычисляются как среднее векторов членов шарда в main()
-// (шаг 9b), а не как эмбеддинг имени папки. Прежние computeCentroids /
-// findNearestCluster (name-based routing) удалены как ошибочные.
+async function getLanceTable(forceRebuild) {
+  const db = await lancedb.connect(LANCEDB_DIR);
+  let tbl;
+  try {
+    const tableNames = await db.tableNames();
+    if (forceRebuild && tableNames.includes('wiki_chunks')) {
+      await db.dropTable('wiki_chunks');
+    }
+    if (!tableNames.includes('wiki_chunks') || forceRebuild) {
+      // Create empty table with dummy schema to define columns, LanceDB will infer the rest
+      tbl = await db.createTable('wiki_chunks', [{
+        fileId: "dummy", chunkIndex: 0, layer: "dummy", sourceType: "dummy",
+        path: "dummy", symbols: "[]", tags: "[]", wikilinks: "[]", extendsRef: "dummy", md5: "dummy",
+        text: "dummy", vector: Array(VECTOR_DIM).fill(0)
+      }]);
+      await tbl.delete("`fileId` = 'dummy'");
+    } else {
+      tbl = await db.openTable('wiki_chunks');
+    }
+  } catch (err) {
+    console.error("LanceDB init error:", err);
+    throw err;
+  }
+  return tbl;
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE
@@ -439,15 +445,14 @@ async function main() {
   }
   console.log(`${C.cyan}[*]${C.reset} Найдено слоёв: ${layers.map(l => l.name).join(', ')}`);
 
-  // 2. Загрузка существующего индекса
-  const index = forceRebuild ? createEmptyIndex() : loadIndex();
+  // 2. Загрузка кэша MD5 из LanceDB
+  const existingDocs = await loadMd5Cache(forceRebuild);
 
   // 3. Инициализация модели
   const extractor = await initModel();
 
-  // 4. Центроиды считаются ПОСЛЕ эмбеддинга (шаг 9b) как среднее векторов
-  //    членов каждого слоя-шарда — настоящий centroid, а не эмбеддинг имени папки.
-  index.clusters_centroids = {};
+  // 4. Подключение к LanceDB
+  const table = await getLanceTable(forceRebuild);
 
   // 5. Сбор всех .md файлов из wiki/ и raw/ каждого слоя
   const allFiles = [];
@@ -485,11 +490,26 @@ async function main() {
   const rawCount  = allFiles.filter(f => f.sourceType === 'raw').length;
   console.log(`${C.cyan}[*]${C.reset} Обнаружено документов: ${C.green}${wikiCount} wiki${C.reset} + ${C.cyan}${rawCount} raw${C.reset} = ${allFiles.length} всего.\n`);
 
-  // 6. Загрузка шардов в память для быстрого обновления
-  const shards = {};
-  for (const layer of layers) {
-    shards[layer.name] = loadShard(layer.name);
+  // Подсчёт коллизий basename среди wiki-файлов. Одноимённые модульные страницы
+  // (Logic.md/Art.md/… в разных модулях) иначе схлопываются в один fileId=basename:
+  // перетирают друг друга в таблице (теряются в поиске) и вечно идут [UPD] каждый
+  // прогон. Уникальные basename СОХРАНЯЮТ id=basename — чтобы [[wikilinks]]
+  // (резолвятся по fileId==basename в graph-lift) продолжали работать; коллизии
+  // дизамбигуируются полным относительным путём.
+  const wikiBasenameCounts = new Map();
+  for (const f of allFiles) {
+    if (f.sourceType !== 'wiki') continue;
+    const bn = path.basename(f.filePath, '.md');
+    wikiBasenameCounts.set(bn, (wikiBasenameCounts.get(bn) || 0) + 1);
   }
+  const collisionCount = [...wikiBasenameCounts.values()].filter(n => n > 1).length;
+  if (collisionCount > 0) {
+    console.log(`${C.dim}  [i] wiki basename-коллизий: ${collisionCount} → дизамбигуация по пути.${C.reset}\n`);
+  }
+
+  // 6. Подготовка батча для LanceDB
+  let batchData = [];
+  const BATCH_INSERT_SIZE = 500;
 
   // 7. Счётчики для статистики
   let countSkipped   = 0;
@@ -512,7 +532,14 @@ async function main() {
 
     // ID: для raw-файлов используем префикс 'raw-<layer>-<basename>' чтобы
     // избежать коллизий с wiki-страницами при одинаковых именах файлов.
-    const fileId     = meta.id || (sourceType === 'raw' ? `raw-${layer}-${basename}` : basename);
+    // fileId: raw → 'raw-<layer>-<basename>'. wiki → basename, если он уникален
+    // во всём корпусе (сохраняет резолвинг [[wikilinks]]); при коллизии basename
+    // (несколько одноимённых страниц) — полный относительный путь без .md.
+    const fileId     = meta.id || (
+      sourceType === 'raw'
+        ? `raw-${layer}-${basename}`
+        : (wikiBasenameCounts.get(basename) > 1 ? relPath.replace(/\.md$/i, '') : basename)
+    );
     // symbols = объявленные во frontmatter + авто-извлечённые из тела (Data Standards §2).
     // Без авто-извлечения raw/код-документы получают symbols=[] и невидимы для Stream A.
     const fmSymbols  = Array.isArray(meta.symbols) ? meta.symbols.map(String) : [];
@@ -528,31 +555,28 @@ async function main() {
 
     // MD5-контроль по подготовленному тексту
     const currentMd5 = md5(textToEmbed);
-    const existing   = index.documents[fileId];
+    const existingMd5 = existingDocs[fileId];
 
-    if (!forceRebuild && existing && existing.md5 === currentMd5) {
+    processedIds.add(fileId);
+
+    if (!forceRebuild && existingMd5 === currentMd5) {
       countSkipped++;
       continue;
     }
 
-    const isNew = !existing;
+    const isNew = !existingMd5;
     if (isNew) countNew++; else countUpdated++;
 
     // Прогресс
     process.stdout.write(
+      `${C.dim}[${i + 1}/${allFiles.length}]${C.reset} ` +
       `  ${isNew ? C.green + '[NEW]' : C.yellow + '[UPD]'}${C.reset} ` +
       `${fileId}${C.dim} (${relPath})${C.reset}`
     );
 
-    // 8a. Очистка старых чанков из шардов
-    if (existing && existing.cluster && shards[existing.cluster]) {
-      shards[existing.cluster] = shards[existing.cluster].filter(
-        entry => entry.fileId !== fileId
-      );
-    }
-    // Также чистим из всех других шардов (на случай миграции кластера)
-    for (const clName of Object.keys(shards)) {
-      shards[clName] = shards[clName].filter(entry => entry.fileId !== fileId);
+    // 8a. Очистка старых чанков в LanceDB (если обновляем существующий документ)
+    if (existingMd5) {
+      await table.delete(`\`fileId\` = '${fileId}'`);
     }
 
     // 8b. Чанкинг. structural: режем сырой Markdown по структуре (видя заголовки
@@ -575,101 +599,67 @@ async function main() {
       continue;
     }
 
-    // 8c. Векторизация чанков (с префиксом passage:). Один шард на слой;
-    //     centroidScore проставим на шаге 9b, когда посчитаем настоящий центроид.
+    // 8c. Векторизация чанков
     const assignedCluster = layer;
-    if (!shards[assignedCluster]) shards[assignedCluster] = [];
-
-    // Батч-эмбеддинг чанков документа (паритет с одиночным — проверен).
-    const vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c}`), VECTOR_DIM, EMBED_BATCH_SIZE);
+    let vecs;
+    const wordCount = textToEmbed.split(/\s+/).length;
+    
+    // Если документ не огромный, используем Late Chunking (попытка вложить весь контекст)
+    if (CHUNK_STRATEGY === 'structural' && wordCount < 6000) {
+      vecs = await libEmbedLateChunking(extractor, textToEmbed, chunks.map(c => `passage: ${c}`), VECTOR_DIM);
+    } else {
+      vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c}`), VECTOR_DIM, EMBED_BATCH_SIZE);
+    }
+    
     for (let ci = 0; ci < chunks.length; ci++) {
-      shards[assignedCluster].push({
+      batchData.push({
         fileId,
         chunkIndex: ci,
-        centroidScore: 0,
-        embedding: vecs[ci],
+        layer: assignedCluster,
+        sourceType: sourceType || 'wiki',
+        path: relPath,
+        symbols: JSON.stringify(symbols),
+        tags: JSON.stringify(tags),
+        wikilinks: JSON.stringify(wikiLinks),
+        extendsRef: extendsRef,
+        md5: currentMd5,
+        text: chunks[ci],
+        vector: vecs[ci],
       });
       countChunks++;
     }
 
-    // 8d. Обновление записи в мета-индексе
-    index.documents[fileId] = {
-      id: fileId,
-      path: relPath,
-      layer,
-      sourceType: sourceType || 'wiki',
-      symbols,
-      tags,
-      extends: extendsRef,
-      wikilinks: wikiLinks,
-      md5: currentMd5,
-      chunksCount: chunks.length,
-      cluster: assignedCluster,
-    };
+    // Если накопили достаточно — сохраняем в LanceDB
+    if (batchData.length >= BATCH_INSERT_SIZE) {
+      await table.add(batchData);
+      batchData = [];
+    }
 
     process.stdout.write(
       ` → ${chunks.length} чанков → ${C.cyan}${assignedCluster}${C.reset}\n`
     );
   }
 
-  // 9. Очистка устаревших документов из индекса
+  // Довставляем остатки
+  if (batchData.length > 0) {
+    await table.add(batchData);
+  }
+
+  // 9. Очистка устаревших документов из LanceDB
   let countRemoved = 0;
-  for (const docId of Object.keys(index.documents)) {
+  for (const docId of Object.keys(existingDocs)) {
     if (!processedIds.has(docId)) {
-      const doc = index.documents[docId];
-      // Удаление чанков из шарда
-      if (doc.cluster && shards[doc.cluster]) {
-        shards[doc.cluster] = shards[doc.cluster].filter(e => e.fileId !== docId);
-      }
-      delete index.documents[docId];
+      await table.delete(`\`fileId\` = '${docId}'`);
       countRemoved++;
     }
   }
 
-  // 9b. Настоящие центроиды: среднее нормализованных векторов членов шарда
-  //     (а не эмбеддинг имени папки). Делает nprobe-маршрутизацию осмысленной.
-  index.clusters_centroids = {};
-  for (const [clName, data] of Object.entries(shards)) {
-    if (!data.length) continue;
-    const dim = data[0].embedding.length;
-    const mean = new Array(dim).fill(0);
-    for (const e of data) {
-      for (let k = 0; k < dim; k++) mean[k] += e.embedding[k];
-    }
-    for (let k = 0; k < dim; k++) mean[k] /= data.length;
-    const norm = Math.sqrt(mean.reduce((s, v) => s + v * v, 0)) || 1;
-    const centroid = mean.map(v => v / norm);
-    index.clusters_centroids[clName] = centroid;
-    // centroidScore = близость чанка к центроиду слоя (для внутришардовой сортировки)
-    for (const e of data) e.centroidScore = cosineSimilarity(e.embedding, centroid);
-  }
-
-  // 10. Внутришардовая сортировка по убыванию centroidScore
-  for (const clName of Object.keys(shards)) {
-    shards[clName].sort((a, b) => b.centroidScore - a.centroidScore);
-  }
-
-  // 11. Сохранение шардов на диск
-  console.log('');
-  for (const [clName, data] of Object.entries(shards)) {
-    saveShard(clName, data);
-    console.log(
-      `${C.cyan}[*]${C.reset} Шард ${C.bold}embeddings-${clName}.json${C.reset}` +
-      ` — ${data.length} векторов`
-    );
-  }
-
-  // 12. Сохранение мета-индекса (JSON — без BOM, иначе ломается JSON.parse)
-  index.updatedAt = new Date().toISOString();
-  index.chunkStrategy = CHUNK_STRATEGY; // для воспроизводимости (смена стратегии → нужен --force)
-  writeTextNoBom(INDEX_FILE, JSON.stringify(index, null, 2));
-
-  const totalDocs = Object.keys(index.documents).length;
-  const totalClusters = Object.keys(index.clusters_centroids).length;
+  const totalDocs = processedIds.size;
+  const totalChunks = await table.countRows();
 
   console.log(
-    `\n${C.cyan}[*]${C.reset} Мета-индекс ${C.bold}wiki-index.json${C.reset}` +
-    ` — ${totalDocs} документов, ${totalClusters} кластеров`
+    `\n${C.cyan}[*]${C.reset} Векторная база ${C.bold}LanceDB${C.reset}` +
+    ` — ${totalDocs} документов (${totalChunks} чанков)`
   );
 
   // 13. Итоговая статистика

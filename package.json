@@ -24,6 +24,8 @@
   "dependencies": {
     "@huggingface/transformers": "file:./system/vendor/huggingface-transformers.tgz",
     "js-yaml": "file:./system/vendor/js-yaml-4.1.0.tgz",
-    "argparse": "file:./system/vendor/argparse-2.0.1.tgz"
+    "argparse": "file:./system/vendor/argparse-2.0.1.tgz",
+    "apache-arrow": "file:./system/vendor/apache-arrow-18.1.0.tgz",
+    "vectordb": "file:./system/vendor/vectordb.tgz"
   }
 }

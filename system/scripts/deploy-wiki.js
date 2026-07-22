@@ -134,6 +134,18 @@ function main() {
   writeMd(path.join(TARGET, 'plans', 'README.md'), `# Plans\n\nHuman planning only (ExecPlans, checklists). NOT part of the knowledge base — never cited as a wiki source.\n`);
   ok('plans/ создан');
 
+  const gitignorePath = path.join(TARGET, '.gitignore');
+  const gitignoreAppend = '\n# AI Wiki Indexes (Local)\nsystem/.lancedb/\nsystem/wiki-index.json\n';
+  if (fs.existsSync(gitignorePath)) {
+    const content = fs.readFileSync(gitignorePath, 'utf8');
+    if (!content.includes('system/.lancedb/')) {
+      fs.appendFileSync(gitignorePath, gitignoreAppend);
+    }
+  } else {
+    fs.writeFileSync(gitignorePath, gitignoreAppend);
+  }
+  ok('.gitignore обновлен (system/.lancedb/ и system/wiki-index.json)');
+
   // ── 4. Правила работы с БЗ ──────────────────────────────────────────────
   step(4, 'Правила работы с БЗ (CCP + ide-rules)');
   const ideRules = path.join(TARGET, 'llm-wiki', 'raw', 'ide-rules');

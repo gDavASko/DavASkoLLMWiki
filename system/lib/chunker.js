@@ -77,12 +77,8 @@ function mergeSmall(chunks, minWords, maxWords) {
   return out;
 }
 
-/**
- * Структурный чанкинг Markdown.
- * @returns {string[]} список чанков (с префиксом-крошкой, если headingBreadcrumbs)
- */
 export function chunkMarkdown(text, {
-  targetWords = 250, minWords = 80, maxWords = 400,
+  targetWords = 250, minWords = 80, maxWords = 400, overlapWords = 20,
   keepCodeAtomic = true, headingBreadcrumbs = true,
 } = {}) {
   if (!text || !text.trim()) return [];
@@ -93,13 +89,30 @@ export function chunkMarkdown(text, {
   let cur = [];               // тексты блоков текущего чанка
   let curWords = 0;
   let curCrumb = '';
+  let overlapText = '';       // кэш для структурного перекрытия
 
   const crumb = () => stack.map(h => h.title).join(' > ');
   const withCrumb = (body, c) => (headingBreadcrumbs && c ? `[${c}]\n\n${body}` : body);
 
   const flush = () => {
     if (!cur.length) return;
-    chunks.push(withCrumb(cur.join('\n\n').trim(), curCrumb));
+    
+    let chunkBody = cur.join('\n\n').trim();
+    if (overlapText) {
+      chunkBody = overlapText + '\n...\n' + chunkBody;
+    }
+    
+    chunks.push(withCrumb(chunkBody, curCrumb));
+    
+    if (overlapWords > 0) {
+      const allWords = cur.join(' ').split(/\s+/).filter(Boolean);
+      if (allWords.length > overlapWords) {
+        overlapText = '...' + allWords.slice(-overlapWords).join(' ');
+      } else {
+        overlapText = '...' + allWords.join(' ');
+      }
+    }
+
     cur = []; curWords = 0;
   };
   const add = (blockText, words) => {
@@ -114,7 +127,10 @@ export function chunkMarkdown(text, {
     if (b.type === 'heading') {
       while (stack.length && stack[stack.length - 1].level >= b.level) stack.pop();
       stack.push({ level: b.level, title: b.title });
-      if (curWords >= minWords) flush();                        // закрыть прошлую секцию, если уже набрала min
+      if (curWords >= minWords) {
+        flush();                        // закрыть прошлую секцию, если уже набрала min
+        overlapText = '';               // очищаем перекрытие на границе смысловой секции
+      }
       continue;
     }
     const words = countWords(b.text);

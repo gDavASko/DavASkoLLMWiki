@@ -1,4 +1,4 @@
-﻿# Transcript Extraction Guide for YouTube
+# Transcript Extraction Guide for YouTube
 
 To analyze video materials, the AI agent must first extract the full text transcript (subtitles). Below are two main methods for downloading transcripts on Windows/macOS/Linux.
 
@@ -65,13 +65,13 @@ If the Node.js library fails (e.g., due to rate-limiting or package issues), you
 If `yt-dlp` is not installed on the system, download it to the workspace or scratch folder:
 - Windows: `Invoke-WebRequest -Uri https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -OutFile C:\Users\DavASko\.gemini\antigravity-ide\brain\<conv-id>\scratch\yt-dlp.exe`
 
-### Step 2. Run the subtitle extraction command
-Run this command to download automatic subtitles in VTT/SRT format without fetching the actual video file:
+### Step 2. Run the subtitle extraction command (with bot-bypass)
+YouTube actively blocks automated scrapers. To bypass "Sign in to confirm you're not a bot" errors, you MUST pass cookies from your local browser (e.g., Chrome). Run this command to download automatic subtitles in VTT/SRT format without fetching the actual video file (ignoring missing format errors):
 ```bash
-yt-dlp.exe --write-auto-subs --skip-download --sub-lang en,ru -o "transcript" "VIDEO_URL"
+yt-dlp.exe --cookies-from-browser chrome --write-auto-subs --skip-download --ignore-no-formats-error --sub-lang en,ru -o "transcript" "VIDEO_URL"
 ```
 
-This will save `transcript.en.vtt` or `transcript.ru.vtt`.
+This will safely bypass bot protections and save `transcript.en.vtt` or `transcript.ru.vtt`.
 
 ### Step 3. Clean VTT file from tags and timestamps
 Write a simple Node.js or Python helper to strip out VTT header data, timing ranges, and duplicated lines.

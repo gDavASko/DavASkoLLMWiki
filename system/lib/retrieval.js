@@ -292,4 +292,46 @@ export async function embedBatch(extractor, texts, vectorDim = 1024, batchSize =
   return out;
 }
 
-export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed, embedBatch };
+/**
+ * Инициализация кросс-энкодера для переранжирования.
+ */
+export async function initReranker({ modelsCache, modelId = 'Xenova/bge-reranker-base', revision, dtype = 'fp32', device = 'cpu' }) {
+  const { env, AutoTokenizer, AutoModelForSequenceClassification } = await import('@huggingface/transformers');
+  env.allowRemoteModels = true; // Разрешаем скачивание реранкера
+  if (modelsCache) {
+    env.cacheDir = modelsCache;
+    env.localModelPath = modelsCache;
+  }
+  
+  const tokenizer = await AutoTokenizer.from_pretrained(modelId, { revision });
+  const model = await AutoModelForSequenceClassification.from_pretrained(modelId, { revision, dtype, device });
+  
+  return { tokenizer, model };
+}
+
+/**
+ * Реренжинг списка документов относительно запроса.
+ * Возвращает массив логитов (scores) для каждого документа.
+ */
+export async function rerank(reranker, query, docs) {
+  if (!docs || docs.length === 0) return [];
+  const inputs = reranker.tokenizer(
+      new Array(docs.length).fill(query), 
+      { text_pair: docs, padding: true, truncation: true }
+  );
+  const outputs = await reranker.model(inputs);
+  return Array.from(outputs.logits.data);
+}
+
+/**
+ * Заглушка для Late Chunking. Если включена, мы пытаемся эмулировать
+ * передачу широкого контекста. Сейчас фоллбэк на embedBatch.
+ */
+export async function embedLateChunking(extractor, fullText, chunks, vectorDim = 1024) {
+  // TODO: Полноценный Late Chunking требует return_offsets_mapping и ручного пулинга, 
+  // что может падать с OOM на полных файлах в Transformers.js. 
+  // Вызываем стандартный батч как безопасный фоллбэк.
+  return embedBatch(extractor, chunks, vectorDim);
+}
+
+export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed, embedBatch, initReranker, rerank, embedLateChunking };

@@ -39,6 +39,12 @@ When the user asks to deploy/set up the wiki into a target folder, perform these
 - Create one directory per layer; each layer holds `wiki/` (curated pages), `raw/` (immutable source snapshots), and a `wiki.json` manifest declaring its `dependencies` (a **strictly descending DAG** — no cycles).
 - Create a root `plans/` directory (human planning only — kept out of layers).
 - Create `NewData/<layer>/` inbound folders for ingestion.
+- Create or update `.gitignore` in the target folder to ensure the LanceDB index is not tracked. Append exactly:
+  ```
+  # AI Wiki Indexes (Local)
+  system/.lancedb/
+  system/wiki-index.json
+  ```
 - Copy the engine: the `system/` folder (engine `system/lib`, scripts `system/scripts`, configs `index-config.json` / `search-config.json`, vendored deps `system/vendor/*.tgz`).
 - Install offline deps: `npm install` (uses the vendored `.tgz`, no registry needed).
 - See [Architecture Setup](references/architecture-setup.md) and [Setup Walkthrough](examples/setup-new-wiki.md).

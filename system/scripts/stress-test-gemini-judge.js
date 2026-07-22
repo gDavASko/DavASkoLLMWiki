@@ -2,7 +2,7 @@
 import fs from 'fs';
 
 const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'gemini-2.5-flash'; 
+const MODEL = 'gemini-flash-lite-latest';
 
 function reduceNoise(query, text, maxParagraphs = 3) {
     if (!text) return "";
@@ -41,7 +41,10 @@ ${cleanedContext.substring(0, 3000)}
 }
 Правило: Верни строго валидный JSON без маркдаун-блоков.`;
 
-    let retries = 3;
+    // Global delay to prevent rate limits (max 10 RPM)
+    await new Promise(r => setTimeout(r, 6000));
+
+    let retries = 5;
     while (retries > 0) {
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
@@ -57,8 +60,8 @@ ${cleanedContext.substring(0, 3000)}
             });
             
             if (!response.ok) {
-                if (response.status === 429) {
-                    console.log(`Gemini HTTP error 429 [${strategyName}]. Retrying in 15 seconds... (${retries} left)`);
+                if (response.status === 429 || response.status === 503) {
+                    console.log(`Gemini HTTP error ${response.status} [${strategyName}]. Retrying in 15 seconds... (${retries} left)`);
                     await new Promise(r => setTimeout(r, 15000));
                     retries--;
                     continue;

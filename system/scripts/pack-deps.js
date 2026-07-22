@@ -42,19 +42,29 @@ const __dirname = path.dirname(__filename);
 const SYSTEM_DIR = path.resolve(__dirname, '..');
 const VENDOR_DIR = path.join(SYSTEM_DIR, 'vendor');
 
-// ─── Target Package ──────────────────────────────────────────────────
-const PACKAGE_NAME    = '@huggingface/transformers';
-const PACKAGE_VERSION = '^3.0.0';
-const OUTPUT_FILENAME = 'huggingface-transformers.tgz';
+// ─── Target Packages ──────────────────────────────────────────────────
+const BUNDLES = [
+  {
+    name: '@huggingface/transformers',
+    version: '^3.0.0',
+    outputFilename: 'huggingface-transformers.tgz',
+    bundleName: 'davasko-transformers-bundle',
+    createIndex: "export * from './node_modules/@huggingface/transformers/src/transformers.js';\n"
+  },
+  {
+    name: 'vectordb',
+    version: '^0.21.2',
+    outputFilename: 'vectordb.tgz',
+    bundleName: 'davasko-vectordb-bundle',
+    main: './node_modules/vectordb/dist/index.js'
+  }
+];
 
 // ─── Standalone vendored packages (pinned) ───────────────────────────
-// Small pure-JS deps packed as-is. Pinned versions так как они становятся
-// частью оффлайн-инварианта и должны быть воспроизводимы. argparse —
-// транзитивная зависимость js-yaml@4 (CLI bin); вендорим, чтобы offline
-// `npm install` не ходил в registry.
 const STANDALONE_PACKAGES = [
   'js-yaml@4.1.0',
   'argparse@2.0.1',
+  'apache-arrow@18.1.0',
 ];
 
 // ─── ANSI Colors ─────────────────────────────────────────────────────
@@ -68,165 +78,127 @@ const C = {
   dim:    '\x1b[2m',
 };
 
-/**
- * Выполняет shell-команду синхронно с выводом в консоль.
- */
 function exec(cmd, cwd) {
   console.log(`${C.dim}  $ ${cmd}${C.reset}`);
   return execSync(cmd, {
     cwd,
     stdio: ['pipe', 'pipe', 'pipe'],
     encoding: 'utf8',
-    maxBuffer: 50 * 1024 * 1024, // 50MB buffer
+    maxBuffer: 50 * 1024 * 1024,
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-//  MAIN
-// ═══════════════════════════════════════════════════════════════════════
-
 async function main() {
   console.log(`\n${C.bold}═══ DavASkoLLMWiki v3.x — Упаковщик зависимостей ═══${C.reset}\n`);
-  console.log(`${C.dim}Пакет:    ${PACKAGE_NAME}@${PACKAGE_VERSION}`);
-  console.log(`Выход:    ${VENDOR_DIR}/${OUTPUT_FILENAME}${C.reset}\n`);
 
-  // 1. Создаём временную директорию
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'davasko-pack-'));
-  console.log(`${C.cyan}[1/5]${C.reset} Временная директория: ${C.dim}${tmpDir}${C.reset}`);
+  for (const bundle of BUNDLES) {
+    console.log(`\n${C.bold}--- Упаковка бандла: ${bundle.name} ---${C.reset}`);
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'davasko-pack-'));
+    console.log(`${C.cyan}[1/5]${C.reset} Временная директория: ${C.dim}${tmpDir}${C.reset}`);
 
-  try {
-    // 2. Создаём минимальный package.json с bundledDependencies
-    const tmpPkg = {
-      name: 'davasko-transformers-bundle',
-      version: '1.0.0',
-      private: true,
-      main: './index.js',
-      dependencies: {
-        [PACKAGE_NAME]: PACKAGE_VERSION,
-      },
-      bundleDependencies: true, // Упаковывает ВСЕ node_modules в .tgz
-    };
-    fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify(tmpPkg, null, 2)
-    );
-
-    // Записываем index.js реэкспорт
-    fs.writeFileSync(
-      path.join(tmpDir, 'index.js'),
-      "export * from './node_modules/@huggingface/transformers/src/transformers.js';\n"
-    );
-
-    // 3. Устанавливаем пакет (это скачает все транзитивные зависимости)
-    console.log(`\n${C.cyan}[2/5]${C.reset} Установка ${PACKAGE_NAME} со всеми зависимостями...`);
     try {
-      exec('npm install --production', tmpDir);
-    } catch (err) {
-      console.error(`${C.red}[ERROR]${C.reset} npm install failed: ${err.stderr || err.message}`);
-      throw err;
-    }
+      const tmpPkg = {
+        name: bundle.bundleName,
+        version: '1.0.0',
+        private: true,
+        dependencies: {
+          [bundle.name]: bundle.version,
+        },
+        bundleDependencies: true,
+      };
 
-    // 4. Считаем количество транзитивных зависимостей
-    const nmDir = path.join(tmpDir, 'node_modules');
-    let depCount = 0;
-    if (fs.existsSync(nmDir)) {
-      for (const entry of fs.readdirSync(nmDir)) {
-        if (entry.startsWith('.')) continue;
-        if (entry.startsWith('@')) {
-          // Scoped packages
-          const scopeDir = path.join(nmDir, entry);
-          for (const subEntry of fs.readdirSync(scopeDir)) {
-            if (!subEntry.startsWith('.')) depCount++;
-          }
-        } else {
-          depCount++;
-        }
+      if (bundle.main) {
+        tmpPkg.main = bundle.main;
+      } else {
+        tmpPkg.main = './index.js';
+        fs.writeFileSync(
+          path.join(tmpDir, 'index.js'),
+          bundle.createIndex
+        );
       }
-    }
-    console.log(`${C.green}[OK]${C.reset} Установлено ${depCount} пакетов (включая транзитивные).`);
 
-    // 5. Упаковка через npm pack (bundleDependencies = true → все node_modules внутри)
-    console.log(`\n${C.cyan}[3/5]${C.reset} Упаковка в .tgz с bundledDependencies...`);
-    let packOutput;
-    try {
-      packOutput = exec('npm pack --json', tmpDir).trim();
-    } catch (err) {
-      console.error(`${C.red}[ERROR]${C.reset} npm pack failed: ${err.stderr || err.message}`);
-      throw err;
-    }
+      fs.writeFileSync(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify(tmpPkg, null, 2)
+      );
 
-    // npm pack --json выводит JSON-массив с метаданными
-    let packFilename;
-    try {
-      const packInfo = JSON.parse(packOutput);
-      packFilename = Array.isArray(packInfo) ? packInfo[0].filename : packInfo.filename;
-    } catch {
-      // Fallback: если не JSON, берём последнюю строку
-      const lines = packOutput.split('\n').filter(Boolean);
-      packFilename = lines[lines.length - 1];
-    }
-
-    const packPath = path.join(tmpDir, packFilename);
-    if (!fs.existsSync(packPath)) {
-      throw new Error(`Packed file not found: ${packPath}`);
-    }
-
-    const packSize = fs.statSync(packPath).size;
-    console.log(
-      `${C.green}[OK]${C.reset} Упаковано: ${packFilename} ` +
-      `(${(packSize / 1024 / 1024).toFixed(1)}MB)`
-    );
-
-    // 6. Копируем в system/vendor/
-    console.log(`\n${C.cyan}[4/5]${C.reset} Копирование в ${VENDOR_DIR}/...`);
-    if (!fs.existsSync(VENDOR_DIR)) fs.mkdirSync(VENDOR_DIR, { recursive: true });
-
-    const destPath = path.join(VENDOR_DIR, OUTPUT_FILENAME);
-    fs.copyFileSync(packPath, destPath);
-
-    const destSize = fs.statSync(destPath).size;
-    console.log(
-      `${C.green}[OK]${C.reset} ${OUTPUT_FILENAME} → ${(destSize / 1024 / 1024).toFixed(1)}MB`
-    );
-
-    // 7. Верификация
-    console.log(`\n${C.cyan}[5/5]${C.reset} Верификация...`);
-    console.log(`${C.dim}  Архив: ${destPath}`);
-    console.log(`  Размер: ${(destSize / 1024 / 1024).toFixed(1)}MB`);
-    console.log(`  Зависимостей: ${depCount} (включая транзитивные)${C.reset}`);
-
-    // 8. Standalone pure-JS пакеты (js-yaml, argparse) — pinned, для offline install
-    console.log(`\n${C.cyan}[+]${C.reset} Упаковка standalone-пакетов...`);
-    if (!fs.existsSync(VENDOR_DIR)) fs.mkdirSync(VENDOR_DIR, { recursive: true });
-    for (const spec of STANDALONE_PACKAGES) {
+      console.log(`\n${C.cyan}[2/5]${C.reset} Установка ${bundle.name} со всеми зависимостями...`);
       try {
-        const out = exec(`npm pack ${spec} --pack-destination "${VENDOR_DIR}" --json`, tmpDir).trim();
-        let fname;
-        try { const j = JSON.parse(out); fname = (Array.isArray(j) ? j[0] : j).filename; }
-        catch { fname = out.split('\n').filter(Boolean).pop(); }
-        console.log(`${C.green}[OK]${C.reset} ${spec} → ${fname}`);
+        exec('npm install --production', tmpDir);
       } catch (err) {
-        console.error(`${C.red}[ERROR]${C.reset} npm pack ${spec} failed: ${err.stderr || err.message}`);
+        console.error(`${C.red}[ERROR]${C.reset} npm install failed: ${err.stderr || err.message}`);
         throw err;
       }
-    }
 
-    console.log(
-      `\n${C.green}[OK]${C.reset} Все зависимости упакованы.\n` +
-      `${C.dim}  Теперь выполните:\n` +
-      `    git add system/vendor/${OUTPUT_FILENAME}\n` +
-      `    git commit -m "chore: add bundled transformers dependencies"\n` +
-      `  Файл будет автоматически отслеживаться через Git LFS.${C.reset}\n`
-    );
+      const nmDir = path.join(tmpDir, 'node_modules');
+      let depCount = 0;
+      if (fs.existsSync(nmDir)) {
+        for (const entry of fs.readdirSync(nmDir)) {
+          if (entry.startsWith('.')) continue;
+          if (entry.startsWith('@')) {
+            const scopeDir = path.join(nmDir, entry);
+            for (const subEntry of fs.readdirSync(scopeDir)) {
+              if (!subEntry.startsWith('.')) depCount++;
+            }
+          } else {
+            depCount++;
+          }
+        }
+      }
+      console.log(`${C.green}[OK]${C.reset} Установлено ${depCount} пакетов (включая транзитивные).`);
 
-  } finally {
-    // Очистка временной директории
-    try {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    } catch {
-      console.log(`${C.dim}[WARN] Не удалось очистить ${tmpDir}${C.reset}`);
+      console.log(`\n${C.cyan}[3/5]${C.reset} Упаковка в .tgz с bundledDependencies...`);
+      let packOutput;
+      try {
+        packOutput = exec('npm pack --json', tmpDir).trim();
+      } catch (err) {
+        console.error(`${C.red}[ERROR]${C.reset} npm pack failed: ${err.stderr || err.message}`);
+        throw err;
+      }
+
+      let packFilename;
+      try {
+        const packInfo = JSON.parse(packOutput);
+        packFilename = Array.isArray(packInfo) ? packInfo[0].filename : packInfo.filename;
+      } catch {
+        const lines = packOutput.split('\n').filter(Boolean);
+        packFilename = lines[lines.length - 1];
+      }
+
+      const packPath = path.join(tmpDir, packFilename);
+      const packSize = fs.statSync(packPath).size;
+      console.log(`${C.green}[OK]${C.reset} Упаковано: ${packFilename} (${(packSize / 1024 / 1024).toFixed(1)}MB)`);
+
+      console.log(`\n${C.cyan}[4/5]${C.reset} Копирование в ${VENDOR_DIR}/...`);
+      if (!fs.existsSync(VENDOR_DIR)) fs.mkdirSync(VENDOR_DIR, { recursive: true });
+
+      const destPath = path.join(VENDOR_DIR, bundle.outputFilename);
+      fs.copyFileSync(packPath, destPath);
+
+      const destSize = fs.statSync(destPath).size;
+      console.log(`${C.green}[OK]${C.reset} ${bundle.outputFilename} → ${(destSize / 1024 / 1024).toFixed(1)}MB`);
+
+    } finally {
+      try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { }
     }
   }
+
+  console.log(`\n${C.cyan}[+]${C.reset} Упаковка standalone-пакетов...`);
+  if (!fs.existsSync(VENDOR_DIR)) fs.mkdirSync(VENDOR_DIR, { recursive: true });
+  for (const spec of STANDALONE_PACKAGES) {
+    try {
+      const out = exec(`npm pack ${spec} --pack-destination "${VENDOR_DIR}" --json`, process.cwd()).trim();
+      let fname;
+      try { const j = JSON.parse(out); fname = (Array.isArray(j) ? j[0] : j).filename; }
+      catch { fname = out.split('\n').filter(Boolean).pop(); }
+      console.log(`${C.green}[OK]${C.reset} ${spec} → ${fname}`);
+    } catch (err) {
+      console.error(`${C.red}[ERROR]${C.reset} npm pack ${spec} failed: ${err.stderr || err.message}`);
+      throw err;
+    }
+  }
+
+  console.log(`\n${C.green}[OK]${C.reset} Все зависимости упакованы.\n`);
 }
 
 main().catch(err => {

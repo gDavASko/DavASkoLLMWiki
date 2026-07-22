@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import { readSafe, writeSafe, copyTextSafe } from './lib/fs-utf8.js';
+import { mergeManagedBlock } from './lib/managed-block-parser.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -52,61 +53,33 @@ for (const c of rulesCandidates) {
   }
 }
 
-const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
-
-// Encoding policy (Data Standards \u00A71): BOM only for .md; everything else no BOM.
+// Encoding policy (Data Standards §1): BOM only for .md; everything else no BOM.
 function shouldHaveBom(filePath) {
   return path.extname(filePath).toLowerCase() === '.md';
 }
 
-// Helper to write UTF-8 text honoring the BOM-only-for-.md policy.
+// Wrapper to use fs-utf8.js
 function writeText(filePath, content) {
-  const contentBuf = Buffer.from(content, 'utf8');
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  const out = shouldHaveBom(filePath) ? Buffer.concat([bom, contentBuf]) : contentBuf;
-  fs.writeFileSync(filePath, out);
+  writeSafe(filePath, content, shouldHaveBom(filePath));
 }
 
-// Helper to read UTF-8 (stripping BOM if present)
+// Wrapper to use fs-utf8.js
 function readText(filePath) {
-  let content = fs.readFileSync(filePath, 'utf8');
-  if (content.startsWith('\uFEFF')) {
-    content = content.substring(1);
-  }
-  return content;
+  return readSafe(filePath);
 }
 
-// Helper to copy a text file, re-emitting with the correct BOM policy.
+// Wrapper to use fs-utf8.js
 function copyTextFile(src, dest) {
   if (!fs.existsSync(src)) return;
-  const content = readText(src);
-  writeText(dest, content);
+  copyTextSafe(src, dest, shouldHaveBom(dest));
 }
-
-// CLAUDE.md / AGENTS.md / GEMINI.md are often user-owned project files. Instead of
-// overwriting them, write our content as a MANAGED BLOCK: replace the block in place
-// if it already exists, otherwise APPEND it to the end — preserving everything the
-// user already had above. Idempotent across re-syncs.
-const MANAGED_BEGIN = '<!-- BEGIN DavASkoLLMWiki (managed by sync-ai-rules — do not edit inside this block) -->';
-const MANAGED_END   = '<!-- END DavASkoLLMWiki (managed by sync-ai-rules) -->';
 
 function mergeManagedRule(srcPath, dstPath) {
   const inner = readText(srcPath).trim();
-  const block = `${MANAGED_BEGIN}\n${inner}\n${MANAGED_END}`;
-  if (!fs.existsSync(dstPath)) { writeText(dstPath, block + '\n'); return 'created'; }
-  const existing = readText(dstPath);
-  const b = existing.indexOf(MANAGED_BEGIN);
-  const e = existing.indexOf(MANAGED_END);
-  if (b !== -1 && e > b) { // replace existing managed block in place
-    writeText(dstPath, existing.slice(0, b) + block + existing.slice(e + MANAGED_END.length));
-    return 'updated';
-  }
-  const sep = existing.endsWith('\n') ? '\n' : '\n\n'; // append, keep user content above
-  writeText(dstPath, existing + sep + block + '\n');
-  return 'appended';
+  const existing = fs.existsSync(dstPath) ? readText(dstPath) : '';
+  const result = mergeManagedBlock(existing, 'DavASkoLLMWiki', inner);
+  writeText(dstPath, result);
+  return existing === '' ? 'created' : 'merged';
 }
 
 // Helper to copy a directory recursively, applying the BOM policy to text files.
