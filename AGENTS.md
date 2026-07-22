@@ -58,7 +58,6 @@ Before requesting data, determine the correct tool based on the scope:
 - Full-Text Search Gaps Policy: if you grep for code patterns not in the wiki, document your findings in the knowledge base
 - Source-of-Truth: code/`raw/` is the truth, `wiki/` is derived. Record `source_hashes` provenance; when `check-staleness.js` flags a page, use the **davasko-wiki-refresh** skill to actualize it (don't just re-stamp)
 - **Model Check (CRITICAL)**: At the very first access or query to the knowledge base, check if the vectorization model is locally installed. If it is missing or fails to load (e.g., `tokenizer.json` not found, `local_files_only` errors), the agent MUST immediately stop and offer to deploy the model itself using the `davasko-llm-wiki` skill (which runs `node system/scripts/setup-model.js`), pointing out the repository link: https://github.com/gDavASko/DavASkoLLMWiki.git.
-
 <!-- BEGIN DavASkoLLMWiki (managed by sync-ai-rules — do not edit inside this block) -->
 Codex Instructions - KBPro Project
 

@@ -201,7 +201,10 @@ if (fs.existsSync(claudeCmdsSource)) {
 const args = process.argv.slice(2);
 const isGlobal = args.includes('--global') || args.includes('-g');
 
-const allSkillsDir = path.join(submoduleRoot, 'all-skills~');
+let allSkillsDir = path.join(submoduleRoot, 'all-skills~');
+if (!fs.existsSync(allSkillsDir) && fs.existsSync(path.join(submoduleRoot, 'skills'))) {
+    allSkillsDir = path.join(submoduleRoot, 'skills');
+}
 let activeSkillNames = null;
 let allSkillData = [];
 
