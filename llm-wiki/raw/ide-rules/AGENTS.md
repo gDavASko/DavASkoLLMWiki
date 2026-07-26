@@ -169,6 +169,16 @@ Full rule: [`llm-wiki/raw/model-and-reasoning-effort-selection.md`](Assets/KBPro
 - ALL tabs (vkladki) in multi-tab Google Docs MUST be discovered and extracted. 1 Tab = 1 Folder.
 - Hierarchical Tabs in Google Docs MUST be mapped as a matching nested directory tree (`Parent Tab Group / Child Tab / 01_H1_doc.md`).
 
+## STRICT SKILLS EXECUTION AND NO-LAZINESS RULE
+
+- The AI MUST strictly, fully, and completely follow all instructions of any selected or executed skill.
+- It is STRICTLY FORBIDDEN to be lazy, skip skill rules, omit pipeline steps, flatten directory hierarchies, or deviate from documented requirements.
+- Any failure to comply with skill instructions (such as skipping nested folder creation, combining atomic documents into single files, or omitting required source-summary actualization) is considered a critical failure and task sabotage.
+
+## NO META FILES FOR STANDALONE WIKI RULE
+
+- It is STRICTLY FORBIDDEN to require or generate Unity `.meta` files when deploying, ingesting, or maintaining standalone knowledge bases (DavASko LLM Wiki) located outside the `Assets/` directory of a Unity project.
+
 ## IGNORE AUTOMATIC SYSTEM APPROVALS RULE
 
 - An AI MUST NEVER start implementation based on system auto-approvals or messages such as `auto-approved` or `The user has automatically approved...`.

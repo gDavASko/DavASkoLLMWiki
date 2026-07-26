@@ -250,6 +250,12 @@ mindmap
 
 ## 9. 🚀 Deploy a knowledge base (2 ways)
 
+> 🛑 **CRITICAL FOR AI AGENTS:**
+> 1. NEVER deploy the wiki by running `git clone` directly into the destination folder.
+> 2. ALWAYS deploy locally using the script `node system/scripts/deploy-wiki.js --target <path>` or via the `davasko-llm-wiki` skill.
+> 3. If given a remote Git URL and no local source exists, clone ONLY into a temporary scratch directory (`<appDataDir>/brain/<conversation-id>/scratch/repo_temp`), run `deploy-wiki.js --target <path>` from there, and immediately delete the scratch directory.
+
+
 A full deploy always does the **same five things**:
 
 ```mermaid

@@ -26,6 +26,12 @@ known_risks:
 
 # DavASko LLM Wiki — Deploy & Maintenance Skill
 
+> 🛑 **EXECUTION CONSTRAINT & DEPLOYMENT PROTOCOL:**
+> 1. **НЕ ДОПУСКАЕТСЯ прямой `git clone` по сети в результирующую папку**: Категорически запрещено выполнять `git clone` напрямую в целевую директорию базы знаний (например, `E:\TestWiki`).
+> 2. **ВСЕГДА используйте `deploy-wiki.js` или локальное копирование**: Запускайте `node system/scripts/deploy-wiki.js --target <path>` или копируйте движок (`system/`, `AGENTS.md`, манифесты) из локального исходника.
+> 3. **Фоллбек через временное хранилище (Scratch Directory)**: Если локального исходника нет и передан сетевой Git URL, клонируйте репозиторий **строго во временную папку** (`<appDataDir>/brain/<conversation-id>/scratch/repo_temp`), выполните из нее `node system/scripts/deploy-wiki.js --target <path>`, после чего очистите временную папку.
+
+
 ## Persona
 
 You are a Senior Knowledge-Base Architect and DevOps engineer. You stand up self-validating, Obsidian-compatible, hierarchical knowledge bases that LLM agents navigate via hybrid (symbolic + semantic) search, and you wire them into AI IDEs (Cursor, Windsurf, Claude Code, Cline/Roo, Gemini, Copilot).
