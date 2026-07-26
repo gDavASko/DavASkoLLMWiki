@@ -1,49 +1,38 @@
-﻿# Knowledge Base Data Standards
+﻿ Knowledge Base Data Standards
 
 To maintain compatibility with Obsidian, Unity, Windows, and multiple AI tooling agents, all files within the **DavASko LLM Wiki** must adhere to strict formatting and encoding standards.
 
 ---
 
-## 1. Encoding: UTF-8 (BOM only for Markdown)
+## 1. Encoding: BOM for Markdown, NO BOM for scripts and JSON
 
-All text files MUST be saved as **UTF-8**. The Byte Order Mark (BOM) policy depends on the file type:
+Encoding rules differ by file type (the linter enforces this):
 
-| File type | Encoding | BOM |
-|---|---|---|
-| `.md` (Markdown wiki/raw pages) | UTF-8 | **with BOM** (`EF BB BF`) |
-| `.json`, `.js`, `.ps1`, `.mdc`, `.yml`/`.yaml`, `.clinerules`, `.cursorrules`, `.windsurfrules` | UTF-8 | **without BOM** |
+- **Markdown (`.md`)** — MUST be saved as **UTF-8 WITH BOM** (Byte Order Mark).
+- **Everything else (`.js`, `.mjs`, `.json`, `.ps1`, `.mdc`, `.yml`, `.yaml`, `.clinerules`, `.cursorrules`, `.windsurfrules`)** — MUST be saved as **UTF-8 WITHOUT BOM**. A BOM breaks `JSON.parse`, pollutes diffs, and can break script loaders and rule parsers.
+- **Exception — skill folders (`skill/`, `skills/`, `all-skills~/`):** ALL skill files, including `.md`, are saved **WITHOUT BOM** — a BOM before the YAML frontmatter (`---`) breaks skill loading. These are distribution copies, not knowledge-base pages, and are excluded from the encoding check.
 
-### Why BOM only for `.md`
-Some Markdown consumers on Windows (legacy editors, Unity asset previews, certain Obsidian setups) auto-detect encoding from the BOM signature, so a BOM on `.md` is a safe hint for Cyrillic content. **The BOM is not what stores Cyrillic** — UTF-8 encodes Russian characters identically with or without a BOM. Garbled text appears only when a *reader* wrongly assumes a legacy code page; the correct fix there is to make the reader assume UTF-8 (see "Console" below), not to stamp every file with a BOM.
+### Why BOM is Mandatory for Markdown
+Windows-based tools, PowerShell, Unity Editor, and Obsidian require the BOM signature (`EF BB BF`) to correctly interpret Cyrillic (Russian) characters. Without BOM, human-facing content written in Russian will appear as garbled text (corrupted encoding) in CLI and IDE logs.
 
-### Why other file types MUST NOT have a BOM
-- **JSON**: A leading BOM is invalid per RFC 8259 and makes `JSON.parse()` throw (`Unexpected token`). Never write BOM into `.json`.
-- **`.js` / `.ps1` / rules**: a BOM produces noisy Git diffs, can break shebang/module detection, and is unnecessary.
-
-### Console (the real fix for garbled Cyrillic)
-Make the terminal read UTF-8 instead of relying on file BOMs:
+### Writing .md Files with BOM in PowerShell
+Prefer using .NET file methods over standard redirectors:
 ```powershell
-chcp 65001                                        # switch console code page to UTF-8
-[Console]::OutputEncoding = [Text.Encoding]::UTF8 # PowerShell output as UTF-8
+[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($true)))
 ```
-PowerShell 7+ and the `.editorconfig` in the repo root enforce UTF-8 across editors.
 
-### Writing files in Node.js
+### Writing .md Files with BOM in Node.js
+Prepend the BOM buffer when writing Markdown files:
 ```javascript
-// Markdown — WITH BOM
 const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
-fs.writeFileSync(mdPath, Buffer.concat([bom, Buffer.from(content, 'utf8')]));
-
-// JSON and everything else — WITHOUT BOM
-fs.writeFileSync(jsonPath, Buffer.from(content, 'utf8'));
+const contentBuf = Buffer.from(content, 'utf8');
+fs.writeFileSync(filePath, Buffer.concat([bom, contentBuf]));
 ```
 
-### Writing Markdown with BOM in PowerShell
-```powershell
-[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($true)))   # $true = emit BOM (.md only)
+### Writing .js / .json Files in Node.js (no BOM)
+```javascript
+fs.writeFileSync(filePath, content, 'utf8'); // plain UTF-8, no BOM
 ```
-
-The wiki linter (`system/scripts/lint-wiki.js`) enforces this policy: `.md` files missing a BOM and non-`.md` files carrying a BOM both fail the lint.
 
 ---
 
@@ -59,11 +48,6 @@ status: draft
 source_status: source-linked
 sources:
   - my-layer-name/raw/docs/source-doc.md
-symbols:
-  - EventBus
-  - IEvent
-tags:
-  - eventbus
 last_updated: YYYY-MM-DD HH:MM
 related:
   - "[[related-page-name]]"
@@ -78,19 +62,6 @@ related:
 - `runbook`: Practical step-by-step procedures.
 - `decision`: Architectural Decisions Records (ADRs) explaining choices and context.
 - `contradiction`: Explanations of conflicts between sources or code behaviors.
-
-<h3>Code symbols & the symbolic search stream (REQUIRED for code-heavy pages)</h3>
-
-Hybrid search has two streams: **Stream B** (semantic, by meaning) and **Stream A** (symbolic, exact match on code identifiers). Stream A matches a query's `PascalCase` / `I*` / `m_*` identifiers against each document's `symbols` field in the index. **If a page's code identifiers are not in the index, exact-identifier lookups (e.g. searching `ParentTimer` or `ObstacleModule`) fall back to weak semantic matching and frequently miss the right page.** This is the single most common reason "the wiki can't find a class that is clearly documented."
-
-To keep identifier search working, the index must contain the relevant code symbols. They enter the index from **two sources**, and `build-index.js` is the contract that fills both:
-
-1. **Auto-extraction from content (engine contract).** `build-index.js` MUST extract strict code identifiers (PascalCase with ≥2 humps, `I`-interfaces, `m_`-fields) from each page's body and code blocks into that document's `symbols`. This guarantees identifier search works even when frontmatter is sparse — do not rely on humans to list every class. Generic ALL-CAPS acronyms (JSON, API, URL) are intentionally excluded (ranking noise).
-2. **Frontmatter `symbols:` (curated emphasis).** For any **entity** page or code-heavy `source-summary`, list the 1–5 primary classes/interfaces the page is *about*. These are merged with the auto-extracted set and let authors boost the canonical identifiers for a page.
-
-**Rule of thumb:** if a page documents a class, service, or module, the class name MUST be findable by an exact-identifier query after `build-index.js`. Verify with `node system/query-wiki.js --query "<ClassName>"`; if the page is not returned, the index is missing that symbol — rebuild (`--force`) and, if still missing, add it to frontmatter `symbols:`.
-
-`tags:` are free-form lowercase keywords (also matched by Stream A at a lower weight) for topical grouping.
 
 ---
 
@@ -143,46 +114,6 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 
 ## 5. Unity AssetDatabase Integration
 
-If the knowledge base is located inside a Unity project repository (under `Assets/`), every folder and file inside `wiki/`, `raw/`, and `evals/` must have a corresponding `.meta` file. 
+If the knowledge base is located inside a Unity project repository (under `Assets/`), Unity generates the `.meta` files automatically when it imports the assets.
 
-The linter will fail if a markdown page is missing its `.meta` file. When programmatically creating wiki files, always generate a corresponding `.meta` containing a unique, randomly generated 32-character hexadecimal GUID.
-
----
-
-## 6. Provenance & Staleness (Source-of-Truth Tracking)
-
-The **code (and its immutable snapshots in `raw/`) is the source of truth**; `wiki/` pages are a curated derived layer. To keep the derived layer honest, every page records the fingerprint of the sources it was generated from, so drift is *detectable* instead of silent.
-
-### Provenance frontmatter
-
-In addition to `sources` and `last_updated`, a page SHOULD carry a `source_hashes` map — the **sha256** (of BOM-stripped content) of each cited source at generation time:
-
-```yaml
-sources:
-  - framework-wiki/raw/docs/event-bus.md
-last_updated: 2026-06-23
-source_hashes:
-  framework-wiki/raw/docs/event-bus.md: 9645671b...c6c9
-```
-
-Sources may point at `raw/` snapshots **or** at real code files in the workspace (e.g. `(source: Assets/.../EventBus.cs)`); the detector hashes whichever file the citation resolves to.
-
-### Page lifecycle
-
-```
-fresh ──(a cited source changes)──▶ stale ──(davasko-wiki-refresh)──▶ fresh
-```
-
-- **fresh**: recorded `source_hashes` match the current sources.
-- **stale**: at least one cited source changed or went missing.
-- **needs-stamp**: page has no `source_hashes` baseline yet.
-
-### Tooling
-
-| Command | Purpose |
-|---|---|
-| `node system/scripts/check-staleness.js` | Recompute hashes, write `system/staleness-report.json`, exit 1 if any page is stale (CI gate). |
-| `node system/scripts/check-staleness.js --strict` | Also fail on `needs-stamp` pages (use once coverage is complete). |
-| `node system/scripts/check-staleness.js --stamp [page]` | Write/refresh `source_hashes` + `last_updated` after a page's body has been actualized. |
-
-The `staleness-report.json` is a machine-readable worklist consumed by the **davasko-wiki-refresh** skill, which regenerates stale pages from their updated sources and re-stamps them. **Never `--stamp` a page without first updating its body to match the changed source** — that would hide real drift rather than resolve it.
+Do **NOT** hand-create `.meta` files. The ingestion pipeline no longer generates them and the linter no longer requires them — Unity creates each `.meta` (with its own GUID) on import.

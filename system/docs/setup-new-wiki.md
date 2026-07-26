@@ -1,4 +1,4 @@
-﻿# Setup New Wiki Example
+﻿ Setup New Wiki Example
 
 This guide demonstrates how an AI agent uses this skill to initialize and validate a brand-new multi-layered knowledge base inside a project.
 
@@ -113,7 +113,7 @@ node davasko-ai-docs/system/scripts/ingest-newdata.js
 We verify the integrity and regression performance of the whole vault:
 ```bash
 node davasko-ai-docs/system/scripts/validate-links.js
-node davasko-ai-docs/system/scripts/check-sources.js
+node davasko-ai-docs/system/scripts/run-evals.js
 ```
 
 If the link validation reports:
@@ -125,7 +125,7 @@ Errors: 0
 Validation passed successfully!
 ```
 
-And `check-sources.js` reports:
+And `run-evals.js` reports:
 ```
 === Regression Evals Summary ===
 Total tests: 5

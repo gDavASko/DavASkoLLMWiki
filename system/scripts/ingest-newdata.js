@@ -59,6 +59,179 @@ function getFilesRecursively(dir, extensions) {
   return results;
 }
 
+// Helper to generate a random 32-character hex GUID for Unity .meta files
+function generateGuid() {
+  let guid = '';
+  for (let i = 0; i < 32; i++) {
+    guid += Math.floor(Math.random() * 16).toString(16);
+  }
+  return guid;
+}
+
+// Helper to read UTF-8 without BOM
+function readUtf8(filePath) {
+  let content = fs.readFileSync(filePath, 'utf8');
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+// Helper to write UTF-8 with BOM
+function writeUtf8Bom(filePath, content) {
+  const bom = Buffer.from([0xEF, 0xBB, 0xBF]);
+  fs.writeFileSync(filePath, Buffer.concat([bom, Buffer.from(content, 'utf8')]));
+}
+
+// Inline Ingest function
+function ingestFile(sourceFile, targetLayer, subfolder) {
+  const layerDir = path.join(submoduleRoot, targetLayer);
+  if (!fs.existsSync(layerDir) || !fs.existsSync(path.join(layerDir, 'wiki.json'))) {
+    console.error(`[Error] Target layer manifest not found: ${targetLayer}/wiki.json`);
+    process.exit(1);
+  }
+  
+  const filename = path.basename(sourceFile);
+  const nameWithoutExt = path.parse(filename).name;
+  
+  // 1. Move and convert to UTF-8 BOM
+  const destSubfolder = subfolder || 'docs';
+  const targetRawDir = path.join(layerDir, 'raw', destSubfolder);
+  if (!fs.existsSync(targetRawDir)) {
+    fs.mkdirSync(targetRawDir, { recursive: true });
+  }
+  
+  const destRawFile = path.join(targetRawDir, filename);
+  const rawContent = readUtf8(sourceFile);
+  writeUtf8Bom(destRawFile, rawContent);
+  fs.unlinkSync(sourceFile); // delete original in NewData/
+  
+  console.log(`[INGEST] Moved ${filename} -> ${targetLayer}/raw/${destSubfolder}/${filename}`);
+
+  // 2. Generate wiki source summary file
+  const sourceSummaryDir = path.join(layerDir, 'wiki', 'sources');
+  if (!fs.existsSync(sourceSummaryDir)) {
+    fs.mkdirSync(sourceSummaryDir, { recursive: true });
+  }
+  
+  const summaryFileName = `${nameWithoutExt}.md`;
+  const summaryFilePath = path.join(sourceSummaryDir, summaryFileName);
+  
+  const dateStr = new Date().toISOString().split('T')[0];
+  const summaryContent = `---
+title: "Summary of ${nameWithoutExt}"
+type: source-summary
+status: draft
+source_status: source-linked
+sources:
+  - ${targetLayer}/raw/${destSubfolder}/${filename}
+last_updated: ${dateStr}
+related: []
+---
+
+# Summary of ${nameWithoutExt}
+
+**Summary**: Source summary of ${nameWithoutExt}.
+
+**Sources**: ${targetLayer}/raw/${destSubfolder}/${filename}
+
+**Last updated**: ${dateStr}
+
+## Key Claims
+
+- No claims extracted yet. (source: ${targetLayer}/raw/${destSubfolder}/${filename})
+
+## Details
+
+Summary details of ${nameWithoutExt}.
+
+## Open Questions
+
+- None.
+
+## Related Pages
+
+- None.
+`;
+  writeUtf8Bom(summaryFilePath, summaryContent);
+  console.log(`[INGEST] Created wiki page: ${targetLayer}/wiki/sources/${summaryFileName}`);
+  // .meta не создаём — Unity генерирует его сам при импорте ассета.
+
+  // 3. Update local index.md
+  const indexPath = path.join(layerDir, 'wiki', 'index.md');
+  if (fs.existsSync(indexPath)) {
+    let indexContent = readUtf8(indexPath);
+    const summaryWikiLink = `[[${nameWithoutExt}]]`;
+    if (!indexContent.includes(summaryWikiLink)) {
+      if (indexContent.includes('### Sources')) {
+        indexContent = indexContent.replace('### Sources', `### Sources\n- ${summaryWikiLink}`);
+      } else if (indexContent.includes('## Sources')) {
+        indexContent = indexContent.replace('## Sources', `## Sources\n- ${summaryWikiLink}`);
+      } else {
+        indexContent += `\n\n### Sources\n- ${summaryWikiLink}`;
+      }
+      writeUtf8Bom(indexPath, indexContent);
+      console.log(`[INGEST] Added link ${summaryWikiLink} to ${targetLayer}/wiki/index.md`);
+    }
+  }
+
+  // 4. Update local log.md
+  const logPath = path.join(layerDir, 'wiki', 'log.md');
+  const localLogLines = [];
+  if (fs.existsSync(logPath)) {
+    let logContent = readUtf8(logPath);
+    const logHeader = `## [${dateStr}]`;
+    const logEntry = `- Imported new source: [[${nameWithoutExt}]] (source: raw/${destSubfolder}/${filename})`;
+    
+    let updatedLogContent = '';
+    if (logContent.includes(logHeader)) {
+      updatedLogContent = logContent.replace(logHeader, `${logHeader}\n${logEntry}`);
+    } else {
+      updatedLogContent = `${logHeader}\n${logEntry}\n\n` + logContent;
+    }
+    
+    const originalLines = logContent.split('\n');
+    writeUtf8Bom(logPath, updatedLogContent);
+    const newLines = updatedLogContent.split('\n');
+    
+    const diffCount = newLines.length - originalLines.length;
+    const endLine = 1 + diffCount + 1;
+    localLogLines.push(1, endLine);
+    
+    console.log(`[INGEST] Logged changes in ${targetLayer}/wiki/log.md`);
+  }
+
+  // 5. Update root log.md
+  const rootLogPath = path.join(submoduleRoot, 'log.md');
+  if (fs.existsSync(rootLogPath)) {
+    let rootLogContent = readUtf8(rootLogPath);
+    const rootHeader = `## [${dateStr}]`;
+    const rangeSuffix = localLogLines.length === 2 ? `#L${localLogLines[0]}-L${localLogLines[1]}` : '';
+    const rootEntry = `- Добавлены изменения в [${targetLayer}/wiki/log.md](file:///${submoduleRoot.replace(/\\/g, '/')}/${targetLayer}/wiki/log.md${rangeSuffix})`;
+    
+    let updatedRoot = '';
+    if (rootLogContent.includes(rootHeader)) {
+      updatedRoot = rootLogContent.replace(rootHeader, `${rootHeader}\n${rootEntry}`);
+    } else {
+      updatedRoot = `${rootHeader}\n${rootEntry}\n\n` + rootLogContent;
+    }
+    writeUtf8Bom(rootLogPath, updatedRoot);
+    console.log(`[INGEST] Logged activity pointer in root log.md`);
+  }
+
+  // 6. Check and resolve stubs.md
+  const stubsPath = path.join(layerDir, 'wiki', 'stubs.md');
+  if (fs.existsSync(stubsPath)) {
+    let stubsContent = readUtf8(stubsPath);
+    const stubPattern = new RegExp(`^\\s*-\\s*\\[\\[${nameWithoutExt}\\]\\].*$\\r?\\n?`, 'm');
+    if (stubPattern.test(stubsContent)) {
+      stubsContent = stubsContent.replace(stubPattern, '');
+      writeUtf8Bom(stubsPath, stubsContent);
+      console.log(`[STUB] Resolved and removed stub [[${nameWithoutExt}]] from ${targetLayer}/wiki/stubs.md!`);
+    }
+  }
+}
+
 function run() {
   const newDataDir = path.join(submoduleRoot, 'NewData');
   if (!fs.existsSync(newDataDir)) {
@@ -117,28 +290,20 @@ function run() {
     const mdFiles = getFilesRecursively(layerSrcDir, ['.md']);
     
     mdFiles.forEach(mdFilePath => {
-      // Вычисляем относительный путь от папки слоя
       const relPath = path.relative(layerSrcDir, mdFilePath).replace(/\\/g, '/');
       const subfolder = path.dirname(relPath);
       const fileName = path.basename(relPath);
 
-      // Входной путь для query-wiki (относительно submoduleRoot)
-      const inputRelPath = `NewData/${layer}/${relPath}`;
-      
       console.log(`Импорт файла: ${relPath} в слой ${layer}, подпапка raw/${subfolder}`);
 
-      // Запускаем query-wiki --ingest
-      execSync(`node "${path.join(submoduleRoot, 'system', 'scripts', 'query-wiki.js')}" --ingest "${inputRelPath}" --layer ${layer} --subfolder "${subfolder}" --no-validate`, {
-        stdio: 'inherit',
-        cwd: submoduleRoot
-      });
+      // Вызываем встроенную логику импорта напрямую
+      ingestFile(mdFilePath, layer, subfolder);
 
       // Переносим .meta файл, если он есть
       const metaFileSrc = mdFilePath + '.meta';
       if (fs.existsSync(metaFileSrc)) {
         const metaFileDest = path.join(submoduleRoot, layer, 'raw', subfolder, `${fileName}.meta`);
         
-        // Создаем целевую директорию, если она не существует
         const destDir = path.dirname(metaFileDest);
         if (!fs.existsSync(destDir)) {
           fs.mkdirSync(destDir, { recursive: true });

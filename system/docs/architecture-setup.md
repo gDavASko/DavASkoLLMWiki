@@ -1,4 +1,4 @@
-﻿# Architecture Setup Guide
+﻿ Architecture Setup Guide
 
 The **DavASko LLM Wiki** is a multi-layered, Obsidian-compatible knowledge base designed to cleanly separate general AI rules, engine-specific rules, framework-specific details, and project-specific documentation.
 
@@ -81,7 +81,7 @@ Each individual layer directory must have the following structure:
 └── raw/                        ← Immutable source materials (read-only)
     ├── docs/                   ← Copied source docs
     ├── transcripts/            ← Meeting or review notes (llm-wiki/raw/transcripts/ only)
-    └── ai-skills~/             ← Portable AI skills package folders
+    └── all-skills~/             ← Portable AI skills package folders
 ```
 
 ---

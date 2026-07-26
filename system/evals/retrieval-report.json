@@ -1,0 +1,984 @@
+{
+  "generatedAt": "2026-06-24T22:30:02.476Z",
+  "k": 5,
+  "config": {
+    "threshold_mode": "relative",
+    "relative_alpha": 0.85,
+    "junk_floor": 0.35,
+    "similarity_threshold": 0.7,
+    "similarity_fallback": 0.65,
+    "top_k_documents": 5,
+    "nprobe": 8,
+    "ground_truth_boost": 0.05,
+    "_README": "Параметры гибридного поиска query-wiki.js. Калибруются скриптом eval-retrieval.js на размеченном наборе, а не подбираются на глаз.",
+    "stream_a_limit": 10,
+    "graph_lift_semantic": 2,
+    "_fields": {
+      "threshold_mode": "'relative' (рекомендуется) — адаптивный порог tau=max(junk_floor, relative_alpha*top_score) на каждый запрос; 'absolute' — фиксированный similarity_threshold (+ fallback).",
+      "relative_alpha": "Для relative-режима: насколько хуже лучшего результата ещё допустимо (0..1). Меньше => шире выдача.",
+      "junk_floor": "Для relative-режима: аварийный нижний пол, чтобы при отсутствии совпадений не тащить шум.",
+      "similarity_threshold": "Для absolute-режима: порог cosine для Stream B.",
+      "similarity_fallback": "Для absolute-режима: повтор с этим порогом, если при threshold 0 результатов.",
+      "top_k_documents": "Сколько документов возвращать.",
+      "nprobe": "Сколько ближайших кластеров сканировать (IVF multi-probe). nprobe>=число_кластеров или <=0 => исчерпывающий поиск.",
+      "ground_truth_boost": "Бонус к score для raw/код (ground truth) над wiki-саммари при ранжировании (#2).",
+      "stream_a_limit": "Максимум символьных совпадений (Stream A), чтобы частый символ не затоплял выдачу. 0 — без лимита.",
+      "graph_lift_semantic": "Сколько топ-семантических результатов расширять по графу (extends/[[ссылки]]). 0 — только точные совпадения."
+    },
+    "device": "auto"
+  },
+  "aggregate": {
+    "hybrid": {
+      "recall": 0.6842105263157895,
+      "mrr": 0.5522729334648839,
+      "ndcg": 0.5793684706316862,
+      "n": 38
+    },
+    "semantic": {
+      "recall": 0.6842105263157895,
+      "mrr": 0.5522729334648839,
+      "ndcg": 0.5793684706316862,
+      "n": 38
+    },
+    "flat": {
+      "recall": 0.6842105263157895,
+      "mrr": 0.5522729334648839,
+      "ndcg": 0.5793684706316862,
+      "n": 38
+    },
+    "lexical": {
+      "recall": 0.23684210526315788,
+      "mrr": 0.17169582085826623,
+      "ndcg": 0.17940866750810355,
+      "n": 38
+    }
+  },
+  "perQuery": [
+    {
+      "query": "механизм публикации и подписки на события для слабого связывания модулей в ядре фреймворка",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0.083,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0.083,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0.083,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 0.2,
+        "ndcg@5": 0.387
+      }
+    },
+    {
+      "query": "жизненный цикл игрового модуля: этапы инициализации, запуска, приостановки и завершения",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0.038,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0.038,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0.038,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "соглашения об именовании и форматировании C#-кода, принятые в проекте",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "компонент таймера, управляющий дочерними отсчётами времени",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.167,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "подробный разбор внутреннего устройства модульной системы",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.04,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "машиночитаемая инструкция для искусственного интеллекта по автоматической генерации модуля",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      }
+    },
+    {
+      "query": "обязательное руководство, которое нужно прочитать перед созданием любого нового игрового модуля",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      }
+    },
+    {
+      "query": "протокол для ИИ по декомпозиции технического задания на отдельные модули",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.059,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "что нужно прочитать перед написанием файла-описания примера модуля",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      }
+    },
+    {
+      "query": "обзорная сводка о том, как структурирована вся кодовая база",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "рекомендованные инженерные принципы проектирования модулей",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      }
+    },
+    {
+      "query": "как сконфигурировать и связать между собой модульную систему",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0.026,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0.026,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0.026,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.016,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "самодостаточные живые планы реализации сложных задач разработки",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "процедура импорта новых исходных материалов в базу знаний",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "подготовка свежего Unity-проекта к разработке с участием ИИ",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.009,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "каталог готовых рецептов команд для ИИ-агента",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "команда, генерирующая шаблонный код нового события обмена сообщениями",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "команда для создания нового геймплейного модуля проекта стройки",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "команда, проверяющая код на соответствие архитектурным стандартам проекта",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "команда для составления плана реализации новой функции",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "сфокусированный аудит эффективности кода во время исполнения в игровом движке",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "разработка через тестирование при участии ИИ-агентов",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "безопасность и готовность к продакшену кода, написанного нейросетью",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "управление структурной сложностью машинно-сгенерированного кода",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "цикл обратной связи, в котором агент учится на собственных ошибках",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0.029,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0.029,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0.029,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "насколько можно доверять найденному фрагменту информации",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "набор специализированных способностей, доступных агенту для Unity",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0.143,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0.143,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0.143,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.004,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "game design document for the dentist cow profession simulator",
+      "skipped": "no resolvable relevant docs",
+      "unresolved": [
+        "dentistry-cow-wiki/raw/GDDDocs/Dentistry_cow/GDD_Dentistry_cow.md"
+      ]
+    },
+    {
+      "query": "design document for the ice-cream cat builder construction simulator",
+      "skipped": "no resolvable relevant docs",
+      "unresolved": [
+        "plombir-buildings-wiki/raw/GDDDocs/GDD_cat_plombir_buildings.md"
+      ]
+    },
+    {
+      "query": "gameplay design overview of the building-construction title",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "semantic": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "flat": {
+        "recall@5": 0,
+        "mrr": 0,
+        "ndcg@5": 0
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 0.25,
+        "ndcg@5": 0.431
+      }
+    },
+    {
+      "query": "reference for the stage that installs a crown onto a chipped tooth",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      }
+    },
+    {
+      "query": "reference for the stage that applies cement to glue a chipped crown",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 0.333,
+        "ndcg@5": 0.5
+      }
+    },
+    {
+      "query": "coordinator module that builds a tall multi-storey tower",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.017,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "the design-selection step of the skyscraper construction flow",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.027,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "module describing the hazards the player must dodge in the endless runner",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.008,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "the core module controlling the running character of the runner game",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 0.5,
+        "ndcg@5": 0.631
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.017,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "module that fires the victory condition in the runner level",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.009,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "module that handles unloading freight at the train station",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.024,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "module responsible for hauling goods between points on the railway",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 0,
+        "mrr": 0.011,
+        "ndcg@5": 0
+      }
+    },
+    {
+      "query": "quick smoke verification that the build launches on a physical handset",
+      "relevant": 1,
+      "hybrid": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "semantic": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "flat": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      },
+      "lexical": {
+        "recall@5": 1,
+        "mrr": 1,
+        "ndcg@5": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+=== DavASko LLM Wiki Lint ===
+Layers parsed: dentistry-cow-wiki, kbpro-wiki, llm-wiki, plombir-buildings-wiki, railway-wiki, unity-wiki
+
+=== Metrics ===
+Layer: dentistry-cow-wiki
+  - Total Wiki Pages: 5
+    - Drafts: 1
+    - Reviewed: 0
+    - Stable: 0
+    - Deprecated: 0
+  - Raw Sources: 27 (Cited: 27, Coverage: 100%)
+Layer: kbpro-wiki
+  - Total Wiki Pages: 94
+    - Drafts: 57
+    - Reviewed: 1
+    - Stable: 31
+    - Deprecated: 0
+  - Raw Sources: 49 (Cited: 49, Coverage: 100%)
+Layer: llm-wiki
+  - Total Wiki Pages: 9
+    - Drafts: 5
+    - Reviewed: 1
+    - Stable: 0
+    - Deprecated: 0
+  - Raw Sources: 22 (Cited: 22, Coverage: 100%)
+Layer: plombir-buildings-wiki
+  - Total Wiki Pages: 6
+    - Drafts: 3
+    - Reviewed: 0
+    - Stable: 0
+    - Deprecated: 0
+  - Raw Sources: 46 (Cited: 46, Coverage: 100%)
+Layer: railway-wiki
+  - Total Wiki Pages: 3
+    - Drafts: 0
+    - Reviewed: 0
+    - Stable: 0
+    - Deprecated: 0
+  - Raw Sources: 17 (Cited: 17, Coverage: 100%)
+Layer: unity-wiki
+  - Total Wiki Pages: 64
+    - Drafts: 60
+    - Reviewed: 0
+    - Stable: 0
+    - Deprecated: 0
+  - Raw Sources: 44 (Cited: 44, Coverage: 100%)
+
+Warnings:
+  - dentistry-cow-wiki/wiki/contradictions.md links to placeholder/stub [[scenario-graph-execplans]]
+  - dentistry-cow-wiki/wiki/contradictions.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - kbpro-wiki/wiki/index.md links to placeholder/stub [[gdd-plombir-building]]
+  - kbpro-wiki/wiki/index.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - kbpro-wiki/wiki/index.md links to placeholder/stub [[scenario-graph-execplans]]
+  - kbpro-wiki/wiki/index.md links to placeholder/stub [[plombir-building-game-design]]
+  - kbpro-wiki/wiki/maps/architecture-map.md links to placeholder/stub [[scenario-graph-execplans]]
+  - kbpro-wiki/wiki/maps/architecture-map.md links to placeholder/stub [[device-build-smoke]]
+  - kbpro-wiki/wiki/maps/gameplay-product-map.md links to placeholder/stub [[plombir-building-game-design]]
+  - kbpro-wiki/wiki/maps/gameplay-product-map.md links to placeholder/stub [[gdd-plombir-building]]
+  - kbpro-wiki/wiki/runbooks/bitrix-task-import.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - kbpro-wiki/wiki/runbooks/bitrix-task-import.md links to placeholder/stub [[plombir-building-game-design]]
+  - kbpro-wiki/wiki/stubs.md links to placeholder/stub [[device-build-smoke]]
+  - kbpro-wiki/wiki/stubs.md links to placeholder/stub [[gdd-plombir-building]]
+  - kbpro-wiki/wiki/stubs.md links to placeholder/stub [[plombir-building-game-design]]
+  - kbpro-wiki/wiki/stubs.md links to placeholder/stub [[scenario-graph-execplans]]
+  - llm-wiki/wiki/concepts/execplans.md links to placeholder/stub [[current-kbpro-ai-docs]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[bitrix-task-import]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[ai-generated-code-review]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[ai-agent-ready-workflow]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-workflow-video-sources]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-agent-skill-set]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-skill-donor-inventory]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-skill-donor-analysis]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-skill-systematization]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-skill-coverage-audit]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[ai-vibe-code-review-video-sources]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[ai-code-cleaning]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-agent-environment-setup]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-agent-rules-and-prompts]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[local-unity-ai-skill-library]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-skill-validation]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-editor-automation-with-ai]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-prefab-scene-workflow]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-vfx-shader-workflow]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-shader-ai-guidelines]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-ai-agent-validation]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[unity-skills-besty-workflow]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[ai-source-confidence]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[security-redaction-over-raw-immutability]]
+  - llm-wiki/wiki/maps/operations-map.md links to placeholder/stub [[decompose-task-to-backlog]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[create-game-module]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[event-bus]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[kbpro-code-style]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[architecture-map]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[module-creation-workflow]]
+  - llm-wiki/wiki/runbooks/ai-command-playbooks.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - llm-wiki/wiki/runbooks/raw-data-ingest-workflow.md links to placeholder/stub [[current-kbpro-ai-docs]]
+  - llm-wiki/wiki/runbooks/raw-data-ingest-workflow.md links to placeholder/stub [[legacy-documents-as-raw-sources]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[current-kbpro-ai-docs]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[legacy-documents-as-raw-sources]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[bitrix-task-import]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[ai-generated-code-review]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[ai-agent-ready-workflow]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-workflow-video-sources]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-agent-skill-set]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-skill-donor-inventory]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-skill-donor-analysis]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-skill-systematization]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-skill-coverage-audit]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[ai-vibe-code-review-video-sources]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[ai-code-cleaning]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-agent-environment-setup]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-agent-rules-and-prompts]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[local-unity-ai-skill-library]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-skill-validation]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-editor-automation-with-ai]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-prefab-scene-workflow]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-vfx-shader-workflow]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-shader-ai-guidelines]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-ai-agent-validation]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[unity-skills-besty-workflow]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[ai-source-confidence]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[security-redaction-over-raw-immutability]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[decompose-task-to-backlog]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[create-game-module]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[event-bus]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[kbpro-code-style]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[architecture-map]]
+  - llm-wiki/wiki/stubs.md links to placeholder/stub [[module-creation-workflow]]
+  - unity-wiki/wiki/concepts/unity-agent-skill-set.md links to placeholder/stub [[kbpro-code-style]]
+  - unity-wiki/wiki/concepts/unity-agent-skill-set.md links to placeholder/stub [[kbpro-module-lifecycle]]
+  - unity-wiki/wiki/concepts/unity-agent-skill-set.md links to placeholder/stub [[spine-integration]]
+  - unity-wiki/wiki/concepts/unity-agent-skill-set.md links to placeholder/stub [[config-and-data]]
+  - unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md links to placeholder/stub [[kbpro-code-style]]
+  - unity-wiki/wiki/concepts/unity-ai-code-review-checklist.md links to placeholder/stub [[kbpro-module-lifecycle]]
+  - unity-wiki/wiki/concepts/unity-ai-skill-validation.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - unity-wiki/wiki/concepts/unity-ai-skill-validation.md links to placeholder/stub [[kbpro-code-style]]
+  - unity-wiki/wiki/concepts/unity-ai-skill-validation.md links to placeholder/stub [[kbpro-module-lifecycle]]
+  - unity-wiki/wiki/entities/figma-to-unity.md links to placeholder/stub [[ui-system]]
+  - unity-wiki/wiki/runbooks/local-unity-ai-skill-library.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - unity-wiki/wiki/sources/agent-skills-docs.md links to placeholder/stub [[kbpro-code-style]]
+  - unity-wiki/wiki/sources/agent-skills-docs.md links to placeholder/stub [[kbpro-module-lifecycle]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[architecture-map]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[automation-scripts-and-rules]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[config-and-data]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[create-game-module]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[event-bus]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[kbpro-code-style]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[kbpro-module-lifecycle]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[module-creation-workflow]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[spine-integration]]
+  - unity-wiki/wiki/stubs.md links to placeholder/stub [[ui-system]]
+  - unity-wiki/wiki/syntheses/unity-ai-skill-donor-analysis.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - unity-wiki/wiki/syntheses/unity-ai-skill-systematization.md links to placeholder/stub [[architecture-challenge-protocol]]
+  - wiki page has no inbound links: dentistry-cow-wiki/wiki/sources/codex-skill-frontmatter.md
+  - wiki page has no inbound links: kbpro-wiki/wiki/sources/kbpro-automation-and-tasks.md
+  - wiki page has no inbound links: unity-wiki/wiki/runbooks/unity-skills-besty-workflow.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/ai-vibe-code-review-transcripts-2.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/ai-vibe-code-review-transcripts.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/source-setup-ai-project-rules.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/source-unity-ai-skill-coverage-audit.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/source-unity-ai-skill-donor-analysis.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/source-unity-ai-skill-systematization.md
+  - wiki page has no inbound links: unity-wiki/wiki/sources/unity-optimization-docs.md
+  - all-skills~/davasko-llm-wiki/SKILL.md has missing raw Markdown link: ../../../system/docs/architecture-setup.md
+  - all-skills~/davasko-llm-wiki/SKILL.md has missing raw Markdown link: ../../../system/docs/data-standards.md
+  - all-skills~/davasko-llm-wiki/SKILL.md has missing raw Markdown link: ../../../system/docs/scripts-templates.md
+  - all-skills~/davasko-llm-wiki/SKILL.md has missing raw Markdown link: ../../../system/docs/sync-integration.md
+  - all-skills~/davasko-llm-wiki/SKILL.md has missing raw Markdown link: ../../../system/docs/setup-new-wiki.md
+  - all-skills~/davasko-wiki-ingest/SKILL.md has missing raw Markdown link: ../../../system/docs/data-standards.md
+  - all-skills~/davasko-youtube-researcher/examples/youtube-research-example.md has missing raw Markdown link: Assets/DavASko/davasko-ai-docs/engine-wiki/raw/transcripts/ai-vibe-code-review/pragmatic-ai-coding.md
+
+Issues:

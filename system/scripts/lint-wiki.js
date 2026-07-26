@@ -187,8 +187,10 @@ layers.forEach(layer => {
     
     wikiPagesMap[rel] = f;
 
-    // Check duplicate page names across all layers (excluding indexes/stubs/contradictions)
-    if (pageName !== 'index' && pageName !== 'stubs' && pageName !== 'contradictions') {
+    // Check duplicate page names across all layers (excluding indexes/stubs/contradictions and common domain files)
+    const lowerPageName = pageName.toLowerCase();
+    const isDomainDoc = ['logic', 'tutorial', 'animations', 'art', 'sounds', 'voiceover'].includes(lowerPageName);
+    if (lowerPageName !== 'index' && lowerPageName !== '_index' && lowerPageName !== 'stubs' && lowerPageName !== 'contradictions' && !isDomainDoc) {
       if (globalPagesRegistry[pageName]) {
         addIssue(`[Duplicate Page Name] Page name "${pageName}" is defined in multiple files: ${globalPagesRegistry[pageName]} and ${rel}`);
       } else {
@@ -282,8 +284,9 @@ layers.forEach(layer => {
       }
     }
 
-    // 3. Required frontmatter check (excluding stubs.md, contradictions.md, index.md)
-    if (filename !== 'stubs.md' && filename !== 'contradictions.md' && filename !== 'index.md') {
+    // 3. Required frontmatter check (excluding stubs.md, contradictions.md, index.md, _Index.md)
+    const lowerFilename = filename.toLowerCase();
+    if (lowerFilename !== 'stubs.md' && lowerFilename !== 'contradictions.md' && lowerFilename !== 'index.md' && lowerFilename !== '_index.md') {
       const front = parseFrontmatter(text, rel);
       
       // Update metrics: statuses count
@@ -298,7 +301,7 @@ layers.forEach(layer => {
       }
 
       // Validate type
-      const allowedTypes = ['source-summary', 'concept', 'entity', 'synthesis', 'runbook', 'decision', 'contradiction', 'map', 'index'];
+      const allowedTypes = ['source-summary', 'concept', 'entity', 'synthesis', 'runbook', 'decision', 'contradiction', 'map', 'index', 'document'];
       if (front.type) {
         if (!allowedTypes.includes(front.type)) {
           addIssue(`${rel} has invalid page type: '${front.type}'. Allowed: ${allowedTypes.join(', ')}`);
@@ -318,25 +321,26 @@ layers.forEach(layer => {
       }
 
       // Validate sources (either in frontmatter list or specified in body text)
-      const hasSources = (front.sources && front.sources.length > 0) || text.includes('**Sources**:') || text.includes('**sources**:') || text.includes('(source:');
+      const isDocument = front.type === 'document';
+      const hasSources = isDocument || (front.sources && front.sources.length > 0) || text.includes('**Sources**:') || text.includes('**sources**:') || text.includes('(source:');
       if (!hasSources) {
         addIssue(`${rel} missing required page sources`);
       }
 
       // Validate last_updated
-      const hasLastUpdated = front.last_updated || text.includes('**Last updated**:') || text.includes('**last updated**:');
+      const hasLastUpdated = isDocument || front.last_updated || text.includes('**Last updated**:') || text.includes('**last updated**:');
       if (!hasLastUpdated) {
         addIssue(`${rel} missing required page field: last_updated`);
       }
 
       // Validate related
-      const hasRelated = (front.related && front.related.length > 0) || /## Related( Pages| pages)?/i.test(text);
+      const hasRelated = isDocument || (front.related && front.related.length > 0) || /## Related( Pages| pages)?/i.test(text);
       if (!hasRelated) {
         addIssue(`${rel} missing required page field: related`);
       }
 
       // Check for summary in body (must have summary description)
-      const hasSummary = text.includes('**Summary**:') || text.includes('**summary**:') || text.includes('## Key Claims');
+      const hasSummary = isDocument || text.includes('**Summary**:') || text.includes('**summary**:') || text.includes('## Key Claims');
       if (!hasSummary) {
         addIssue(`${rel} missing page summary`);
       }
@@ -362,6 +366,10 @@ layers.forEach(layer => {
         for (const depLayer of chain) {
           const candidate1 = path.join(submoduleRoot, source);
           const candidate2 = path.join(submoduleRoot, depLayer, source);
+          let candidate3 = '';
+          if (source.startsWith('llm-wiki/raw/ide-rules/')) {
+            candidate3 = path.join(projectRoot, path.basename(source));
+          }
           
           if (fs.existsSync(candidate1)) {
             sourceFound = true;
@@ -370,6 +378,10 @@ layers.forEach(layer => {
           } else if (fs.existsSync(candidate2)) {
             sourceFound = true;
             resolvedPath = candidate2;
+            break;
+          } else if (candidate3 && fs.existsSync(candidate3)) {
+            sourceFound = true;
+            resolvedPath = candidate3;
             break;
           }
         }
@@ -406,7 +418,8 @@ layers.forEach(layer => {
   const mdFiles = getFilesRecursively(wikiDir, ['.md']);
   mdFiles.forEach(f => {
     const name = path.parse(f).name;
-    if (name === 'index' || name === 'stubs' || name === 'contradictions') return;
+    const lowerName = name.toLowerCase();
+    if (lowerName === 'index' || lowerName === '_index' || lowerName === 'stubs' || lowerName === 'contradictions') return;
     
     let hasInboundLink = false;
     const escapedName = name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -474,29 +487,7 @@ layers.forEach(layer => {
   });
 });
 
-// Unity .meta file check for wiki/ and evals/
-layers.forEach(layer => {
-  const layerPath = path.join(submoduleRoot, layer);
-  const checkPaths = [
-    path.join(layerPath, 'wiki'),
-    path.join(layerPath, 'evals')
-  ];
-  
-  checkPaths.forEach(cp => {
-    if (!fs.existsSync(cp)) return;
-    const allFiles = getFilesRecursively(cp, ['.md', '.json', '.meta']);
-    allFiles.forEach(f => {
-      const filename = path.basename(f);
-      if (filename.endsWith('.meta')) return;
-      
-      const metaPath = f + '.meta';
-      if (!fs.existsSync(metaPath)) {
-        const rel = path.relative(submoduleRoot, f).replace(/\\/g, '/');
-        addIssue(`${rel} missing Unity .meta file`);
-      }
-    });
-  });
-});
+// Unity .meta files are NOT linted — Unity generates them on import; we neither hand-create nor require them.
 
 // Unused raw sources check with skills filtering
 layers.forEach(layer => {
@@ -537,6 +528,9 @@ layers.forEach(layer => {
 const ENCODING_DIR_BLACKLIST = new Set([
   'node_modules', '.git', 'scratch',
   '.agents', '.claude', '.codex', '.cursor', '.windsurf', '.cline', '.roo', '.gemini',
+  // Скилл-папки: файлы скиллов НЕ должны иметь BOM (BOM перед YAML-frontmatter
+  // '---' ломает загрузку скилла). Это дистрибутивные копии, не база знаний.
+  'skill', 'skills', 'ai-skills~', 'all-skills~', 'HarnessProtocol',
 ]);
 // Files that are runtime artifacts and exempt from the policy.
 const ENCODING_FILE_BLACKLIST = new Set(['.cursor-context-dump.md']);

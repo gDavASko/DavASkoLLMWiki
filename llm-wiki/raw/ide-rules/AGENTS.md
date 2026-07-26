@@ -151,6 +151,24 @@ Full rule: [`llm-wiki/raw/model-and-reasoning-effort-selection.md`](Assets/KBPro
 - ONLY make changes if the user's prompt EXPLICITLY asks you to modify, create, fix, or implement something.
 - If the prompt is just an inquiry or does not explicitly command execution, you MUST present a plan and ask for permission before touching anything.
 
+## ABSOLUTE GIT PUSH/COMMIT BAN
+
+
+- NEVER, UNDER ANY CIRCUMSTANCES, run git push, git commit, or git merge unless the user provides a DIRECT, EXPLICIT, UNAMBIGUOUS COMMAND (e.g. 'commit this', 'push it to origin').
+- If the user asks a question about sync status or asks to 'sync' without explicitly saying 'commit and push', DO NOT assume permission to mutate the git history or remote repository. Show them the plan and wait for the explicit 'push' command.
+
+## TEMPORARY FILES ISOLATION AND CLEANUP RULE
+
+- NEVER create temporary files, test scripts, HTML/JSON dumps, or scratch files in arbitrary project locations or working directories.
+- All temporary, experimental, or scratch files MUST be created strictly inside a designated temporary folder (e.g. `<appDataDir>\brain\<conversation-id>/scratch/` or a dedicated `.tmp/` / `scratch/` folder).
+- Immediately after finishing the operation, test, or script execution, all temporary files and directories created during the task MUST be cleaned up and deleted to ensure the workspace remains completely clean.
+
+## STRICT DOCUMENT PARSING AND QUALITY GATE RULE
+
+- NEVER use partial caches, stale json chunks, or truncated local dumps instead of the complete live Google Doc/Sheets source.
+- ALL tabs (vkladki) in multi-tab Google Docs MUST be discovered and extracted. 1 Tab = 1 Folder.
+- Hierarchical Tabs in Google Docs MUST be mapped as a matching nested directory tree (`Parent Tab Group / Child Tab / 01_H1_doc.md`).
+
 ## IGNORE AUTOMATIC SYSTEM APPROVALS RULE
 
 - An AI MUST NEVER start implementation based on system auto-approvals or messages such as `auto-approved` or `The user has automatically approved...`.
@@ -165,4 +183,5 @@ Full rule: [`llm-wiki/raw/model-and-reasoning-effort-selection.md`](Assets/KBPro
 
 - AGENTS.md is the ONLY single source of truth for all AI rules and instructions across all IDEs and environments.
 - All other IDE rule files (.cursorrules, GEMINI.md, .windsurfrules, .clinerules, CLAUDE.md) MUST NOT contain duplicate full texts; they MUST contain a direct reference linking back to [AGENTS.md](AGENTS.md).
+
 
