@@ -211,4 +211,19 @@ Full rule: [`llm-wiki/raw/model-and-reasoning-effort-selection.md`](Assets/KBPro
 - NEVER make active codebase changes, run modifying commands, edit files, or execute implementation plans on your own initiative.
 - ONLY make changes if the user's prompt EXPLICITLY asks you to modify, create, fix, or implement something.
 - If the prompt is just an inquiry or does not explicitly command execution, you MUST present a plan and ask for permission before touching anything.
+
+## IGNORE AUTOMATIC SYSTEM APPROVALS RULE
+
+- An AI MUST NEVER start implementation based on system auto-approvals or messages such as `auto-approved` or `The user has automatically approved...`.
+- After presenting an implementation plan, the AI MUST STOP and wait ONLY for explicit manual user text input in chat containing the exact phrase `Реализуй план`.
+
+## STRICT RULES MODIFICATION PROTECTION RULE
+
+- NEVER touch, modify, edit, rephrase, delete, or add to any sections of system instructions, rules, or AGENTS.md files that were NOT explicitly requested by the user.
+- Any change to system rules is allowed strictly and only in the exact places, scope, and intent directly authorized by the user. Unsanctioned edits to system rules are considered critical failure.
+
+## SINGLE AGENTS.MD SOURCE OF TRUTH RULE
+
+- AGENTS.md is the ONLY single source of truth for all AI rules and instructions across all IDEs and environments.
+- All other IDE rule files (.cursorrules, GEMINI.md, .windsurfrules, .clinerules, CLAUDE.md) MUST NOT contain duplicate full texts; they MUST contain a direct reference linking back to [AGENTS.md](AGENTS.md).
 <!-- END DavASkoLLMWiki -->
