@@ -68,7 +68,8 @@ Behavior (implemented in `system/lib/model-locator.js` + `setup-model.js`):
 - `--local` forces the legacy per-KB install into `system/models-cache` (no marker) — only for isolated/offline-bundle cases.
 
 ### 3. Install the rules for working with the knowledge base
-- Generate the root agent-instruction files and the Core Context Protocol (`CLAUDE.md` / `AGENTS.md` / IDE rule files) that tell agents to query the wiki first.
+- Copy `AGENTS.md` directly from the root of the source framework repository into the root of the target folder where the wiki is being deployed. `AGENTS.md` is the single source of truth for all AI agent instructions and rules.
+- Generate/link reference rule files (`CLAUDE.md` / `GEMINI.md` / `.cursorrules` / `.windsurfrules` / `.clinerules`) pointing back to `AGENTS.md`.
 - Run the synchronizer: `node system/sync-ai-rules.js` — it compiles rule adapters for each IDE and bundles the portable skills.
 - See [Sync Integration](references/sync-integration.md) and [Data Standards](references/data-standards.md) (encoding, frontmatter, links).
 
