@@ -335,6 +335,18 @@ flowchart LR
 
 ---
 
+## 10.1. Current index compatibility contract
+
+- `node system/build-index.js` is incremental: it re-embeds only new, changed, or removed source documents.
+- Chunking profile **v3** is part of the LanceDB format: structural chunks target 200 words, have a 300-word upper bound, and carry 32 words of context from the preceding chunk on every boundary after the first.
+- Changing a chunking or embedding profile requires the deliberate `node system/build-index.js --force`; an ordinary incremental run must not mix vectors created by different profiles.
+- A valid layer has `wiki.json` and at least one content directory: `wiki/` or `raw/`. Raw-only layers are indexed deliberately because Git omits empty `wiki/` directories.
+- Run `node system/scripts/audit-chunks.js --json` after a full rebuild to inspect chunk counts, overlap coverage, forced boundaries, and unusually large documents.
+
+The detailed profile and migration rules are in [docs/2026-08-12-chunking-profile.md](docs/2026-08-12-chunking-profile.md).
+
+---
+
 ## 11. 📊 Evaluation & results
 
 Quality is **measured**, not asserted. `eval-retrieval.js` runs a labeled query set through several retrievers — including a `lexical` (grep‑like) baseline — and reports recall@k / MRR / nDCG.

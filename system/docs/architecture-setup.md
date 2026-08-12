@@ -29,6 +29,8 @@ graph TD
 
 Every layer directory MUST contain a `wiki.json` file in its root. This manifest defines the layer name and its explicit dependencies. In the layer description indexes and LLM-WIKI guides, dependency references must include clickable local paths to their folders, e.g. `[davasko-wiki](../davasko-wiki)`.
 
+For authoring, a layer normally contains both `wiki/` and `raw/`. For indexing, a manifest with either directory is valid: a raw-only layer must be indexed because Git does not retain an empty `wiki/` directory after cloning. A layer with neither directory is ignored as invalid.
+
 ### Configuration Format
 ```json
 {
