@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const submoduleRoot = path.resolve(__dirname, '../..');
-const projectRoot = path.resolve(submoduleRoot, '../../..');
+const projectRoot = path.resolve(submoduleRoot, '..');
 
 const errors = [];
 const warnings = [];
@@ -28,6 +28,10 @@ function readUtf8(filePath) {
   return content;
 }
 
+function isPathInside(candidatePath, rootPath) {
+  const relative = path.relative(rootPath, candidatePath);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
 // Helper to recursively find files matching extensions
 function getFilesRecursively(dir, extensions, excludeDirs = []) {
   let results = [];
@@ -163,18 +167,27 @@ function validateLinks() {
   // Collect files to scan
   let filesToScan = [];
 
-  // 1. All markdown, json, rules inside submodule layers
+  // 1. Wiki pages and managed GDD source exports. Raw archives are source material
+  // and may contain example or historical links that are not links in this Wiki.
   layers.forEach(layer => {
     const layerPath = path.join(submoduleRoot, layer);
-    filesToScan = filesToScan.concat(
-      getFilesRecursively(layerPath, ['.md', '.json', '.clinerules', '.cursorrules', '.windsurfrules'])
-    );
+    const wikiPath = path.join(layerPath, 'wiki');
+    if (fs.existsSync(wikiPath)) {
+      filesToScan = filesToScan.concat(
+        getFilesRecursively(wikiPath, ['.md', '.clinerules', '.cursorrules', '.windsurfrules'])
+      );
+    }
+
+    const gddSourcePath = path.join(layerPath, 'raw', 'gdd-source');
+    if (fs.existsSync(gddSourcePath)) {
+      filesToScan = filesToScan.concat(getFilesRecursively(gddSourcePath, ['.md']));
+    }
   });
 
-  // 2. System files
+  // 2. System documentation
   const systemPath = path.join(submoduleRoot, 'system');
   if (fs.existsSync(systemPath)) {
-    filesToScan = filesToScan.concat(getFilesRecursively(systemPath, ['.md', '.json']));
+    filesToScan = filesToScan.concat(getFilesRecursively(systemPath, ['.md']));
   }
 
   // 3. Submodule root files
@@ -182,7 +195,7 @@ function validateLinks() {
     const fullPath = path.join(submoduleRoot, file);
     if (fs.statSync(fullPath).isFile()) {
       const ext = path.extname(file).toLowerCase();
-      if (['.md', '.json'].includes(ext)) {
+      if (ext === '.md') {
         filesToScan.push(fullPath);
       }
     }
@@ -207,30 +220,41 @@ function validateLinks() {
   console.log(`Scanning ${filesToScan.length} files...`);
 
   filesToScan.forEach(filePath => {
-    if (path.basename(filePath) === 'validate_errors.json') return;
+    if (['validate_errors.json', '.cursor-context-dump.md'].includes(path.basename(filePath))) return;
     const fileContent = readUtf8(filePath);
     const lines = fileContent.split('\n');
     const fileLayer = getFileLayer(filePath);
     const dirPath = path.dirname(filePath);
     const relPath = path.relative(projectRoot, filePath).replace(/\\/g, '/');
+    let inFencedCode = false;
 
     lines.forEach((lineText, index) => {
       const lineNumber = index + 1;
+      const trimmedLine = lineText.trimStart();
+
+      // Documentation may show link syntax in fenced or inline code. Those are
+      // examples, not outgoing links of the document being validated.
+      if (/^(?:```|~~~)/.test(trimmedLine)) {
+        inFencedCode = !inFencedCode;
+        return;
+      }
+      if (inFencedCode) return;
+
+      const validationText = lineText.replace(/`[^`]*`/g, '');
 
       // Check for doubled system paths (system\system/ or system/system/)
-      if (/system[\\/]system[\\/]/i.test(lineText)) {
-        addError(filePath, lineNumber, `Doubled system directory path detected in line: "${lineText.trim()}"`);
+      if (/system[\\/]system[\\/]/i.test(validationText)) {
+        addError(filePath, lineNumber, `Doubled system directory path detected in line: "${validationText.trim()}"`);
       }
 
       // Check for raw/project-docs/ references that should have been updated
-      if (/raw\/project-docs\//i.test(lineText)) {
-        addError(filePath, lineNumber, `Deprecated path 'raw/project-docs/' detected in line: "${lineText.trim()}"`);
+      if (/raw\/project-docs\//i.test(validationText)) {
+        addError(filePath, lineNumber, `Deprecated path 'raw/project-docs/' detected in line: "${validationText.trim()}"`);
       }
-
       // 1. Check Obsidian links [[link]]
       const obsidianRegex = /\[\[([^\]|#]+)(?:#([^\]|]+))?(?:\|([^\]]+))?\]\]/g;
       let obsMatch;
-      while ((obsMatch = obsidianRegex.exec(lineText)) !== null) {
+      while ((obsMatch = obsidianRegex.exec(validationText)) !== null) {
         const linkTarget = obsMatch[1].trim();
         const ignoredObsidianLinks = ['wiki-links', 'related-page', 'wiki-link', 'some-page'];
         if (ignoredObsidianLinks.includes(linkTarget)) continue;
@@ -269,7 +293,7 @@ function validateLinks() {
       // 2. Check Markdown links [label](href)
       const markdownRegex = /\[[^\]]*\]\(([^)]+)\)/g;
       let mdMatch;
-      while ((mdMatch = markdownRegex.exec(lineText)) !== null) {
+      while ((mdMatch = markdownRegex.exec(validationText)) !== null) {
         let href = mdMatch[1].trim();
         
         // Skip network links
@@ -286,44 +310,34 @@ function validateLinks() {
           continue;
         }
 
-        // Strip url formatting / decoding
+        // Strip URL formatting / decoding
         href = decodeURIComponent(href);
 
-        let targetPath = '';
-
-        if (href.startsWith('file:///Assets/') || href.startsWith('file://Assets/')) {
-          // Path within project
-          const cleanPath = href.replace(/^file:\/\/\/?/, ''); // leaves "Assets/..."
-          targetPath = path.resolve(projectRoot, cleanPath);
-        } else if (href.startsWith('file://references/') || href.startsWith('file:///references/') ||
-                   href.startsWith('file://examples/') || href.startsWith('file:///examples/')) {
-          // Skill local reference
-          const cleanPath = href.replace(/^file:\/\/\/?/, ''); // leaves "references/..." or "examples/..."
-          targetPath = path.resolve(dirPath, cleanPath);
-        } else if (href.startsWith('file:///')) {
-          // Absolute path or project-root relative
-          const cleanPath = href.substring(8); // remove file:///
-          if (cleanPath.match(/^[a-zA-Z]:/)) {
-            // Absolute path e.g. E:/...
-            targetPath = path.resolve(cleanPath);
-          } else {
-            // Relative to project root
-            targetPath = path.resolve(projectRoot, cleanPath);
-          }
-        } else if (href.startsWith('file://')) {
-          // Two slashes, check if relative to project root or absolute
-          const cleanPath = href.substring(7);
-          targetPath = path.resolve(projectRoot, cleanPath);
-        } else {
-          // Standard relative markdown path
-          targetPath = path.resolve(dirPath, href);
+        // The knowledge base must remain portable across operating systems.
+        // Only relative Markdown paths inside knowledge-base/ are permitted.
+        if (/^(?:file:|[a-zA-Z]:[\\/]|[\\/]{1,2}|~[\\/])/.test(href)) {
+          addError(filePath, lineNumber, `Absolute or OS-specific file path is forbidden: "${href}". Use a relative Markdown path inside knowledge-base/.`);
+          continue;
         }
 
-        // Verify file existence
-        if (!fs.existsSync(targetPath)) {
+        const targetPaths = [];
+        if (href.startsWith('./') || href.startsWith('../')) {
+          // Explicit paths always use standard Markdown file-relative resolution.
+          targetPaths.push(path.resolve(dirPath, href));
+        } else {
+          // A bare relative path is always rooted at knowledge-base/.
+          targetPaths.push(path.resolve(submoduleRoot, href));
+        }
+
+        if (targetPaths.some((targetPath) => !isPathInside(targetPath, submoduleRoot))) {
+          addError(filePath, lineNumber, `Relative path escapes knowledge-base/: "${href}"`);
+          continue;
+        }
+        // Verify file existence against every valid resolution convention.
+        if (!targetPaths.some((targetPath) => fs.existsSync(targetPath))) {
           const isPlanFile = relPath.endsWith('_Plan.md') || relPath.endsWith('_plan.md') || relPath.endsWith('PLANS.md') || relPath.endsWith('implementation_plan.md') || relPath.endsWith('task.md') || relPath.endsWith('walkthrough.md');
           if (!isPlanFile) {
-            addError(filePath, lineNumber, `Broken file link: "${href}" (resolved to: ${targetPath})`);
+            addError(filePath, lineNumber, `Broken file link: "${href}" (resolved to: ${targetPaths.join(' | ')})`);
           }
         }
       }

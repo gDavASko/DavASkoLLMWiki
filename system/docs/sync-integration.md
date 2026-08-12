@@ -1,4 +1,4 @@
-﻿ Rules & Skill Synchronizer
+ Rules & Skill Synchronizer
 
 To guide AI agents (like Cursor, Windsurf, Claude Code, Cline, Roo, Gemini, and Copilot) according to the project's architecture, we distribute master rules and skills into IDE-specific paths.
 
@@ -42,12 +42,12 @@ The script `sync-ai-rules.js` resides in the `system/` directory of the submodul
 
 When initializing a new workspace, run the synchronizer via Node.js from the submodule folder:
 ```bash
-node Assets/DavASko/davasko-ai-docs/system/sync-ai-rules.js
+node system/sync-ai-rules.js
 ```
 
-To synchronize skills globally into the user's home configuration folder (`~/.gemini/config/skills/`), pass the `--global` flag:
+To synchronize skills globally, pass the `--global` flag. The CLI resolves the OS-specific user configuration directory at runtime and does not persist that path in the knowledge base:
 ```bash
-node Assets/DavASko/davasko-ai-docs/system/sync-ai-rules.js --global
+node system/sync-ai-rules.js --global
 ```
 
 This keeps both your project-local and global agent rules and skills fully aligned with the knowledge base.

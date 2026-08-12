@@ -29,7 +29,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
-import { chunkMarkdown } from './lib/chunker.js';
+import { chunkMarkdownDetailed } from './lib/chunker.js';
 import { initModel as libInitModel, embedBatch as libEmbedBatch, embedLateChunking as libEmbedLateChunking } from './lib/retrieval.js';
 import { resolveModelsCache } from './lib/model-locator.js';
 import * as lancedb from 'vectordb';
@@ -48,6 +48,7 @@ const MODELS_CACHE = (() => {
   return r.dir || r.hint;
 })();
 const LANCEDB_DIR  = path.join(SYSTEM_DIR, '.lancedb');
+const CHUNKING_MANIFEST_FILE = path.join(LANCEDB_DIR, 'chunking-profile.json');
 
 // ─── Model Configuration ────────────────────────────────────────────
 const MODEL_ID       = 'jinaai/jina-embeddings-v3';
@@ -62,13 +63,13 @@ const INDEX_CONFIG_FILE = path.join(SYSTEM_DIR, 'index-config.json');
 const INDEX_DEFAULTS = {
   index_code:          true,        // индексировать код (для базы ПРО КОД — по умолчанию да)
   chunk_strategy:      'structural',// 'structural' (по структуре Markdown) | 'fixed' (окно слов)
-  chunk_size_words:    250,         // целевой размер чанка
-  chunk_min_words:     80,          // мельче — сливается с соседом
-  chunk_max_words:     400,         // крупнее — единственный случай хард-сплита
-  chunk_overlap_words: 50,          // только для fixed-стратегии
+  chunk_size_words:    200,         // целевой размер retrieval-чанка
+  chunk_min_words:     45,          // короткая секция остаётся атомарной
+  chunk_max_words:     300,         // крупнее — рекурсивный split по предложениям
+  chunk_overlap_words: 32,          // только на вынужденной границе внутри абзаца
   keep_code_atomic:    true,        // не рвать блоки ```...```
   heading_breadcrumbs: true,        // приписывать к чанку путь заголовков
-  max_raw_file_bytes:  200 * 1024,  // raw/-файлы крупнее — пропускаются (ГДД/ТЗ → сотни чанков)
+  max_raw_file_bytes:  0,            // 0 = не пропускать raw-источники по размеру
 };
 function loadIndexConfig() {
   try {
@@ -90,6 +91,20 @@ const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
 const INDEX_CODE          = ICFG.index_code;
 const EMBED_BATCH_SIZE    = ICFG.embed_batch_size || 16;
 const DEVICE              = ICFG.device || 'auto';   // 'auto'(GPU→CPU) | 'dml' | 'cuda' | 'cpu'
+const CHUNKING_PROFILE = Object.freeze({
+  version: 2,
+  strategy: CHUNK_STRATEGY,
+  targetWords: CHUNK_SIZE_WORDS,
+  minWords: CHUNK_MIN_WORDS,
+  maxWords: CHUNK_MAX_WORDS,
+  overlapWords: CHUNK_OVERLAP_WORDS,
+  keepCodeAtomic: KEEP_CODE_ATOMIC,
+  headingBreadcrumbs: HEADING_BREADCRUMBS,
+  maxRawFileBytes: MAX_RAW_FILE_BYTES,
+});
+function sameChunkingProfile(previous, current) {
+  return JSON.stringify(previous || null) === JSON.stringify(current);
+}
 
 // ─── Folder Blacklist (не индексируются) ─────────────────────────────
 // ВАЖНО: 'raw' намеренно исключён — raw/-папки индексируются отдельным проходом.
@@ -97,7 +112,7 @@ const DEVICE              = ICFG.device || 'auto';   // 'auto'(GPU→CPU) | 'dml
 const FOLDER_BLACKLIST = new Set([
   '.git', '.github', '.obsidian', '.vscode',
   'system', 'node_modules', 'plans', 'NewData',
-  'ai-skills~', 'skills',
+  'ai-skills~', 'skills', 'rlm_mode',
   '.agents', '.cursor', '.claude', '.gemini',
   '.cline', '.codex', '.roo', '.windsurf',
 ]);
@@ -403,7 +418,8 @@ async function getLanceTable(forceRebuild) {
     if (!tableNames.includes('wiki_chunks') || forceRebuild) {
       // Create empty table with dummy schema to define columns, LanceDB will infer the rest
       tbl = await db.createTable('wiki_chunks', [{
-        fileId: "dummy", chunkIndex: 0, layer: "dummy", sourceType: "dummy",
+        fileId: "dummy", parentId: "dummy", chunkIndex: 0, previousChunkIndex: -1, nextChunkIndex: -1,
+        sectionIndex: 0, sectionPath: "", chunkWords: 0, overlapWords: 0, boundary: "semantic", layer: "dummy", sourceType: "dummy",
         path: "dummy", symbols: "[]", tags: "[]", wikilinks: "[]", extendsRef: "dummy", md5: "dummy",
         text: "dummy", vector: Array(VECTOR_DIM).fill(0)
       }]);
@@ -425,11 +441,19 @@ async function getLanceTable(forceRebuild) {
 async function main() {
   const startTime = Date.now();
   const forceRebuild = process.argv.includes('--force');
+  let previousChunkingProfile = null;
+  try { previousChunkingProfile = JSON.parse(fs.readFileSync(CHUNKING_MANIFEST_FILE, 'utf8')); } catch { /* legacy index */ }
+  if (previousChunkingProfile && !sameChunkingProfile(previousChunkingProfile, CHUNKING_PROFILE) && !forceRebuild) {
+    throw new Error('Chunking profile changed. Rebuild the whole index explicitly with --force before searching.');
+  }
+  if (!previousChunkingProfile && fs.existsSync(LANCEDB_DIR) && !forceRebuild) {
+    throw new Error('Legacy index has no chunking profile. Rebuild explicitly with --force before incremental indexing.');
+  }
 
   console.log(`\n${C.bold}═══ DavASkoLLMWiki v3.x — Индексатор ═══${C.reset}\n`);
   console.log(`${C.dim}Корень:       ${ROOT_DIR}`);
   console.log(`Модель:       ${MODEL_ID}`);
-  console.log(`Чанки:        ${CHUNK_SIZE_WORDS} слов, перекрытие ${CHUNK_OVERLAP_WORDS}`);
+  console.log(`Чанки:        структурные, цель ${CHUNK_SIZE_WORDS} слов, максимум ${CHUNK_MAX_WORDS}, overlap ${CHUNK_OVERLAP_WORDS} только внутри абзаца`);
   console.log(`Размерность:  ${VECTOR_DIM}d (${DTYPE})${C.reset}\n`);
 
   if (forceRebuild) {
@@ -476,7 +500,7 @@ async function main() {
         if (RAW_SKIP_FILES.has(basename)) continue;
         // Пропускаем очень большие файлы (ГДД, ТЗ) — они дают сотни чанков
         const fileSize = fs.statSync(f).size;
-        if (fileSize > MAX_RAW_FILE_BYTES) {
+        if (MAX_RAW_FILE_BYTES > 0 && fileSize > MAX_RAW_FILE_BYTES) {
           const sizekb = (fileSize / 1024).toFixed(0);
           console.log(`${C.dim}  [SKIP] ${path.relative(ROOT_DIR, f).replace(/\\/g, '/')} (${sizekb}KB > ${MAX_RAW_FILE_BYTES/1024}KB limit)${C.reset}`);
           continue;
@@ -516,6 +540,9 @@ async function main() {
   let countNew       = 0;
   let countUpdated   = 0;
   let countChunks    = 0;
+  let countSingleChunkDocs = 0;
+  let countForcedBoundaries = 0;
+  let countOverlappedChunks = 0;
 
   // Трекинг обработанных файлов (для очистки устаревших записей)
   const processedIds = new Set();
@@ -582,22 +609,32 @@ async function main() {
     // 8b. Чанкинг. structural: режем сырой Markdown по структуре (видя заголовки
     //     и ```-фенсы), затем чистим каждый чанк (код — по index_code). fixed:
     //     старое окно слов по уже очищенному тексту.
-    let chunks;
+    let chunkDetails;
     if (CHUNK_STRATEGY === 'structural') {
-      chunks = chunkMarkdown(body, {
+      chunkDetails = chunkMarkdownDetailed(body, {
         targetWords: CHUNK_SIZE_WORDS,
         minWords: CHUNK_MIN_WORDS,
         maxWords: CHUNK_MAX_WORDS,
+        overlapWords: CHUNK_OVERLAP_WORDS,
         keepCodeAtomic: KEEP_CODE_ATOMIC,
         headingBreadcrumbs: HEADING_BREADCRUMBS,
-      }).map(c => prepareTextForEmbedding(c).trim()).filter(Boolean);
+      });
     } else {
-      chunks = chunkText(textToEmbed);
+      chunkDetails = chunkText(textToEmbed).map((text, sectionIndex) => ({
+        text, sectionIndex, sectionPath: '', contentWords: text.split(/\s+/).filter(Boolean).length,
+        overlapWords: sectionIndex === 0 ? 0 : CHUNK_OVERLAP_WORDS, boundary: 'forced',
+      }));
     }
+    const chunks = chunkDetails
+      .map((chunk) => ({ ...chunk, text: prepareTextForEmbedding(chunk.text).trim() }))
+      .filter((chunk) => chunk.text);
     if (chunks.length === 0) {
       process.stdout.write(` — пустой, пропуск\n`);
       continue;
     }
+    if (chunks.length === 1) countSingleChunkDocs++;
+    countForcedBoundaries += chunks.filter((chunk) => chunk.boundary === 'forced').length;
+    countOverlappedChunks += chunks.filter((chunk) => chunk.overlapWords > 0).length;
 
     // 8c. Векторизация чанков
     const assignedCluster = layer;
@@ -606,15 +643,23 @@ async function main() {
     
     // Если документ не огромный, используем Late Chunking (попытка вложить весь контекст)
     if (CHUNK_STRATEGY === 'structural' && wordCount < 6000) {
-      vecs = await libEmbedLateChunking(extractor, textToEmbed, chunks.map(c => `passage: ${c}`), VECTOR_DIM);
+      vecs = await libEmbedLateChunking(extractor, textToEmbed, chunks.map(c => `passage: ${c.text}`), VECTOR_DIM);
     } else {
-      vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c}`), VECTOR_DIM, EMBED_BATCH_SIZE);
+      vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c.text}`), VECTOR_DIM, EMBED_BATCH_SIZE);
     }
     
     for (let ci = 0; ci < chunks.length; ci++) {
       batchData.push({
         fileId,
+        parentId: `${fileId}::section-${chunks[ci].sectionIndex}`,
         chunkIndex: ci,
+        previousChunkIndex: ci - 1,
+        nextChunkIndex: ci + 1 < chunks.length ? ci + 1 : -1,
+        sectionIndex: chunks[ci].sectionIndex,
+        sectionPath: chunks[ci].sectionPath,
+        chunkWords: chunks[ci].contentWords,
+        overlapWords: chunks[ci].overlapWords,
+        boundary: chunks[ci].boundary,
         layer: assignedCluster,
         sourceType: sourceType || 'wiki',
         path: relPath,
@@ -623,7 +668,7 @@ async function main() {
         wikilinks: JSON.stringify(wikiLinks),
         extendsRef: extendsRef,
         md5: currentMd5,
-        text: chunks[ci],
+        text: chunks[ci].text,
         vector: vecs[ci],
       });
       countChunks++;
@@ -656,6 +701,7 @@ async function main() {
 
   const totalDocs = processedIds.size;
   const totalChunks = await table.countRows();
+  fs.writeFileSync(CHUNKING_MANIFEST_FILE, JSON.stringify(CHUNKING_PROFILE, null, 2) + '\n', 'utf8');
 
   console.log(
     `\n${C.cyan}[*]${C.reset} Векторная база ${C.bold}LanceDB${C.reset}` +
@@ -671,6 +717,8 @@ async function main() {
   console.log(`  Без изменений: ${C.dim}${countSkipped}${C.reset}`);
   console.log(`  Удалено:    ${C.red}${countRemoved}${C.reset}`);
   console.log(`  Всего чанков: ${countChunks}`);
+  console.log(`  Документов с одним чанком: ${countSingleChunkDocs}`);
+  console.log(`  Вынужденных границ: ${countForcedBoundaries}; чанков с overlap: ${countOverlappedChunks}`);
   console.log(`\n${C.green}[OK]${C.reset} Индекс собран за ${elapsed}s.\n`);
 }
 

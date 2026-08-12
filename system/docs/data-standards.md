@@ -1,4 +1,4 @@
-﻿ Knowledge Base Data Standards
+ Knowledge Base Data Standards
 
 To maintain compatibility with Obsidian, Unity, Windows, and multiple AI tooling agents, all files within the **DavASko LLM Wiki** must adhere to strict formatting and encoding standards.
 
@@ -103,11 +103,12 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 
 - **Wiki Links**: Use Obsidian double-bracket style `[[page-name]]` for references between pages. Filenames must be in lowercase kebab-case (e.g. `module-lifecycle.md` should be linked as `[[module-lifecycle]]`).
 - **Source Citations**: Any factual claim made in `wiki/` pages MUST be supported by a citation pointing to an immutable raw file in `raw/` or a file in the project repository using this exact format: `(source: layer-name/raw/docs/source-doc.md)`.
-- **Plans Isolation & Linking**: All execution plans, stabilization plans, task lists (`task.md`), and walkthroughs (`walkthrough.md`) must be placed in the root-level `plans/` directory of the workspace, completely isolated from individual layer repositories. Links to these plan files must use standard Markdown links with absolute or relative `file:///` URIs (e.g., `[task.md](../../plans/task.md)`) and must never wrap the link text in backticks.
-- **File Links**: When linking to actual source code or configuration files, use markdown links with absolute or relative `file:///` URIs, e.g., `[MyClass](../../path/to/MyClass.cs)`. Never surround the file link text with backticks.
+- **Plans Isolation & Linking**: All execution plans, stabilization plans, task lists (`task.md`), and walkthroughs (`walkthrough.md`) must be placed in the root-level `plans/` directory of the workspace, completely isolated from individual layer repositories. Links to these plan files must use portable relative Markdown paths (e.g., `[task.md](../../plans/task.md)`) and must never wrap the link text in backticks.
+- **File Links**: Use only portable relative Markdown links, e.g., `[MyClass](../../path/to/MyClass.cs)`. `file://` URIs and absolute OS paths are forbidden. Never surround the file link text with backticks.
+- **Правило корня Wiki**: Явные `./` и `../` всегда считаются от папки Markdown-файла. Относительный путь без такого префикса всегда считается от корня `knowledge-base/`; ссылка не может выйти за его пределы.
 - **C# Code Style Location**: The C# code style guidelines (`code_style.md`) must reside inside the framework layer: `framework-wiki/raw/code_style.md` (NOT in `engine-wiki/raw/code_style.md`), since coding style conventions are a property of the core Framework framework. All references to code style must link to this path.
 - **Full-Text Search Gaps Policy**: If the AI assistant has to perform grep, ripgrep, full-text search, custom Python/Node scripts, or any other global search methods across the codebase due to missing information, maps, or undocumented patterns in the knowledge base, the assistant must document these findings. The new code symbols, directories, and logic patterns must be described and added to the most appropriate layer of the knowledge base. This ensures that future searches are performed directly via the wiki query system, eliminating redundant low-level code searches.
-- **Dependencies Paths**: Manifests or documentation explaining layer dependencies must include absolute/relative paths to the target dependency folder (e.g., `[davasko-wiki](../davasko-wiki)`).
+- **Dependencies Paths**: Manifests or documentation explaining layer dependencies must include relative paths to the target dependency folder (e.g., `[davasko-wiki](../davasko-wiki)`).
 - **Aesthetic Independence & Generalization**: All documentation, code rules, and instructions stored in the knowledge base must be kept in a generic, project-agnostic format. Avoid hardcoding proprietary framework names or third-party project identifiers (such as project submodules or specific client directories) in general-purpose rules. Keep files portable and transferable to any target workspace.
 
 ---

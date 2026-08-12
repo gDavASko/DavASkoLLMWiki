@@ -191,7 +191,7 @@ flowchart TD
 
 ## 7. 🔎 Reading knowledge (the search pipeline)
 
-One command searches by **keyword and meaning at the same time**, then writes the best pages to a context file the agent reads. With the introduction of the **Query Router**, the engine can automatically pick the best tool for the job.
+One command searches by **keyword and meaning at the same time**, then writes the best pages to a context file the agent reads. The entire process is orchestrated by a **LangGraph Control Plane**, which provides strict state typing, contract validation, and selects the optimal tool via the **Query Router**.
 
 ```mermaid
 flowchart TD
@@ -199,18 +199,18 @@ flowchart TD
     
     ROUTER -->|Code relations,<br/>Dependencies| G["🕸️ Graphify<br/>(AST Call Graph)"]
     ROUTER -->|Deep synthesis,<br/>Architecture| RLM["🤖 RLM Agent<br/>(Deep Research)"]
-    ROUTER -->|Fact lookup,<br/>Guides| RAG["🗂️ Jina RAG<br/>(Hybrid Search)"]
+    ROUTER -->|Fact lookup,<br/>Guides| RAG["🗂️ Jina RAG<br/>(Hybrid Search, Worker Thread)"]
 
     RAG --> P["Parse query →<br/>symbols + meaning"]
     P --> A["🅰️ Stream A — Symbols<br/>(instant, exact match)"]
     P --> B["🅱️ Stream B — Semantic<br/>(vector similarity)"]
-    A & B --> MERGE["🔗 Merge & Graph Lift"]
+    A & B --> MERGE["🔗 Merge, Graph Lift &<br/>Image Path Normalization"]
 
     G & RLM & MERGE --> DUMP(["📝 .cursor-context-dump.md<br/>(Agent Context)"])
 ```
 
 **The Three Search Paths:**
-1. **RAG (Hybrid Search):** Standard mode. Fast semantic + symbolic search using the Jina vector model. Best for quick lookups and documentation reads.
+1. **RAG (Hybrid Search):** Standard mode. Fast semantic + symbolic search using the Jina vector model. Safely executed in isolated Worker Threads. **Image Path Normalization** automatically resolves relative image links to absolute ones against the layer root, preventing filename collisions across different projects.
 2. **RLM (Research Language Model):** Deep research agent. Best for complex, multi-hop architectural questions. Uses a local LLM (like Ollama) to read, synthesize, and explore the wiki iteratively.
 3. **Graphify:** Codebase knowledge graph. Best for resolving C# class inheritance, component dependencies, and method call chains directly from the AST.
 

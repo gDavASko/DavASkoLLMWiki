@@ -1,4 +1,4 @@
-﻿ Maintenance and Automation Scripts
+ Maintenance and Automation Scripts
 
 To keep the DavASko LLM Wiki healthy, validate cross-references, search content, safely migrate paths, execute regression tests, and automatically process incoming documents, the automation scripts are placed under `system/scripts/` and `system/sync-ai-rules.js`.
 
@@ -17,7 +17,7 @@ Validates the integrity, format, and dependencies of the knowledge base.
 ---
 
 ## 2. Global Link Validator: `system/scripts/validate-links.js`
-Scans all files inside the workspace (C# code, JSON configs, markdown files, IDE rule files like `.cursorrules`, `.clinerules`, etc.) for broken links, old directory mappings, and doubled system paths (`system/system/`).
+Проверяет Markdown-страницы Wiki, управляемый экспорт GDD и системную документацию на битые ссылки, устаревшие пути и удвоенные пути (`system/system/`). Относительные пути без `./` и `../` разрешаются от корня `knowledge-base/`.
 
 ---
 
@@ -60,8 +60,8 @@ The active source code of these scripts is located inside the submodule:
 
 1. **`lint-wiki.js`**: [lint-wiki.js](../scripts/lint-wiki.js)
 2. **`validate-links.js`**: [validate-links.js](../scripts/validate-links.js)
-3. **`query-wiki.js`**: [query-wiki.js](../scripts/query-wiki.js)
+3. **`query-wiki.js`**: [query-wiki.js](../query-wiki.js)
 4. **`ingest-newdata.js`**: [ingest-newdata.js](../scripts/ingest-newdata.js)
 5. **`update-links.js`**: [update-links.js](../scripts/update-links.js)
-6. **`run-evals.js`**: [run-evals.js](../scripts/run-evals.js)
+6. **`eval-retrieval.js`**: [eval-retrieval.js](../scripts/eval-retrieval.js)
 7. **`sync-ai-rules.js`**: [sync-ai-rules.js](../sync-ai-rules.js)
