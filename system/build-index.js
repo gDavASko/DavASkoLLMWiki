@@ -341,7 +341,8 @@ async function initModel() {
 
 /**
  * Обнаруживает все слои (директории с wiki.json) в корне репозитория.
- * Возвращает массив: [{ name, dir, wikiDir }]
+ * Возвращает массив: [{ name, dir, wikiDir?, rawDir? }]. Слой с первичными
+ * raw-источниками валиден и без wiki/: Git намеренно не хранит пустые папки.
  */
 // --layers a,b,c → индексировать только указанные слои (для частичной пересборки/тестов).
 function layerFilter() {
@@ -365,12 +366,14 @@ function discoverLayers() {
     const wikiDir = path.join(fullPath, 'wiki');
     const rawDir  = path.join(fullPath, 'raw');
 
-    if (fs.existsSync(manifestPath) && fs.existsSync(wikiDir)) {
+    const hasWiki = fs.existsSync(wikiDir);
+    const hasRaw = fs.existsSync(rawDir);
+    if (fs.existsSync(manifestPath) && (hasWiki || hasRaw)) {
       layers.push({
         name: entry,
         dir: fullPath,
-        wikiDir,
-        rawDir: fs.existsSync(rawDir) ? rawDir : null,
+        wikiDir: hasWiki ? wikiDir : null,
+        rawDir: hasRaw ? rawDir : null,
       });
     }
   }
@@ -463,7 +466,7 @@ async function main() {
   // 1. Обнаружение слоёв
   const layers = discoverLayers();
   if (layers.length === 0) {
-    console.log(`${C.yellow}[WARN]${C.reset} Слои базы знаний не найдены (папки с wiki.json и wiki/).`);
+    console.log(`${C.yellow}[WARN]${C.reset} Слои базы знаний не найдены (нужны wiki.json и хотя бы wiki/ или raw/).`);
     console.log(`       Создайте хотя бы один слой, например: llm-wiki/wiki.json`);
     process.exit(0);
   }
@@ -485,7 +488,7 @@ async function main() {
 
   for (const layer of layers) {
     // Сбор wiki/-страниц
-    const wikiFiles = getFilesRecursively(layer.wikiDir, ['.md']);
+    const wikiFiles = layer.wikiDir ? getFilesRecursively(layer.wikiDir, ['.md']) : [];
     for (const f of wikiFiles) {
       const basename = path.basename(f, '.md');
       if (WIKI_MOC_FILES.has(basename)) continue;
