@@ -92,7 +92,7 @@ const INDEX_CODE          = ICFG.index_code;
 const EMBED_BATCH_SIZE    = ICFG.embed_batch_size || 16;
 const DEVICE              = ICFG.device || 'auto';   // 'auto'(GPU→CPU) | 'dml' | 'cuda' | 'cpu'
 const CHUNKING_PROFILE = Object.freeze({
-  version: 2,
+  version: 3,
   strategy: CHUNK_STRATEGY,
   targetWords: CHUNK_SIZE_WORDS,
   minWords: CHUNK_MIN_WORDS,

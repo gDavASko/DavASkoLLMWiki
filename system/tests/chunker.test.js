@@ -60,17 +60,29 @@ test('крошки можно отключить', () => {
   assert.ok(!chunks[0].startsWith('['));
 });
 
-test('overlap добавляется только на вынужденной границе внутри длинного абзаца', () => {
-  const chunks = chunkMarkdownDetailed(W(700), { targetWords: 200, minWords: 45, maxWords: 300, overlapWords: 32, headingBreadcrumbs: false });
+test('overlap добавляется на каждой границе чанков, включая семантическую', () => {
+  const chunks = chunkMarkdownDetailed([W(120), W(120), W(120), W(120), W(120), W(120)].join('\n\n'), { targetWords: 200, minWords: 45, maxWords: 300, overlapWords: 32, headingBreadcrumbs: false });
   assert.ok(chunks.length >= 3);
   assert.equal(chunks[0].overlapWords, 0);
-  assert.ok(chunks.slice(1).every((chunk) => chunk.overlapWords === 32 && chunk.boundary === 'forced'));
-  assert.ok(chunks.slice(1).every((chunk) => chunk.text.startsWith('[Продолжение предыдущего фрагмента]')));
+  assert.ok(chunks.slice(1).every((chunk) => chunk.overlapWords === 32));
+  assert.ok(chunks.slice(1).every((chunk) => chunk.text.startsWith('[Контекст предыдущего фрагмента]')));
+});
+
+test('крупные таблицы, списки и код остаются в пределах max', () => {
+  const list = Array.from({ length: 30 }, (_, i) => `- rule ${i}: ${W(15)}`).join('\n');
+  const table = ['| key | value |', '| --- | --- |', ...Array.from({ length: 25 }, (_, i) => `| key-${i} | ${W(12)} |`)].join('\n');
+  const code = ['```ts', ...Array.from({ length: 50 }, (_, i) => `const value${i} = createValue(${i});`), '```'].join('\n');
+  const chunks = chunkMarkdownDetailed([list, table, code].join('\n\n'), {
+    targetWords: 80, minWords: 20, maxWords: 120, overlapWords: 16, headingBreadcrumbs: false,
+  });
+  assert.ok(chunks.length > 3);
+  assert.ok(chunks.every((chunk) => chunk.contentWords <= 120), 'all source content must be bounded');
+  assert.ok(chunks.filter((chunk) => chunk.text.includes('const value')).every((chunk) => chunk.text.includes('```ts') && chunk.text.includes('```')));
 });
 
 test('таблица и список остаются атомарными и получают секционный parent', () => {
   const md = ['# Характеристики', '| Поле | Значение |', '| --- | --- |', '| A | B |', '', '## Правила', '- Первое правило', '- Второе правило'].join('\n');
-  const chunks = chunkMarkdownDetailed(md, { targetWords: 5, minWords: 1, maxWords: 8 });
+  const chunks = chunkMarkdownDetailed(md, { targetWords: 20, minWords: 1, maxWords: 50, overlapWords: 0 });
   assert.equal(chunks.length, 2);
   assert.equal(chunks[0].sectionPath, 'Характеристики');
   assert.match(chunks[0].text, /\| Поле \| Значение \|/);

@@ -44,6 +44,68 @@ function splitBySentences(text, maxWords) {
   return out;
 }
 
+function packUnits(units, maxWords, { prefix = '', suffix = '' } = {}) {
+  const out = [];
+  let current = [];
+  let currentWords = countWords(prefix) + countWords(suffix);
+  const flush = () => {
+    if (!current.length) return;
+    out.push({ text: [prefix, current.join('\n'), suffix].filter(Boolean).join('\n').trim(), continuation: out.length > 0, forced: out.length > 0 });
+    current = [];
+    currentWords = countWords(prefix) + countWords(suffix);
+  };
+  for (const unit of units) {
+    const unitWords = countWords(unit);
+    if (currentWords > countWords(prefix) + countWords(suffix) && currentWords + unitWords > maxWords) flush();
+    if (unitWords > maxWords - countWords(prefix) - countWords(suffix)) {
+      flush();
+      for (const part of splitBySentences(unit, Math.max(1, maxWords - countWords(prefix) - countWords(suffix)))) {
+        out.push({ text: [prefix, part.text, suffix].filter(Boolean).join('\n').trim(), continuation: out.length > 0, forced: true });
+      }
+      continue;
+    }
+    current.push(unit);
+    currentWords += unitWords;
+  }
+  flush();
+  return out;
+}
+
+function splitListBlock(text, maxWords) {
+  const items = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    if (/^\s*(?:[-*+]\s+|\d+[.)]\s+)/.test(line) || !items.length) items.push(line);
+    else items[items.length - 1] += `\n${line}`;
+  }
+  return packUnits(items, maxWords);
+}
+
+function splitTableBlock(text, maxWords) {
+  const lines = String(text).split(/\r?\n/).filter(Boolean);
+  const header = lines.slice(0, Math.min(2, lines.length));
+  const rows = lines.slice(header.length);
+  if (!rows.length || countWords(text) <= maxWords) return [{ text: String(text).trim(), continuation: false, forced: false }];
+  return packUnits(rows, maxWords, { prefix: header.join('\n') });
+}
+
+function splitCodeBlock(text, maxWords) {
+  const lines = String(text).split(/\r?\n/);
+  const isFence = (line) => /^\s*(```|~~~)/.test(line);
+  const opening = isFence(lines[0]) ? lines.shift() : '```';
+  const closing = isFence(lines.at(-1)) ? lines.pop() : '```';
+  return packUnits(lines, maxWords, { prefix: opening, suffix: closing });
+}
+
+function splitBlock(block, maxWords, keepCodeAtomic) {
+  const text = String(block.text || '').trim();
+  if (!text) return [];
+  if (countWords(text) <= maxWords) return [{ text, continuation: false, forced: false }];
+  if (block.type === 'list') return splitListBlock(text, maxWords);
+  if (block.type === 'table') return splitTableBlock(text, maxWords);
+  if (block.type === 'code' && keepCodeAtomic) return splitCodeBlock(text, maxWords);
+  return splitBySentences(text, maxWords);
+}
+
 function tokenizeMarkdown(text) {
   const lines = text.split(/\r?\n/);
   const blocks = [];
@@ -148,17 +210,20 @@ export function chunkMarkdownDetailed(text, {
   }
 
   const output = [];
+  let previousBody = '';
+  const effectiveOverlap = Math.min(overlapWords, Math.floor(targetWords / 4), maxWords - minWords);
+  const continuationLabel = '[Контекст предыдущего фрагмента]';
   for (const section of toSections(tokenizeMarkdown(text))) {
     let current = [];
     let currentWords = 0;
-    let continuationPrefix = '';
-    let continuationWords = 0;
     let pendingForcedBoundary = false;
 
     const flush = () => {
       if (!current.length) return;
       const body = current.join('\n\n').trim();
-      const withOverlap = continuationPrefix ? `[Продолжение предыдущего фрагмента]\n${continuationPrefix}\n\n${body}` : body;
+      const continuationPrefix = previousBody && effectiveOverlap > 0 ? tailWords(previousBody, effectiveOverlap) : '';
+      const continuationWords = countWords(continuationPrefix);
+      const withOverlap = continuationPrefix ? `${continuationLabel}\n${continuationPrefix}\n\n${body}` : body;
       const textWithBreadcrumb = headingBreadcrumbs && section.path ? `[${section.path}]\n\n${withOverlap}` : withOverlap;
       output.push({
         text: textWithBreadcrumb,
@@ -166,35 +231,27 @@ export function chunkMarkdownDetailed(text, {
         sectionIndex: section.index,
         contentWords: currentWords,
         overlapWords: continuationWords,
-        boundary: pendingForcedBoundary ? 'forced' : 'semantic',
+        boundary: pendingForcedBoundary ? 'forced' : (continuationWords > 0 ? 'contextual' : 'semantic'),
       });
-      continuationPrefix = '';
-      continuationWords = 0;
+      previousBody = body;
       pendingForcedBoundary = false;
       current = [];
       currentWords = 0;
     };
 
     for (const block of section.blocks) {
-      const isAtomic = block.type === 'table' || block.type === 'list' || (block.type === 'code' && keepCodeAtomic);
-      const units = isAtomic
-        ? [{ text: block.text, continuation: false, forced: false, atomic: true }]
-        : splitBySentences(block.text, maxWords);
+      const units = splitBlock(block, Math.max(minWords, maxWords - effectiveOverlap), keepCodeAtomic);
 
       for (const unit of units) {
         const words = countWords(unit.text);
+        const currentMaxWords = previousBody ? maxWords - effectiveOverlap : maxWords;
         const mustFlush = currentWords > 0 && (
-          currentWords + words > maxWords ||
+          currentWords + words > currentMaxWords ||
           (currentWords >= targetWords && !unit.continuation)
         );
         if (mustFlush) {
-          const previousText = current.join(' ');
           flush();
-          if (unit.continuation && overlapWords > 0) {
-            continuationPrefix = tailWords(previousText, overlapWords);
-            continuationWords = countWords(continuationPrefix);
-            pendingForcedBoundary = true;
-          }
+          if (unit.forced) pendingForcedBoundary = true;
         }
         current.push(unit.text);
         currentWords += words;
