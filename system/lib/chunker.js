@@ -9,6 +9,10 @@ function tailWords(text, count) {
   return String(text).split(/\s+/).filter(Boolean).slice(-count).join(' ');
 }
 
+function headWords(text, count) {
+  return String(text).split(/\s+/).filter(Boolean).slice(0, count).join(' ');
+}
+
 function splitBySentences(text, maxWords) {
   const normalized = String(text).trim();
   if (countWords(normalized) <= maxWords) return [{ text: normalized, continuation: false, forced: false }];
@@ -54,6 +58,7 @@ function packUnits(units, maxWords, { prefix = '', suffix = '' } = {}) {
     current = [];
     currentWords = countWords(prefix) + countWords(suffix);
   };
+
   for (const unit of units) {
     const unitWords = countWords(unit);
     if (currentWords > countWords(prefix) + countWords(suffix) && currentWords + unitWords > maxWords) flush();
@@ -82,6 +87,7 @@ function splitListBlock(text, maxWords) {
 
 function splitTableBlock(text, maxWords) {
   const lines = String(text).split(/\r?\n/).filter(Boolean);
+  // Repeat the header in every continuation so a retrieved table slice stays interpretable.
   const header = lines.slice(0, Math.min(2, lines.length));
   const rows = lines.slice(header.length);
   if (!rows.length || countWords(text) <= maxWords) return [{ text: String(text).trim(), continuation: false, forced: false }];
@@ -93,6 +99,8 @@ function splitCodeBlock(text, maxWords) {
   const isFence = (line) => /^\s*(```|~~~)/.test(line);
   const opening = isFence(lines[0]) ? lines.shift() : '```';
   const closing = isFence(lines.at(-1)) ? lines.pop() : '```';
+  // A fence is repeated around every piece. We split at lines first; a single
+  // generated/minified line falls back to a bounded word split as a last resort.
   return packUnits(lines, maxWords, { prefix: opening, suffix: closing });
 }
 
@@ -102,6 +110,9 @@ function splitBlock(block, maxWords, keepCodeAtomic) {
   if (countWords(text) <= maxWords) return [{ text, continuation: false, forced: false }];
   if (block.type === 'list') return splitListBlock(text, maxWords);
   if (block.type === 'table') return splitTableBlock(text, maxWords);
+  // `keepCodeAtomic` preserves every code block that fits. Oversized code must
+  // still be bounded for retrieval; splitting on lines is safer than admitting
+  // multi-thousand-word vectors.
   if (block.type === 'code' && keepCodeAtomic) return splitCodeBlock(text, maxWords);
   return splitBySentences(text, maxWords);
 }
@@ -201,6 +212,12 @@ export function chunkMarkdownDetailed(text, {
   minWords = 45,
   maxWords = 300,
   overlapWords = 32,
+  // Overlap ВПЕРЁД: к каждому чанку (кроме последнего) приписывается голова
+  // следующего фрагмента. По умолчанию симметричен overlapWords, поэтому старые
+  // профили с overlapWords:0 остаются без forward-контекста (и не превышают max в
+  // тестах word-count). Улучшает связность на границе: чанк «видит», чем
+  // продолжается мысль, — как предыдущий контекст, только в другую сторону.
+  forwardOverlapWords = overlapWords,
   keepCodeAtomic = true,
   headingBreadcrumbs = true,
 } = {}) {
@@ -211,8 +228,12 @@ export function chunkMarkdownDetailed(text, {
 
   const output = [];
   let previousBody = '';
+  // Tiny test profiles must remain valid too; production profile 200/300 uses
+  // the configured 32-word overlap unchanged.
   const effectiveOverlap = Math.min(overlapWords, Math.floor(targetWords / 4), maxWords - minWords);
+  const effectiveForward = Math.max(0, Math.min(forwardOverlapWords, Math.floor(targetWords / 4)));
   const continuationLabel = '[Контекст предыдущего фрагмента]';
+  const forwardLabel = '[Контекст следующего фрагмента]';
   for (const section of toSections(tokenizeMarkdown(text))) {
     let current = [];
     let currentWords = 0;
@@ -227,10 +248,12 @@ export function chunkMarkdownDetailed(text, {
       const textWithBreadcrumb = headingBreadcrumbs && section.path ? `[${section.path}]\n\n${withOverlap}` : withOverlap;
       output.push({
         text: textWithBreadcrumb,
+        _body: body, // сырое тело секции — источник forward-контекста для предыдущего чанка
         sectionPath: section.path,
         sectionIndex: section.index,
         contentWords: currentWords,
         overlapWords: continuationWords,
+        forwardWords: 0, // проставится в пост-проходе ниже
         boundary: pendingForcedBoundary ? 'forced' : (continuationWords > 0 ? 'contextual' : 'semantic'),
       });
       previousBody = body;
@@ -240,6 +263,8 @@ export function chunkMarkdownDetailed(text, {
     };
 
     for (const block of section.blocks) {
+      // Reserve the overlap budget in every primitive unit. This keeps the
+      // final retrievable chunk bounded even after its predecessor context is added.
       const units = splitBlock(block, Math.max(minWords, maxWords - effectiveOverlap), keepCodeAtomic);
 
       for (const unit of units) {
@@ -259,6 +284,21 @@ export function chunkMarkdownDetailed(text, {
     }
     flush();
   }
+
+  // Пост-проход: forward-overlap. К каждому чанку (кроме последнего) добавляем
+  // голову тела СЛЕДУЮЩЕГО чанка. Отдельным проходом — потому что на момент flush
+  // следующий фрагмент ещё не построен. Не резервируем под него бюджет упаковки:
+  // это служебный контекст для эмбеддинга, +N слов в хвосте некритичны, а
+  // contentWords (исходное содержимое) остаётся в пределах max.
+  if (effectiveForward > 0) {
+    for (let i = 0; i < output.length - 1; i++) {
+      const nextHead = headWords(output[i + 1]._body, effectiveForward);
+      if (!nextHead) continue;
+      output[i].text = `${output[i].text}\n\n${forwardLabel}\n${nextHead}`;
+      output[i].forwardWords = countWords(nextHead);
+    }
+  }
+  for (const chunk of output) delete chunk._body; // служебное поле наружу не отдаём
 
   return output;
 }

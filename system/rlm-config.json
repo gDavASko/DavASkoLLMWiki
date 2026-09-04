@@ -1,6 +1,40 @@
 {
-    "backend": "ollama",
-    "baseUrl": "http://localhost:11434/v1",
-    "model": "qwen2.5-coder:7b-instruct",
-    "apiKey": "ollama"
+  "version": 1,
+  "providers": {
+    "ollama": {
+      "command": "ollama"
+    }
+  },
+  "roles": {
+    "router": {
+      "provider": "ollama",
+      "model": "qwen3.5:9b-mlx",
+      "fallback": []
+    },
+    "researcher": {
+      "provider": "ollama",
+      "model": "qwen3.8:27b",
+      "fallback": [
+        {
+          "provider": "ollama",
+          "model": "qwen3.5:9b-mlx"
+        }
+      ]
+    },
+    "judge": {
+      "provider": "ollama",
+      "model": "qwen3.5:9b-mlx",
+      "fallback": [
+        {
+          "provider": "ollama",
+          "model": "qwen3.8:27b"
+        }
+      ]
+    },
+    "normalizer": {
+      "provider": "ollama",
+      "model": "qwen3.5:9b-mlx",
+      "fallback": []
+    }
+  }
 }

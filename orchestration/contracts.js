@@ -4,6 +4,8 @@
  * @property {number} maxConcurrency
  * @property {number} maxIterations
  * @property {number} maxToolOutputBytes
+ * @property {number} [topK] Broad cognitive-tier candidate width.
+ * @property {number} [finalTopK] Optional post-rerank context cap.
  */
 
 /**
@@ -31,6 +33,7 @@
  * @property {string} content
  * @property {string[]} sources
  * @property {string} [code]
+ * @property {{requestedTopK?: number, candidateTopK?: number, finalTopK?: number, candidates?: number, reranked?: number, resultCount?: number}} [retrieval]
  * @property {TraceEvent[]} trace
  */
 

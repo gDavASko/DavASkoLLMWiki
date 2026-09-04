@@ -1,0 +1,19 @@
+{
+  "provider": "transformers",
+  "model": "jinaai/jina-embeddings-v3",
+  "revision": "815152ccf78fb243a0d9b4db0b80ec6ef87e2213",
+  "dimension": 1024,
+  "dtype": "fp16",
+  "chunking": {
+    "version": 3,
+    "strategy": "structural",
+    "targetWords": 200,
+    "minWords": 45,
+    "maxWords": 300,
+    "overlapWords": 32,
+    "keepCodeAtomic": true,
+    "headingBreadcrumbs": true,
+    "maxRawFileBytes": 0
+  },
+  "indexedAt": "2026-08-16T15:38:37.806Z"
+}

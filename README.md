@@ -1,4 +1,4 @@
-# 📚 DavASko LLM Wiki
+﻿# 📚 DavASko LLM Wiki
 
 **A knowledge base that AI agents can actually search — fully offline.**
 
@@ -187,6 +187,17 @@ flowchart TD
 
 > ⚠️ **Important:** step 2 creates a *stub* summary (`related: []`, "No claims extracted") that **fails the linter on purpose**. You must fill in real **Key Claims** (each citing the raw source) and a non‑empty **related** list. This is what the **davasko-wiki-ingest** skill walks you through.
 
+### ⚙️ Indexer v3.x with Checkpoints and Safe Late Chunking (`build-index.js`)
+
+The indexer is engineered for high reliability when indexing enterprise-grade knowledge bases:
+
+* **Automatic Checkpoints every 20 documents:** Every 20 processed documents (`CHECKPOINT_INTERVAL = 20`), the accumulated embedding batch is atomically committed to LanceDB, the empty document cache is saved, and progress is recorded to `EMBEDDING_MANIFEST_FILE` with status `in_progress`. If the indexing run is interrupted (by user, power loss, or network timeout), subsequent runs **resume directly from the last checkpoint** instead of re-embedding from scratch.
+* **Manifest Status Lifecycle:** Starts with status `in_progress` and timestamp. Upon successful completion, status is updated to `complete`.
+* **Auto-switch to `--force`:** If embedding model profile or chunking strategy changes, or an incomplete index is detected, the system automatically switches to full rebuild mode.
+* **Safe Late Chunking (`late_chunk_max_words: 6000`):** Documents up to 6000 words are embedded as single sequences for maximal context retention. Documents exceeding this threshold automatically route to the chunked batch pathway, preventing GPU memory crashes (DirectML / CUDA OOM).
+* **Ollama Embedding Batching:** Requests to local Ollama API are batched in groups of 8 chunks (`BATCH_SIZE = 8`) with a 300-second timeout.
+* **No File Size Restrictions:** `max_raw_file_bytes: 0` ensures no large raw sources are skipped.
+
 ---
 
 ## 7. 🔎 Reading knowledge (the search pipeline)
@@ -216,6 +227,15 @@ flowchart TD
 
 **Why two streams in RAG?** Code identifiers (`CowController`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
 **Adaptive threshold** keeps only strong matches scoring at least `α · (best score for this query)`.
+
+### ⚡ Resident Search Server (`system/search-server.js`)
+For seamless integration with IDEs (Cursor, VS Code), AI agents, and external chat servers (Mattermost, Slack), DavASko LLM Wiki includes a resident search server. It retains LanceDB tables and vector caches resident in memory, communicating via JSON-RPC over `stdin`/`stdout`. This drops query latency from ~8 seconds down to **~1.5 seconds**!
+
+### 🧙‍♂️ Knowledge Base Setup Wizard (`system/scripts/setup-knowledge-base.js`)
+An interactive CLI setup tool to:
+* Auto-detect or clone the shared knowledge base repository on the machine.
+* Configure the `KBPRO_AI_CHAT_WIKI_DIR` environment variable.
+* Generate a local project override marker (`.davasko-local-kb`).
 
 ---
 
@@ -329,6 +349,8 @@ flowchart LR
 | `node system/sync-ai-rules.js [--global]` | Sync IDE rules (append‑safe) + compile skill adapters. |
 | `node system/scripts/lint-wiki.js` | Validate encoding, frontmatter, links (must be **0 errors**). |
 | `node system/scripts/validate-links.js` | Check every `[[wiki link]]` and file link. |
+| `node system/search-server.js` | Start resident JSON-RPC search server (~1.5s latency). |
+| `node system/scripts/setup-knowledge-base.js` | Interactive setup wizard for knowledge base environment and paths. |
 | `node system/scripts/check-staleness.js` | Detect wiki pages whose cited sources changed. |
 | `node system/scripts/eval-retrieval.js [--sweep]` | Measure retrieval quality (recall@k / MRR / nDCG) vs baselines. |
 | `npm test` | 32 unit tests of the retrieval core (no model needed). |
@@ -341,6 +363,9 @@ flowchart LR
 - Chunking profile **v3** is part of the LanceDB format: structural chunks target 200 words, have a 300-word upper bound, and carry 32 words of context from the preceding chunk on every boundary after the first.
 - Changing a chunking or embedding profile requires the deliberate `node system/build-index.js --force`; an ordinary incremental run must not mix vectors created by different profiles.
 - A valid layer has `wiki.json` and at least one content directory: `wiki/` or `raw/`. Raw-only layers are indexed deliberately because Git omits empty `wiki/` directories.
+- **Fault-Tolerant Indexing:** Indexer v3.x writes checkpoints every 20 documents. The `in_progress` manifest ensures configuration validity and enables incremental completion after interruption.
+- **Late Chunking & Memory Safety:** The `late_chunk_max_words` parameter (default 6000) provides safe batching fallback to prevent GPU VRAM OOM errors.
+- **Unlimited Raw File Size:** By default `max_raw_file_bytes: 0` — all raw/ source documents are indexed without skipping.
 - Run `node system/scripts/audit-chunks.js --json` after a full rebuild to inspect chunk counts, overlap coverage, forced boundaries, and unusually large documents.
 
 The detailed profile and migration rules are in [docs/2026-08-12-chunking-profile.md](docs/2026-08-12-chunking-profile.md).
@@ -396,14 +421,18 @@ A few hard rules keep the KB machine‑readable (the linter enforces them):
 
 ```
 DavASkoLLMWiki/
-├── system/                      # the engine
-│   ├── build-index.js           # vectorize the KB
-│   ├── query-wiki.js            # hybrid search
-│   ├── sync-ai-rules.js         # deploy rules/skills to IDEs (append‑safe)
-│   ├── lib/                     # model-locator, retrieval core, chunker, metrics
-│   ├── scripts/                 # deploy-wiki, setup-model, ingest-newdata, lint, eval…
-│   ├── vendor/                  # offline npm deps (.tgz)
-│   └── models-cache/            # bundled model SOURCE (copied to the system location)
+├── system/                      # engine v3.x
+│   ├── build-index.js           # vectorization with checkpoints (batches of 20 docs)
+│   ├── query-wiki.js            # hybrid search (RAG / RLM / Graphify)
+│   ├── query-target.js          # targeted search across specified layers
+│   ├── search-server.js         # resident JSON-RPC search server (~1.5s latency)
+│   ├── sync-ai-rules.js         # deploy rules/skills to IDEs (append-safe)
+│   ├── index-config.json        # chunking, Late Chunking and limit settings
+│   ├── search-config.json       # hybrid search weights and thresholds (BM25 + LanceDB)
+│   ├── lib/                     # core: embedding-client, chunker, retrieval, wiki-paths
+│   ├── scripts/                 # deploy-wiki, setup-knowledge-base, ingest-newdata...
+│   ├── vendor/                  # offline npm dependencies (.tgz)
+│   └── models-cache/            # bundled model SOURCE (copied to system location)
 ├── skills/                      # the 5 portable skills (sources of truth)
 ├── docs/paper/                  # the measured scientific report (EN + RU)
 ├── CLAUDE.md / AGENTS.md        # agent rules (Core Context Protocol)

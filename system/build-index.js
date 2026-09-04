@@ -30,8 +30,11 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { parseFrontmatter } from './lib/frontmatter.js';
 import { chunkMarkdownDetailed } from './lib/chunker.js';
-import { initModel as libInitModel, embedBatch as libEmbedBatch, embedLateChunking as libEmbedLateChunking } from './lib/retrieval.js';
+import { createEmbeddingClient, getEmbeddingProfile, sameEmbeddingProfile } from './lib/embedding-client.js';
 import { resolveModelsCache } from './lib/model-locator.js';
+import { documentId } from './lib/document-identity.js';
+import { loadEmptyDocumentCache, writeEmptyDocumentCache } from './lib/empty-document-cache.js';
+import { resolveWikiPaths } from './lib/wiki-paths.js';
 import * as lancedb from 'vectordb';
 
 // ─── ESM __dirname Shim ──────────────────────────────────────────────
@@ -40,34 +43,39 @@ const __dirname = path.dirname(__filename);
 
 // ─── Paths ───────────────────────────────────────────────────────────
 const SYSTEM_DIR   = __dirname;
-const ROOT_DIR     = path.resolve(SYSTEM_DIR, '..');
+// Единый резолвинг путей: legacy (колокация в checkout) или внешний профиль.
+// ROOT_DIR — корень данных (слои), runtime-артефакты индекса — в .runtime профиля.
+const WIKI_PATHS   = resolveWikiPaths(process.env, SYSTEM_DIR);
+const ROOT_DIR     = WIKI_PATHS.dataRoot;
 // Путь к модели: общая системная копия (по системной метке) с фолбэком на
-// репо-исходник <system>/models-cache. См. system/lib/model-locator.js.
+// runtime-кэш моделей профиля. См. system/lib/model-locator.js.
 const MODELS_CACHE = (() => {
-  const r = resolveModelsCache({ localFallback: path.join(SYSTEM_DIR, 'models-cache') });
+  const r = resolveModelsCache({ localFallback: WIKI_PATHS.modelsCacheFallback });
   return r.dir || r.hint;
 })();
-const LANCEDB_DIR  = path.join(SYSTEM_DIR, '.lancedb');
-const CHUNKING_MANIFEST_FILE = path.join(LANCEDB_DIR, 'chunking-profile.json');
+const LANCEDB_DIR  = WIKI_PATHS.lancedbDir;
+const EMBEDDING_MANIFEST_FILE = WIKI_PATHS.embeddingManifestFile;
+const EMPTY_DOCUMENT_CACHE_FILE = WIKI_PATHS.emptyDocCacheFile;
 
 // ─── Model Configuration ────────────────────────────────────────────
-const MODEL_ID       = 'jinaai/jina-embeddings-v3';
-const MODEL_REVISION = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
-const VECTOR_DIM     = 1024;
-const DTYPE          = 'fp16';
+const EMBEDDING_PROFILE = getEmbeddingProfile();
+const MODEL_ID       = EMBEDDING_PROFILE.model;
+const VECTOR_DIM     = EMBEDDING_PROFILE.dimension;
+const DTYPE          = EMBEDDING_PROFILE.dtype || 'native';
 
 // ─── Indexing Configuration (externalized → system/index-config.json) ──
 // Вынесено в конфиг, чтобы тюнить без правки кода. Файл может отсутствовать —
 // тогда действуют дефолты ниже.
-const INDEX_CONFIG_FILE = path.join(SYSTEM_DIR, 'index-config.json');
+const INDEX_CONFIG_FILE = WIKI_PATHS.indexConfigFile;
 const INDEX_DEFAULTS = {
   index_code:          true,        // индексировать код (для базы ПРО КОД — по умолчанию да)
   chunk_strategy:      'structural',// 'structural' (по структуре Markdown) | 'fixed' (окно слов)
   chunk_size_words:    200,         // целевой размер retrieval-чанка
   chunk_min_words:     45,          // короткая секция остаётся атомарной
-  chunk_max_words:     300,         // крупнее — рекурсивный split по предложениям
-  chunk_overlap_words: 32,          // только на вынужденной границе внутри абзаца
-  keep_code_atomic:    true,        // не рвать блоки ```...```
+  chunk_max_words:     300,         // больше — рекурсивный split по предложениям
+  chunk_overlap_words: 32,          // контекст предыдущего фрагмента на каждой границе чанка
+  chunk_forward_overlap_words: 32,  // контекст СЛЕДУЮЩЕГО фрагмента (голова следующего чанка)
+  keep_code_atomic:    true,        // не рвать блоки ```...```, если они укладываются в max
   heading_breadcrumbs: true,        // приписывать к чанку путь заголовков
   max_raw_file_bytes:  0,            // 0 = не пропускать raw-источники по размеру
 };
@@ -85,13 +93,21 @@ const CHUNK_SIZE_WORDS    = ICFG.chunk_size_words;
 const CHUNK_MIN_WORDS     = ICFG.chunk_min_words;
 const CHUNK_MAX_WORDS     = ICFG.chunk_max_words;
 const CHUNK_OVERLAP_WORDS = ICFG.chunk_overlap_words;
+const CHUNK_FORWARD_OVERLAP_WORDS = ICFG.chunk_forward_overlap_words ?? ICFG.chunk_overlap_words;
 const KEEP_CODE_ATOMIC    = ICFG.keep_code_atomic;
 const HEADING_BREADCRUMBS = ICFG.heading_breadcrumbs;
 const MAX_RAW_FILE_BYTES  = ICFG.max_raw_file_bytes;
 const INDEX_CODE          = ICFG.index_code;
 const EMBED_BATCH_SIZE    = ICFG.embed_batch_size || 16;
 const DEVICE              = ICFG.device || 'auto';   // 'auto'(GPU→CPU) | 'dml' | 'cuda' | 'cpu'
+// Порог слов для Late Chunking (эмбеддинг всего документа одной последовательностью).
+// Документы крупнее идут по безопасному батч-пути (по чанкам ≤ max), что исключает
+// переполнение VRAM (DirectML OOM) на GPU с ограниченной памятью. Дефолт 6000 сохраняет
+// прежнее поведение; локальные профили с большими доками на слабой GPU снижают порог.
+const LATE_CHUNK_MAX_WORDS = ICFG.late_chunk_max_words ?? 6000;
 const CHUNKING_PROFILE = Object.freeze({
+  // Bump whenever chunk construction changes independently of config values.
+  // Otherwise an incremental run could retain vectors built by an older algorithm.
   version: 3,
   strategy: CHUNK_STRATEGY,
   targetWords: CHUNK_SIZE_WORDS,
@@ -200,11 +216,16 @@ function extractWikiLinks(body) {
  */
 function extractCodeSymbols(text, limit = 60) {
   const freq = new Map();
-  for (const tok of String(text).split(/[^A-Za-z0-9_]+/)) {
-    if (!tok) continue;
-    const ok = /^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(tok)  // PascalCase ≥2 humps
-      || /^I[A-Z][A-Za-z0-9]+$/.test(tok)                        // I* interfaces
-      || /^m_[A-Za-z][A-Za-z0-9_]*$/.test(tok);                  // m_ fields
+  for (const rawTok of String(text).split(/[^A-Za-z0-9_]+/)) {
+    if (!rawTok) continue;
+    let tok = rawTok;
+    let ok = false;
+    if (/^[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+$/.test(tok) || /^I[A-Z][A-Za-z0-9]+$/.test(tok) || /^m_[A-Za-z][A-Za-z0-9_]*$/.test(tok)) {
+      ok = true;
+    } else if (/^[a-zA-Z]{3,}$/.test(tok)) {
+      ok = true;
+      tok = tok.toLowerCase();
+    }
     if (ok) freq.set(tok, (freq.get(tok) || 0) + 1);
   }
   return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(e => e[0]);
@@ -320,9 +341,9 @@ async function loadMd5Cache(forceRebuild) {
 async function initModel() {
   console.log(`${C.cyan}[*]${C.reset} Initializing model (first run may take a few seconds)...`);
   const startMs = Date.now();
-  let extractor;
+  let client;
   try {
-    extractor = await libInitModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REVISION, dtype: DTYPE, device: DEVICE });
+    client = await createEmbeddingClient(EMBEDDING_PROFILE, { modelsCache: MODELS_CACHE, device: DEVICE, batchSize: EMBED_BATCH_SIZE });
   } catch (err) {
     console.error(`\n${C.red}[FATAL]${C.reset} Не удалось загрузить модель из ${MODELS_CACHE}`);
     console.error(`  Убедитесь, что модель скачана: node system/scripts/setup-model.js`);
@@ -330,9 +351,9 @@ async function initModel() {
     process.exit(1);
   }
   const elapsed = ((Date.now() - startMs) / 1000).toFixed(1);
-  const dev = extractor.__device || 'cpu';
+  const dev = client.profile.provider === 'ollama' ? 'ollama' : 'transformers';
   console.log(`${C.green}[OK]${C.reset} Модель загружена за ${elapsed}s (${DTYPE}, ${VECTOR_DIM}d, device=${C.bold}${dev}${dev !== 'cpu' ? ' ⚡GPU' : ''}${C.reset})\n`);
-  return extractor;
+  return client;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -443,14 +464,16 @@ async function getLanceTable(forceRebuild) {
 
 async function main() {
   const startTime = Date.now();
-  const forceRebuild = process.argv.includes('--force');
-  let previousChunkingProfile = null;
-  try { previousChunkingProfile = JSON.parse(fs.readFileSync(CHUNKING_MANIFEST_FILE, 'utf8')); } catch { /* legacy index */ }
-  if (previousChunkingProfile && !sameChunkingProfile(previousChunkingProfile, CHUNKING_PROFILE) && !forceRebuild) {
-    throw new Error('Chunking profile changed. Rebuild the whole index explicitly with --force before searching.');
+  let forceRebuild = process.argv.includes('--force');
+  let existingProfile = null;
+  try { existingProfile = JSON.parse(fs.readFileSync(EMBEDDING_MANIFEST_FILE, 'utf8')); } catch { /* legacy index */ }
+  if (existingProfile && (!sameEmbeddingProfile(existingProfile, EMBEDDING_PROFILE) || !sameChunkingProfile(existingProfile.chunking, CHUNKING_PROFILE)) && !forceRebuild) {
+    console.warn(`${C.yellow}[WARN] Профиль эмбеддингов или чанкинга изменился. Автоматически переходим в режим --force для пересборки индекса.${C.reset}`);
+    forceRebuild = true;
   }
-  if (!previousChunkingProfile && fs.existsSync(LANCEDB_DIR) && !forceRebuild) {
-    throw new Error('Legacy index has no chunking profile. Rebuild explicitly with --force before incremental indexing.');
+  if (!existingProfile && EMBEDDING_PROFILE.provider !== 'transformers' && fs.existsSync(LANCEDB_DIR) && !forceRebuild) {
+    console.warn(`${C.yellow}[WARN] Индекс существует, но embedding-profile.json отсутствует (первый или прерванный запуск). Автоматически переходим в режим --force.${C.reset}`);
+    forceRebuild = true;
   }
 
   console.log(`\n${C.bold}═══ DavASkoLLMWiki v3.x — Индексатор ═══${C.reset}\n`);
@@ -474,12 +497,32 @@ async function main() {
 
   // 2. Загрузка кэша MD5 из LanceDB
   const existingDocs = await loadMd5Cache(forceRebuild);
+  // Пустые документы не имеют векторов и потому отсутствуют в LanceDB. Их MD5
+  // хранится отдельно, чтобы они не выглядели [NEW] на каждом запуске.
+  const emptyDocumentCache = forceRebuild ? {} : loadEmptyDocumentCache(EMPTY_DOCUMENT_CACHE_FILE);
+  for (const [fileId, cachedMd5] of Object.entries(emptyDocumentCache)) {
+    if (!existingDocs[fileId]) existingDocs[fileId] = cachedMd5;
+  }
 
   // 3. Инициализация модели
   const extractor = await initModel();
 
   // 4. Подключение к LanceDB
   const table = await getLanceTable(forceRebuild);
+
+  // Фиксируем манифест профиля сразу (in_progress), чтобы при любом прерывании
+  // профиль считался валидным, а последующий запуск мог инкрементально продолжить
+  fs.mkdirSync(path.dirname(EMBEDDING_MANIFEST_FILE), { recursive: true });
+  fs.writeFileSync(
+    EMBEDDING_MANIFEST_FILE,
+    JSON.stringify({
+      ...EMBEDDING_PROFILE,
+      chunking: CHUNKING_PROFILE,
+      status: 'in_progress',
+      startedAt: new Date().toISOString()
+    }, null, 2) + '\n',
+    'utf8'
+  );
 
   // 5. Сбор всех .md файлов из wiki/ и raw/ каждого слоя
   const allFiles = [];
@@ -524,10 +567,15 @@ async function main() {
   // (резолвятся по fileId==basename в graph-lift) продолжали работать; коллизии
   // дизамбигуируются полным относительным путём.
   const wikiBasenameCounts = new Map();
+  const rawBasenameCounts = new Map();
   for (const f of allFiles) {
-    if (f.sourceType !== 'wiki') continue;
     const bn = path.basename(f.filePath, '.md');
-    wikiBasenameCounts.set(bn, (wikiBasenameCounts.get(bn) || 0) + 1);
+    if (f.sourceType === 'wiki') {
+      wikiBasenameCounts.set(bn, (wikiBasenameCounts.get(bn) || 0) + 1);
+    } else {
+      const rawKey = `${f.layer}\u0000${bn}`;
+      rawBasenameCounts.set(rawKey, (rawBasenameCounts.get(rawKey) || 0) + 1);
+    }
   }
   const collisionCount = [...wikiBasenameCounts.values()].filter(n => n > 1).length;
   if (collisionCount > 0) {
@@ -549,6 +597,9 @@ async function main() {
 
   // Трекинг обработанных файлов (для очистки устаревших записей)
   const processedIds = new Set();
+  // Start from the previous cache: unchanged empty files take the fast MD5
+  // skip path below and never reach chunk construction.
+  const nextEmptyDocumentCache = { ...emptyDocumentCache };
 
   // 8. Обработка каждого файла
   for (let i = 0; i < allFiles.length; i++) {
@@ -560,16 +611,18 @@ async function main() {
     const rawContent = readText(filePath);
     const { meta, body } = parseFrontmatter(rawContent);
 
-    // ID: для raw-файлов используем префикс 'raw-<layer>-<basename>' чтобы
-    // избежать коллизий с wiki-страницами при одинаковых именах файлов.
-    // fileId: raw → 'raw-<layer>-<basename>'. wiki → basename, если он уникален
-    // во всём корпусе (сохраняет резолвинг [[wikilinks]]); при коллизии basename
-    // (несколько одноимённых страниц) — полный относительный путь без .md.
-    const fileId     = meta.id || (
-      sourceType === 'raw'
-        ? `raw-${layer}-${basename}`
-        : (wikiBasenameCounts.get(basename) > 1 ? relPath.replace(/\.md$/i, '') : basename)
-    );
+    // Raw-источник всегда получает ID из своего пути. Нельзя использовать его
+    // frontmatter id: он часто совпадает с ID wiki-страницы и тогда документы
+    // перетирают MD5/векторы друг друга при каждом инкрементальном запуске.
+    const fileId = documentId({
+      sourceType,
+      layer,
+      relPath,
+      basename,
+      metaId: meta.id,
+      wikiBasenameCount: wikiBasenameCounts.get(basename) || 0,
+      rawBasenameCount: rawBasenameCounts.get(`${layer}\u0000${basename}`) || 0,
+    });
     // symbols = объявленные во frontmatter + авто-извлечённые из тела (Data Standards §2).
     // Без авто-извлечения raw/код-документы получают symbols=[] и невидимы для Stream A.
     const fmSymbols  = Array.isArray(meta.symbols) ? meta.symbols.map(String) : [];
@@ -580,16 +633,29 @@ async function main() {
 
     processedIds.add(fileId);
 
+    // Иерархия документа (таб/сущность) из фронтматтера. GDD нарезан на секции по
+    // отдельным файлам, и имя сущности («Робот гуманоид») живёт только в meta, не в
+    // теле секции. Без него секции «Концепция»/«Анимации» векторизуются без слова
+    // «гуманоид» и слабо матчат запросы про сущность — из-за чего относительный
+    // порог оставлял один Overview. Приписываем этот путь к КАЖДОМУ чанку при
+    // эмбеддинге, чтобы все секции сущности находились по запросу о ней.
+    const docBreadcrumb = [meta.parent_tab, meta.tab_name].filter(Boolean).map(String).join(' > ');
+    const embedPrefix = docBreadcrumb ? `[${docBreadcrumb}]\n` : '';
+
     // Подготовка текста для эмбеддинга (вырезание блоков кода)
     const textToEmbed = prepareTextForEmbedding(body);
 
-    // MD5-контроль по подготовленному тексту
-    const currentMd5 = md5(textToEmbed);
+    // MD5-контроль по подготовленному тексту (+ хлебные крошки: смена tab_name
+    // должна триггерить переэмбеддинг, иначе инкрементальный билд её не подхватит).
+    const currentMd5 = md5(`${embedPrefix}\n${textToEmbed}`);
     const existingMd5 = existingDocs[fileId];
 
     processedIds.add(fileId);
 
     if (!forceRebuild && existingMd5 === currentMd5) {
+      if (Object.hasOwn(emptyDocumentCache, fileId)) {
+        nextEmptyDocumentCache[fileId] = currentMd5;
+      }
       countSkipped++;
       continue;
     }
@@ -619,6 +685,7 @@ async function main() {
         minWords: CHUNK_MIN_WORDS,
         maxWords: CHUNK_MAX_WORDS,
         overlapWords: CHUNK_OVERLAP_WORDS,
+        forwardOverlapWords: CHUNK_FORWARD_OVERLAP_WORDS,
         keepCodeAtomic: KEEP_CODE_ATOMIC,
         headingBreadcrumbs: HEADING_BREADCRUMBS,
       });
@@ -632,9 +699,13 @@ async function main() {
       .map((chunk) => ({ ...chunk, text: prepareTextForEmbedding(chunk.text).trim() }))
       .filter((chunk) => chunk.text);
     if (chunks.length === 0) {
+      nextEmptyDocumentCache[fileId] = currentMd5;
       process.stdout.write(` — пустой, пропуск\n`);
       continue;
     }
+    // A file can become non-empty after a previous pass. Its empty marker must
+    // disappear once vectors are going to be stored.
+    delete nextEmptyDocumentCache[fileId];
     if (chunks.length === 1) countSingleChunkDocs++;
     countForcedBoundaries += chunks.filter((chunk) => chunk.boundary === 'forced').length;
     countOverlappedChunks += chunks.filter((chunk) => chunk.overlapWords > 0).length;
@@ -645,10 +716,12 @@ async function main() {
     const wordCount = textToEmbed.split(/\s+/).length;
     
     // Если документ не огромный, используем Late Chunking (попытка вложить весь контекст)
-    if (CHUNK_STRATEGY === 'structural' && wordCount < 6000) {
-      vecs = await libEmbedLateChunking(extractor, textToEmbed, chunks.map(c => `passage: ${c.text}`), VECTOR_DIM);
+    // embedPrefix (иерархия таба) приписывается к КАЖДОМУ чанку только в тексте для
+    // ЭМБЕДДИНГА — сам сохранённый chunk.text и отображение/цитаты не меняются.
+    if (CHUNK_STRATEGY === 'structural' && wordCount < LATE_CHUNK_MAX_WORDS) {
+      vecs = await extractor.embedLateChunking(embedPrefix + textToEmbed, chunks.map(c => `passage: ${embedPrefix}${c.text}`));
     } else {
-      vecs = await libEmbedBatch(extractor, chunks.map(c => `passage: ${c.text}`), VECTOR_DIM, EMBED_BATCH_SIZE);
+      vecs = await extractor.embedBatch(chunks.map(c => `passage: ${embedPrefix}${c.text}`));
     }
     
     for (let ci = 0; ci < chunks.length; ci++) {
@@ -677,20 +750,44 @@ async function main() {
       countChunks++;
     }
 
-    // Если накопили достаточно — сохраняем в LanceDB
-    if (batchData.length >= BATCH_INSERT_SIZE) {
-      await table.add(batchData);
-      batchData = [];
-    }
-
     process.stdout.write(
       ` → ${chunks.length} чанков → ${C.cyan}${assignedCluster}${C.reset}\n`
     );
+
+    // Автосохранение чекпоинта каждые CHECKPOINT_INTERVAL документов или при накоплении чанков
+    const CHECKPOINT_INTERVAL = 20;
+    const shouldCheckpoint = (countNew + countUpdated) > 0 && ((countNew + countUpdated) % CHECKPOINT_INTERVAL === 0);
+    if (batchData.length >= BATCH_INSERT_SIZE || shouldCheckpoint) {
+      if (batchData.length > 0) {
+        await table.add(batchData);
+        batchData = [];
+      }
+      writeEmptyDocumentCache(EMPTY_DOCUMENT_CACHE_FILE, nextEmptyDocumentCache);
+      fs.writeFileSync(
+        EMBEDDING_MANIFEST_FILE,
+        JSON.stringify({
+          ...EMBEDDING_PROFILE,
+          chunking: CHUNKING_PROFILE,
+          status: 'in_progress',
+          checkpoint: {
+            processedDocs: i + 1,
+            totalDocs: allFiles.length,
+            newOrUpdated: countNew + countUpdated,
+            updatedAt: new Date().toISOString()
+          }
+        }, null, 2) + '\n',
+        'utf8'
+      );
+      if (shouldCheckpoint) {
+        process.stdout.write(`  ${C.green}[ЧЕКПОИНТ]${C.reset} Сохранён прогресс в LanceDB (${i + 1}/${allFiles.length} документов, обработано: ${countNew + countUpdated})\n`);
+      }
+    }
   }
 
   // Довставляем остатки
   if (batchData.length > 0) {
     await table.add(batchData);
+    batchData = [];
   }
 
   // 9. Очистка устаревших документов из LanceDB
@@ -702,9 +799,23 @@ async function main() {
     }
   }
 
+  for (const fileId of Object.keys(nextEmptyDocumentCache)) {
+    if (!processedIds.has(fileId)) delete nextEmptyDocumentCache[fileId];
+  }
+  writeEmptyDocumentCache(EMPTY_DOCUMENT_CACHE_FILE, nextEmptyDocumentCache);
+
   const totalDocs = processedIds.size;
   const totalChunks = await table.countRows();
-  fs.writeFileSync(CHUNKING_MANIFEST_FILE, JSON.stringify(CHUNKING_PROFILE, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(
+    EMBEDDING_MANIFEST_FILE,
+    JSON.stringify({
+      ...EMBEDDING_PROFILE,
+      chunking: CHUNKING_PROFILE,
+      status: 'complete',
+      indexedAt: new Date().toISOString()
+    }, null, 2) + '\n',
+    'utf8'
+  );
 
   console.log(
     `\n${C.cyan}[*]${C.reset} Векторная база ${C.bold}LanceDB${C.reset}` +
@@ -719,7 +830,8 @@ async function main() {
   console.log(`  Обновлено:  ${C.yellow}${countUpdated}${C.reset}`);
   console.log(`  Без изменений: ${C.dim}${countSkipped}${C.reset}`);
   console.log(`  Удалено:    ${C.red}${countRemoved}${C.reset}`);
-  console.log(`  Всего чанков: ${countChunks}`);
+  console.log(`  Добавлено/обновлено чанков: ${countChunks}`);
+  console.log(`  Всего чанков в базе: ${totalChunks}`);
   console.log(`  Документов с одним чанком: ${countSingleChunkDocs}`);
   console.log(`  Вынужденных границ: ${countForcedBoundaries}; чанков с overlap: ${countOverlappedChunks}`);
   console.log(`\n${C.green}[OK]${C.reset} Индекс собран за ${elapsed}s.\n`);

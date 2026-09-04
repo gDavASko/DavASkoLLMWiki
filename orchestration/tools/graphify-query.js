@@ -1,18 +1,36 @@
-import { execSync } from 'child_process';
+import { execFile } from 'node:child_process';
 import path from 'path';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
+
+export function buildGraphifyCommand(rawQuery) {
+  if (typeof rawQuery !== 'string' || !rawQuery.trim()) {
+    throw new Error('Graphify query must be a non-empty string.');
+  }
+  return { command: 'graphify', args: ['query', rawQuery] };
+}
+
+async function runGraphify(command, args, options) {
+  const { stdout } = await execFileAsync(command, args, options);
+  return stdout;
+}
 
 /**
  * Execute Graphify as a Tool Adapter
  * @param {string} rawQuery 
  * @returns {Promise<import('../contracts.js').ToolResult>}
  */
-export async function executeGraphifyAdapter(rawQuery) {
+export async function executeGraphifyAdapter(rawQuery, dependencies = {}) {
   try {
     const rootDir = path.resolve(process.cwd());
-    const graphifyResult = execSync(`graphify query "${rawQuery.replace(/"/g, '\\"')}"`, { 
-        cwd: rootDir, 
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'ignore'] 
+    const { command, args } = buildGraphifyCommand(rawQuery);
+    const execute = dependencies.execute ?? runGraphify;
+    const graphifyResult = await execute(command, args, {
+      cwd: rootDir,
+      encoding: 'utf8',
+      windowsHide: true,
+      maxBuffer: dependencies.maxOutputBytes ?? 120_000,
     });
     
     const graphifyDump = `# Graphify Results\n\n> Query: \`${rawQuery}\`\n\n\`\`\`text\n${graphifyResult}\n\`\`\`\n`;

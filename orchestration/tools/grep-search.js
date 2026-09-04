@@ -1,10 +1,42 @@
-import { execSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '../..');
+const execFileAsync = promisify(execFile);
+
+function maxOutputBytes(value) {
+  return Number.isInteger(value) && value > 0 ? value : 120_000;
+}
+
+export function resolveSearchLocations(locations = []) {
+  return locations.map((location) => {
+    if (typeof location !== 'string' || !location.trim()) {
+      throw new Error('Search location must be a non-empty string.');
+    }
+    const absolute = path.resolve(ROOT_DIR, location);
+    const relative = path.relative(ROOT_DIR, absolute);
+    if (relative === '' || relative === '.') return '.';
+    if (relative.startsWith('..') || path.isAbsolute(relative) || !fs.existsSync(absolute)) {
+      throw new Error(`Search location is outside the knowledge-base root or does not exist: ${location}`);
+    }
+    return relative;
+  });
+}
+
+export function buildGrepCommand(query, locations = []) {
+  const paths = locations.length > 0 ? resolveSearchLocations(locations) : ['.'];
+  return { command: 'git', args: ['grep', '-i', '-I', '-C', '2', '-e', query, '--', ...paths] };
+}
+
+async function runGrep(command, args, options) {
+  const { stdout } = await execFileAsync(command, args, options);
+  return stdout;
+}
 
 /**
  * Execute Grep search as a Tool Adapter
@@ -14,9 +46,9 @@ const ROOT_DIR = path.resolve(__dirname, '../..');
  * @param {string[]} [locations=[]]
  * @returns {Promise<import('../contracts.js').ToolResult>}
  */
-export async function executeGrepAdapter(rawQuery, limits = {}, correlationId = 'none', locations = []) {
+export async function executeGrepAdapter(rawQuery, limits = {}, correlationId = 'none', locations = [], dependencies = {}) {
   try {
-    const safeQuery = rawQuery.replace(/[^a-zA-Z0-9а-яА-ЯёЁ\s_-]/g, ' ').trim();
+    const safeQuery = rawQuery.replace(/[^a-zA-Z0-9а-яА-ЯёЁ\s_-]/g, ' ').replace(/\s+/g, ' ').trim();
     if (!safeQuery) {
       return {
         status: 'ok',
@@ -26,19 +58,20 @@ export async function executeGrepAdapter(rawQuery, limits = {}, correlationId = 
       };
     }
 
-    let searchPaths = ROOT_DIR;
-    if (locations && locations.length > 0) {
-       searchPaths = locations.map(loc => {
-           return path.isAbsolute(loc) ? loc : path.join(ROOT_DIR, loc);
-       }).join(' ');
-    }
-
     let output = '';
+    const outputLimit = maxOutputBytes(limits.maxToolOutputBytes);
     try {
-        const cmd = `git grep -i -I -C 2 "${safeQuery}" -- ${locations.length > 0 ? locations.join(' ') : '.'}`;
-        output = execSync(cmd, { cwd: ROOT_DIR, encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const { command, args } = buildGrepCommand(safeQuery, locations);
+        const execute = dependencies.execute ?? runGrep;
+        output = await execute(command, args, {
+          cwd: ROOT_DIR,
+          encoding: 'utf8',
+          windowsHide: true,
+          maxBuffer: outputLimit,
+        });
     } catch (e) {
-        if (e.stdout) output = e.stdout;
+        if (e?.stdout) output = String(e.stdout);
+        else throw e;
     }
 
     if (!output || output.trim().length === 0) {
@@ -50,9 +83,8 @@ export async function executeGrepAdapter(rawQuery, limits = {}, correlationId = 
       };
     }
 
-    const MAX_LEN = limits.maxToolOutputBytes || 120000;
-    if (output.length > MAX_LEN) {
-        output = output.substring(0, MAX_LEN) + '\n\n...[TRUNCATED]';
+    if (Buffer.byteLength(output, 'utf8') > outputLimit) {
+        output = Buffer.from(output, 'utf8').subarray(0, outputLimit).toString('utf8') + '\n\n...[TRUNCATED]';
     }
 
     const dump = `# GREP Context Dump\n\n> Query: \`${rawQuery}\`\n\n\`\`\`text\n${output}\n\`\`\`\n`;

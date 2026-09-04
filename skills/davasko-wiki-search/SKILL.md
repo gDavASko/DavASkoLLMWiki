@@ -1,6 +1,6 @@
-﻿---
+---
 name: davasko-wiki-search
-description: Use this skill to perform hybrid (symbolic + semantic) search across the DavASko LLM Wiki knowledge base. It queries the pre-built vector index using Jina v3 embeddings and returns relevant wiki pages via a context dump file.
+description: Hybrid semantic search in LLM Wiki. Triggers: search wiki, найди в базе знаний.
 status: stable
 owner: DavASko
 license: Proprietary
@@ -30,16 +30,26 @@ Execute a hybrid search (symbolic + semantic) against the pre-built wiki vector 
 
 Before using this skill, ensure:
 
-1. **Index exists**: `system/wiki-index.json` must exist. If not, build it:
+1. **Knowledge Base configured**: The external knowledge base profile must be accessible via `KBPRO_AI_CHAT_WIKI_DIR`.
+   - **ЕСЛИ БАЗА ЗНАНИЙ НЕ НАЙДЕНА ЛОКАЛЬНО**:
+     Если переменная `KBPRO_AI_CHAT_WIKI_DIR` не задана или путь не существует, агент **ОБЯЗАН** предложить пользователю автоматическую настройку:
+     1. Спросить у пользователя путь для клонирования (предложить по умолчанию `C:\KBProData\knowledge-base`).
+     2. Запустить скрипт настройки:
+        ```bash
+        node system/scripts/setup-knowledge-base.js --target <путь_пользователя>
+        ```
+     3. Скрипт автоматически клонирует `https://gitlab.kbpro.ru/ai-env/kbpro-knowledge-base.git`, персистентно пропишет `KBPRO_AI_CHAT_WIKI_DIR`, проверит зависимости, модель и выполнит самотестирование с автопочинкой.
+     4. После успешной настройки повторить поиск.
+2. **Index exists**: `system/wiki-index.json` or `.lancedb` must exist in the profile. If not, build it:
    ```bash
    node system/build-index.js
    ```
-2. **Shared model installed**: The Jina v3 model lives in a single **system-wide** location referenced by a marker (`…/DavASkoLLMWiki/config.json`) — it is NOT stored inside the KB. If the query can't find it, install once:
+3. **Shared model installed**: The Jina v3 model lives in a single **system-wide** location referenced by a marker (`…/DavASkoLLMWiki/config.json`) — it is NOT stored inside the KB. If the query can't find it, install once:
    ```bash
    node system/scripts/setup-model.js
    ```
    Resolution order (see `system/lib/model-locator.js`): env `DAVASKO_LLM_WIKI_MODELS` → marker → repo-local `system/models-cache` (fallback). If nothing is found, `setup-model.js` asks where to place the shared model.
-3. **Dependencies installed**: Run `npm install` from the repository root (uses offline `.tgz` from `system/vendor/`).
+4. **Dependencies installed**: Run `npm install` from the repository root (uses offline `.tgz` from `system/vendor/`).
 
 ## Workflow
 
@@ -62,7 +72,7 @@ node system/query-wiki.js --query "CowController, blend tree animation optimizat
 ```
 
 **What happens inside:**
-- **Stream A** (instant): Matches the query's code identifiers against the `id`, `symbols`, `tags`, `wikilinks` fields in the index. Those `symbols` are filled by `build-index.js` from **auto-extracted content identifiers + frontmatter `symbols:`** — so if an exact-identifier query misses a page that clearly documents that class, the index is missing the symbol: rebuild (`--force`) and/or add it to the page's frontmatter `symbols:` (see Data Standards §2)
+- **Stream A** (instant): Matches symbols against `id`, `symbols`, `tags`, `wikilinks` fields in the index
 - **Stream B** (1–2s): Vectorizes the semantic phrase with `query:` prefix, ranks clusters by centroid and scans the `nprobe` nearest shards (IVF multi-probe; exhaustive when `nprobe ≥ cluster count`), then filters by an **adaptive threshold** — default `relative` mode keeps chunks with cosine ≥ `max(junk_floor, relative_alpha · top_score)` (per-query), `absolute` mode uses a fixed `similarity_threshold`. Returns Top-`top_k_documents`. All knobs come from `system/search-config.json`
 - **Graph Lift**: For exact matches (Stream A), loads `extends` parent (+1) and `[[WikiLinks]]` references (+1)
 - **Context Dump**: Writes matched documents to `.cursor-context-dump.md` in the project root

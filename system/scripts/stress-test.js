@@ -84,8 +84,9 @@ function runGrepBaseline(query) {
     const words = query.replace(/[?.,()]/g, '').split(' ').filter(w => w.length > 3);
     const keywords = words.slice(0, 2).join('|');
     
+    const assetsDir = process.env.UNITY_ASSETS_DIR || path.resolve(__dirname, '../../../Assets');
     try {
-        const cmd = `rg -i "${keywords}" --max-count 5 "E:\\UnityProjects\\IRI\\dentistry-cow\\Assets"`;
+        const cmd = `rg -i "${keywords}" --max-count 5 "${assetsDir}"`;
         const stdout = execSync(cmd, { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });
         return stdout.substring(0, 2000);
     } catch (e) {

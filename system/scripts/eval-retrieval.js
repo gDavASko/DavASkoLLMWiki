@@ -34,7 +34,8 @@ import path from 'path';
 import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { initModel, embed, cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches } from '../lib/retrieval.js';
+import { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches } from '../lib/retrieval.js';
+import { createEmbeddingClient, getEmbeddingProfile } from '../lib/embedding-client.js';
 import { resolveModelsCache } from '../lib/model-locator.js';
 import { recallAtK, mrr, ndcgAtK } from '../lib/metrics.js';
 
@@ -52,9 +53,8 @@ const MODELS_CACHE = (() => {
   const r = resolveModelsCache({ localFallback: path.join(SYSTEM_DIR, 'models-cache') });
   return r.dir || r.hint;
 })();
-const MODEL_ID     = 'jinaai/jina-embeddings-v3';
-const MODEL_REV    = '815152ccf78fb243a0d9b4db0b80ec6ef87e2213';
-const VECTOR_DIM   = 1024;
+const EMBEDDING_PROFILE = getEmbeddingProfile();
+const VECTOR_DIM   = EMBEDDING_PROFILE.dimension;
 
 const args = process.argv.slice(2);
 const SELF_TEST = args.includes('--self-test');
@@ -163,7 +163,7 @@ function lexicalRank(query, corpus) {
 async function runEval(index, queries, cfg, K) {
   const resolve = buildResolver(index);
   const corpus = buildCorpus(index);
-  const extractor = await initModel({ modelsCache: MODELS_CACHE, modelId: MODEL_ID, revision: MODEL_REV, dtype: 'fp16', device: cfg.device || 'auto' });
+  const extractor = await createEmbeddingClient(EMBEDDING_PROFILE, { modelsCache: MODELS_CACHE, device: cfg.device || 'auto' });
 
   const retrievers = ['hybrid', 'semantic', 'flat', 'lexical'];
   const agg = {};
@@ -179,7 +179,7 @@ async function runEval(index, queries, cfg, K) {
     }
     if (relevant.size === 0) { perQuery.push({ query: q.query, skipped: 'no resolvable relevant docs', unresolved }); continue; }
 
-    const queryVec = await embed(extractor, `query: ${q.query}`, VECTOR_DIM);
+    const queryVec = await extractor.embed(`query: ${q.query}`);
 
     const docsMap = index.documents || {};
     const gtb = (id) => (docsMap[id] && docsMap[id].sourceType === 'raw' ? (cfg.ground_truth_boost || 0) : 0);
@@ -236,7 +236,7 @@ async function sweepThreshold(index, queries, cfg, K, extractor) {
     const relevant = new Set();
     for (const label of (q.relevant || [])) { const id = resolve(label); if (id) relevant.add(id); }
     if (relevant.size === 0) continue;
-    prepared.push({ vec: await embed(extractor, `query: ${q.query}`, VECTOR_DIM), relevant });
+    prepared.push({ vec: await extractor.embed(`query: ${q.query}`), relevant });
   }
 
   const rows = [];
@@ -292,7 +292,9 @@ async function main() {
   if (SELF_TEST) {
     console.error('[self-test] building synthetic fixture + index...');
     // Сохранить существующий реальный индекс, чтобы self-test его не затёр.
-    const bakDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eval-idxbak-'));
+    // ВАЖНО: бэкап на том же диске, что и индекс (SYSTEM_DIR), иначе fs.renameSync
+    // падает с EXDEV, когда os.tmpdir() на другом диске (напр. checkout на E:, temp на C:).
+    const bakDir = fs.mkdtempSync(path.join(SYSTEM_DIR, 'eval-idxbak-'));
     const idxBak = path.join(bakDir, 'wiki-index.json');
     const shardsBak = path.join(bakDir, 'index-shards');
     if (fs.existsSync(INDEX_FILE)) fs.renameSync(INDEX_FILE, idxBak);

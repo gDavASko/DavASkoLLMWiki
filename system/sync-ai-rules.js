@@ -42,9 +42,10 @@ console.log('');
 // 2. Locate Rules Directory
 let rulesDir = '';
 const rulesCandidates = [
-  path.join(projectRoot, 'Assets', 'DavASko', 'davasko-ai-docs', 'llm-wiki', 'raw', 'ide-rules'),
-  path.join(projectRoot, 'davasko-ai-docs', 'llm-wiki', 'raw', 'ide-rules'),
-  path.join(submoduleRoot, 'llm-wiki', 'raw', 'ide-rules')
+  path.join(submoduleRoot, 'ide-rules'),   // шаблоны правил живут в системе управления (сабмодуль), НЕ в БЗ-контенте
+  path.join(projectRoot, 'Assets', 'DavASko', 'davasko-ai-docs', 'ide-rules'),
+  path.join(projectRoot, 'davasko-ai-docs', 'ide-rules'),
+  path.join(submoduleRoot, 'llm-wiki', 'raw', 'ide-rules')     // legacy fallback: когда правила лежали в контенте llm-wiki
 ];
 for (const c of rulesCandidates) {
   if (fs.existsSync(c)) {

@@ -224,6 +224,7 @@ export function createQuerySupervisorGraph(dependencies = {}) {
       sources: uniqueSources,
       route: state.route || 'RAG',
       correlationId,
+      ...(rawResponse.retrieval ? { retrieval: rawResponse.retrieval } : {}),
       ...(rawResponse.code ? { code: rawResponse.code } : {})
     };
 

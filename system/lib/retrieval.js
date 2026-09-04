@@ -69,6 +69,10 @@ export function applyThreshold(allScores, cfg = {}) {
   for (const [id, s] of entries) {
     if (s >= tau && s > (best.get(id) || 0)) best.set(id, s);
   }
+  
+  if (process.env.DEBUG || true) {
+    console.log(`[Search Debug] applyThreshold (mode=${mode}): topScore=${top.toFixed(3)}, tau=${tau.toFixed(3)}, results=${best.size}`);
+  }
 
   // Fallback только для абсолютного режима (в relative порог уже адаптивен).
   let usedFallback = false;
@@ -143,7 +147,7 @@ export function scoreSymbolMatches(symbols, documents, { weights, limit } = {}) 
  * Загрузка feature-extraction пайплайна Jina v3 (строго оффлайн).
  * Логирование намеренно отсутствует — оборачивайте на стороне вызова.
  */
-export async function initModel({ modelsCache, modelId, revision, dtype = 'fp16', device = 'auto' }) {
+async function initModelUncached({ modelsCache, modelId, revision, dtype = 'fp16', device = 'auto' }) {
   const { pipeline, env } = await import('@huggingface/transformers');
   env.allowRemoteModels = false;
   env.cacheDir = modelsCache;
@@ -295,7 +299,7 @@ export async function embedBatch(extractor, texts, vectorDim = 1024, batchSize =
 /**
  * Инициализация кросс-энкодера для переранжирования.
  */
-export async function initReranker({ modelsCache, modelId = 'Xenova/bge-reranker-base', revision, dtype = 'fp32', device = 'cpu' }) {
+async function initRerankerUncached({ modelsCache, modelId = 'Xenova/bge-reranker-base', revision, dtype = 'fp32', device = 'cpu' }) {
   const { env, AutoTokenizer, AutoModelForSequenceClassification } = await import('@huggingface/transformers');
   env.allowRemoteModels = true; // Разрешаем скачивание реранкера
   if (modelsCache) {
@@ -334,4 +338,35 @@ export async function embedLateChunking(extractor, fullText, chunks, vectorDim =
   return embedBatch(extractor, chunks, vectorDim);
 }
 
+
+
+// ─── Мемоизация загрузки моделей ─────────────────────────────────────────────
+// Загрузка ONNX-моделей — самая дорогая часть поиска (замер: 2.44 с эмбеддинги,
+// 1.28 с кросс-энкодер). В одноразовом процессе это платилось один раз и роли
+// не играло, но резидентный поисковый сервер обслуживает много запросов подряд,
+// и без кэша модели грузились бы заново на каждый — весь смысл резидентности
+// пропадал бы. Ключ кэша — полный набор параметров загрузки, поэтому смена
+// модели/устройства даёт новый экземпляр, а не молча возвращает старый.
+const MODEL_CACHE = new Map();
+
+function memoizeLoader(loader, kind) {
+  return (options = {}) => {
+    const key = `${kind}|${options.modelsCache ?? ''}|${options.modelId ?? ''}|${options.revision ?? ''}|${options.dtype ?? ''}|${options.device ?? ''}`;
+    const cached = MODEL_CACHE.get(key);
+    if (cached) return cached;
+    // Кэшируем именно промис: параллельные запросы не должны грузить модель дважды.
+    const pending = loader(options).catch((error) => {
+      MODEL_CACHE.delete(key); // неудачную загрузку не запоминаем — иначе не будет шанса на повтор
+      throw error;
+    });
+    MODEL_CACHE.set(key, pending);
+    return pending;
+  };
+}
+
+export const initModel = memoizeLoader(initModelUncached, 'embed');
+export const initReranker = memoizeLoader(initRerankerUncached, 'rerank');
+
+// Собран в конце файла: инициализаторы моделей объявлены ниже по тексту через const,
+// и ссылка на них раньше объявления давала ошибку временной мёртвой зоны.
 export default { cosineSimilarity, selectProbeClusters, applyThreshold, scoreSymbolMatches, initModel, embed, embedBatch, initReranker, rerank, embedLateChunking };

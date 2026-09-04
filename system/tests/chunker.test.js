@@ -68,6 +68,30 @@ test('overlap добавляется на каждой границе чанко
   assert.ok(chunks.slice(1).every((chunk) => chunk.text.startsWith('[Контекст предыдущего фрагмента]')));
 });
 
+test('forward-overlap приписывает голову следующего фрагмента (кроме последнего)', () => {
+  const chunks = chunkMarkdownDetailed([W(120), W(120), W(120)].join('\n\n'), {
+    targetWords: 100, minWords: 20, maxWords: 150, overlapWords: 0, forwardOverlapWords: 16, headingBreadcrumbs: false,
+  });
+  assert.ok(chunks.length >= 2, `ожидалось >=2 чанка, получено ${chunks.length}`);
+  // Все, кроме последнего, содержат метку контекста следующего фрагмента.
+  for (const c of chunks.slice(0, -1)) {
+    assert.ok(c.text.includes('[Контекст следующего фрагмента]'), 'нет forward-метки');
+    assert.ok(c.forwardWords > 0, 'forwardWords не проставлен');
+  }
+  // Последний чанк forward-контекста не имеет.
+  assert.ok(!chunks.at(-1).text.includes('[Контекст следующего фрагмента]'));
+  assert.equal(chunks.at(-1).forwardWords, 0);
+  // Служебное поле _body наружу не отдаётся.
+  assert.ok(!('_body' in chunks[0]));
+});
+
+test('forwardOverlapWords:0 отключает forward-контекст', () => {
+  const chunks = chunkMarkdownDetailed([W(120), W(120)].join('\n\n'), {
+    targetWords: 100, minWords: 20, maxWords: 150, overlapWords: 0, forwardOverlapWords: 0, headingBreadcrumbs: false,
+  });
+  assert.ok(chunks.every((c) => !c.text.includes('[Контекст следующего фрагмента]')));
+});
+
 test('крупные таблицы, списки и код остаются в пределах max', () => {
   const list = Array.from({ length: 30 }, (_, i) => `- rule ${i}: ${W(15)}`).join('\n');
   const table = ['| key | value |', '| --- | --- |', ...Array.from({ length: 25 }, (_, i) => `| key-${i} | ${W(12)} |`)].join('\n');
