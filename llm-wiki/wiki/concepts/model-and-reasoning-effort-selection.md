@@ -56,7 +56,7 @@ existing IDE subagents: `deep-reasoner` (high), `reasoning-architect` (medium),
 `fast-worker` (low). Concrete model ids stay machine-owned in `harness.config.json`;
 this rule governs the decision procedure, not the id mapping.
 
-Full text: [model-and-reasoning-effort-selection.md](file:///e:/UnityProjects/IRI/dentistry-cow/Assets/KBPro/kbpro-ai-docs/llm-wiki/raw/model-and-reasoning-effort-selection.md)
+Full text: [model-and-reasoning-effort-selection.md](../../raw/model-and-reasoning-effort-selection.md)
 
 ## Related Pages
 

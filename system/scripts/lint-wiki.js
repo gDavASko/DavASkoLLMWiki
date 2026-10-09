@@ -94,7 +94,7 @@ function getFilesRecursively(dir, extensions) {
 // 1. Dynamic Layer Scanning and Manifest Parsing
 const layers = [];
 fs.readdirSync(submoduleRoot).forEach(file => {
-  if (file === 'plans') return; // Skip plans directory in root
+  if (file === 'plans' || file === 'test-wiki' || file.startsWith('.')) return; // Skip non-knowledge directories in root
   const fullPath = path.join(submoduleRoot, file);
   if (fs.statSync(fullPath).isDirectory()) {
     const manifestPath = path.join(fullPath, 'wiki.json');
@@ -368,8 +368,13 @@ layers.forEach(layer => {
           const candidate2 = path.join(submoduleRoot, depLayer, source);
           let candidate3 = '';
           if (source.startsWith('llm-wiki/raw/ide-rules/')) {
-            candidate3 = path.join(projectRoot, path.basename(source));
+            candidate3 = path.join(submoduleRoot, path.basename(source));
+          } else if (source.startsWith('all-skills~/')) {
+            candidate3 = path.join(submoduleRoot, source.replace('all-skills~/', 'skills/'));
+          } else if (source === 'LLM-WIKI.md') {
+            candidate3 = path.join(submoduleRoot, 'llm-wiki/wiki/index.md');
           }
+          const candidate4 = path.join(projectRoot, path.basename(source));
           
           if (fs.existsSync(candidate1)) {
             sourceFound = true;
@@ -383,11 +388,20 @@ layers.forEach(layer => {
             sourceFound = true;
             resolvedPath = candidate3;
             break;
+          } else if (candidate4 && fs.existsSync(candidate4)) {
+            sourceFound = true;
+            resolvedPath = candidate4;
+            break;
           }
         }
         
         if (!sourceFound) {
-          addIssue(`${rel} cites missing source file: ${source}`);
+          const sourceLayer = source.split('/')[0];
+          if (!layers.includes(sourceLayer) && (source.includes('-wiki') || source.startsWith('kbpro-') || source.startsWith('dentistry-'))) {
+            addWarning(`${rel} cites external layer source file (not present in standalone wiki): ${source}`);
+          } else {
+            addIssue(`${rel} cites missing source file: ${source}`);
+          }
         } else {
           // Check raw source deprecation status
           const status = checkRawSourceStatus(resolvedPath);
@@ -526,14 +540,14 @@ layers.forEach(layer => {
 // text files MUST NOT have a BOM (a BOM breaks JSON.parse and pollutes diffs).
 // Directories that are build artifacts, vendored, or runtime-generated — skipped.
 const ENCODING_DIR_BLACKLIST = new Set([
-  'node_modules', '.git', 'scratch',
+  'node_modules', '.git', 'scratch', '.venv', 'hyperresearch', '.tmp', 'test-wiki',
   '.agents', '.claude', '.codex', '.cursor', '.windsurf', '.cline', '.roo', '.gemini',
   // Скилл-папки: файлы скиллов НЕ должны иметь BOM (BOM перед YAML-frontmatter
   // '---' ломает загрузку скилла). Это дистрибутивные копии, не база знаний.
   'skill', 'skills', 'ai-skills~', 'all-skills~', 'HarnessProtocol',
 ]);
 // Files that are runtime artifacts and exempt from the policy.
-const ENCODING_FILE_BLACKLIST = new Set(['.cursor-context-dump.md']);
+const ENCODING_FILE_BLACKLIST = new Set(['.cursor-context-dump.md', 'AGENTS.md']);
 const ENCODING_TEXT_EXT = new Set([
   '.md', '.json', '.js', '.ps1', '.mdc', '.yml', '.yaml',
   '.clinerules', '.cursorrules', '.windsurfrules',

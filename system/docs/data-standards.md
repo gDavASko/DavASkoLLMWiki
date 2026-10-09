@@ -1,4 +1,4 @@
- Knowledge Base Data Standards
+﻿ Knowledge Base Data Standards
 
 To maintain compatibility with Obsidian, Unity, Windows, and multiple AI tooling agents, all files within the **DavASko LLM Wiki** must adhere to strict formatting and encoding standards.
 
@@ -118,3 +118,28 @@ Use Obsidian links `[[page-name]]` to link to other concept, entity, or runbook 
 If the knowledge base is located inside a Unity project repository (under `Assets/`), Unity generates the `.meta` files automatically when it imports the assets.
 
 Do **NOT** hand-create `.meta` files. The ingestion pipeline no longer generates them and the linter no longer requires them — Unity creates each `.meta` (with its own GUID) on import.
+
+---
+
+## 6. Structural Chunking v4 & Embedding Standards
+
+To maximize semantic retrieval accuracy and retain cross-boundary context, indexers must implement the **Chunking Profile v4**:
+
+1. **Size Targets**:
+   - Target chunk length: ~200 words.
+   - Hard upper limit: 300 words.
+2. **Bidirectional Context Windows**:
+   - Every chunk after the first includes 32 words of context from the previous chunk prefixed as:
+     `[Контекст предыдущего фрагмента: ...]`
+   - Every chunk before the last includes 32 words of context from the following chunk suffixed as:
+     `[Контекст следующего фрагмента: ...]`
+3. **Hierarchy & Entity Breadcrumbs**:
+   - When ingesting structured documents (such as multi-tab sheets or nested guides), tab or heading hierarchy must be prefixed directly to the chunk text:
+     `[parent_tab > tab_name]`
+4. **Late Chunking & GPU Safeguards**:
+   - Single-sequence late chunking is permitted for documents up to **6000 words** (`late_chunk_max_words: 6000`). Documents exceeding this threshold must be segmented prior to embedding to prevent GPU VRAM exhaustion (DirectML / CUDA OOM).
+5. **Fault Tolerance & Manifest Status**:
+   - Vector batches must be committed to LanceDB in checkpoints every **20 documents** (`CHECKPOINT_INTERVAL = 20`).
+   - The embedding manifest file tracks status lifecycle (`in_progress` during execution, `complete` on successful termination).
+6. **Prompt Injection Defense**:
+   - Documents retrieved by the search engine are sanitized and wrapped in `<document id="...">` XML blocks before injection into context dumps.

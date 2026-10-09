@@ -1,4 +1,4 @@
----
+﻿---
 title: "Summary of youtube-autoresearch-karpathy"
 type: source-summary
 status: draft
@@ -6,12 +6,15 @@ source_status: source-linked
 sources:
   - llm-wiki/raw/transcripts/youtube-autoresearch-karpathy.md
 last_updated: 2026-07-22
-related: []
+related:
+  - "[[operations-map]]"
 ---
 
-﻿# Autoresearch от Андрея Карпати: Автономное рекурсивное самоулучшение AI-агентов и систем
+# Autoresearch от Андрея Карпати: Автономное рекурсивное самоулучшение AI-агентов и систем
 
-**Source URL**: [YouTube Video Transcript - Autoresearch Karpathy](file:///C:/Users/DavASko/.gemini/antigravity-ide/brain/5df6a0c7-a3ee-47bb-abd5-9c9faa0e32f5/scratch/transcript_ksr5n.ru.txt)  
+**Summary**: Обзор концепции и репозитория Autoresearch Андрея Карпати: автономное рекурсивное самоулучшение AI-агентов и систем.
+
+**Sources**: llm-wiki/raw/transcripts/youtube-autoresearch-karpathy.md  
 **Author/Channel**: Андрей Карпати (Andrej Karpathy) / Обзор концепции и репозитория Autoresearch  
 **Date Analyzed**: 2026-07-22  
 

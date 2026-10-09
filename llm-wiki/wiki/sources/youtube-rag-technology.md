@@ -1,4 +1,4 @@
----
+﻿---
 title: "Summary of youtube-rag-technology"
 type: source-summary
 status: draft
@@ -6,10 +6,13 @@ source_status: source-linked
 sources:
   - llm-wiki/raw/transcripts/youtube-rag-technology.md
 last_updated: 2026-07-22
-related: []
+related:
+  - "[[operations-map]]"
 ---
 
-﻿# Технология RAG (Retrieval-Augmented Generation): Полная архитектура, методы чанкинга, эмбеддинги и практическое применение
+# Технология RAG (Retrieval-Augmented Generation): Полная архитектура, методы чанкинга, эмбеддинги и практическое применение
+
+**Summary**: Архитектурный разбор технологии RAG: стратегии чанкинга, эмбеддинги, векторные базы данных и оценка качества.
 
 > [!NOTE]
 > данный документ представляет собой исчерпывающий конспект и архитектурный разбор технологии **RAG (Retrieval-Augmented Generation)**, составленный на основе материалов обучающего видео. Предназначен для включения в базу знаний по архитектуре современных LLM-систем и корпоративных AI-сервисов.

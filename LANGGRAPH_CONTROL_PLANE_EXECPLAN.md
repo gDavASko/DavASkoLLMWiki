@@ -1,4 +1,4 @@
-# LangGraph control plane для самостоятельного DavASko LLM Wiki
+﻿# LangGraph control plane для самостоятельного DavASko LLM Wiki
 
 Этот ExecPlan — живой документ. При реализации обязательно поддерживать в актуальном состоянии разделы `Progress`, `Surprises & Discoveries`, `Decision Log` и `Outcomes & Retrospective`. План следует правилам `llm-wiki/raw/PLANS.md`: он должен оставаться самодостаточным, а все найденные в ходе реализации факты, отсутствующие в Wiki, необходимо добавить в подходящий слой Wiki до завершения работы.
 

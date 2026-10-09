@@ -47,7 +47,8 @@ export function resolveWikiPaths(env, systemDir) {
   // checkoutRoot, индекс в system/.lancedb), игнорируя глобальный
   // KBPRO_AI_CHAT_WIKI_DIR. Нужен проектным сабмодулям (напр. в Unity-проекте),
   // чтобы держать собственную БЗ и не зависеть от общего профиля хоста/бота.
-  const localOverride = fs.existsSync(path.join(checkoutRoot, ".kbpro-local-kb"));
+  const localOverride = fs.existsSync(path.join(checkoutRoot, ".kbpro-local-kb")) ||
+                        fs.existsSync(path.join(checkoutRoot, ".davasko-local-kb"));
 
   const wikiDir = (env.KBPRO_AI_CHAT_WIKI_DIR ?? "").trim();
   // Заданный WIKI_DIR обязан быть абсолютным (fail-fast), но деривация путей —

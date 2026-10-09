@@ -1,4 +1,4 @@
----
+﻿---
 title: "Summary of youtube-rag-systems-deepdive"
 type: source-summary
 status: draft
@@ -6,10 +6,13 @@ source_status: source-linked
 sources:
   - llm-wiki/raw/transcripts/youtube-rag-systems-deepdive.md
 last_updated: 2026-07-22
-related: []
+related:
+  - "[[operations-map]]"
 ---
 
-﻿# RAG-системы: Глубокое погружение (Theory, Vector Search, Qdrant, Data Engineering)
+# RAG-системы: Глубокое погружение (Theory, Vector Search, Qdrant, Data Engineering)
+
+**Summary**: Архитектура и инженерное устройство RAG-систем: векторный поиск, хранилища, эмбеддинги и data engineering.
 
 > **Источник:** Практический разбор построения RAG-систем (YouTube Transcript / Python + Qdrant + Sber Embeddings + LangChain)  
 > **Категория:** AI Architecture / Knowledge Base / RAG Engineering  

@@ -1,4 +1,4 @@
-# DavASko LLM Wiki Architecture: How Layered RAG, Graphify, and RLM Tamed LLMs in Complex Systems
+﻿# DavASko LLM Wiki Architecture: How Layered RAG, Graphify, and RLM Tamed LLMs in Complex Systems
 
 > **TL;DR:** Sooner or later, every engineer trying to apply modern LLM agents (Claude, GPT-4, Gemini) to real-world production codebases and sprawling documentation repositories hits two brick walls: skyrocketing API bills with daily token quotas exhausted by midday, and "confident hallucinations". We abandoned the naive illusion of "just dumping 2 million tokens into the context window" and built **DavASko LLM Wiki** — an autonomous, layered context grounding and multi-engine retrieval system.
 >

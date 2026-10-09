@@ -104,3 +104,61 @@ To reference a page that is outside or above the layer's dependency chain, regis
 ```
 
 The wiki linter will recognize this stub as a valid reference. When the actual page is eventually ingested into the project layer, the stub prevents link errors while keeping the engine/framework layer completely portable and independent.
+
+---
+
+## 5. LangGraph Control Plane Architecture
+
+The knowledge retrieval subsystem is governed by a deterministic, multi-tiered LangGraph Control Plane located in `orchestration/`:
+
+```mermaid
+flowchart TD
+    REQ[Client Query] --> VAL[Validate Request]
+    VAL --> ROUTE{Query Router}
+    ROUTE -->|RAG| RAG_NODE[Execute RAG Search]
+    ROUTE -->|RLM| RLM_NODE[Start Research Subgraph]
+    ROUTE -->|Graphify| GRAPH_NODE[AST Graph Query]
+    
+    RAG_NODE & RLM_NODE --> JUDGE1{Judge Initial Score >= 7?}
+    JUDGE1 -->|Yes| NORM[Normalize Response]
+    JUDGE1 -->|No| FALLBACK[Execute Fallback Tier: RAG <-> RLM]
+    FALLBACK --> JUDGE2{Judge Fallback Score >= 7?}
+    JUDGE2 -->|Yes| NORM
+    JUDGE2 -->|No| COMP1[Compare Answers A/B]
+    COMP1 --> GREP[Execute Grep Search Fallback]
+    GREP --> JUDGE3{Judge Grep Score >= 7?}
+    JUDGE3 -->|Yes| NORM
+    JUDGE3 -->|No| COMP2[Compare Final Best]
+    COMP2 --> NORM
+    GRAPH_NODE --> NORM
+    NORM --> DUMP[.cursor-context-dump.md]
+```
+
+### Components
+1. **State & Action Contracts (`orchestration/contracts.js`)**: Strictly typed request parameters, validation rules, token budgets, and search modes.
+2. **5-Tier Supervisor Graph (`orchestration/graphs/query-supervisor.js`)**:
+   - **Tier 1 (Validation & Route Selection)**: Validates limits and dispatches to RAG, RLM, or Graphify via local LLM router.
+   - **Tier 2 (Initial Search)**: Performs targeted semantic/symbolic retrieval or launches research worker.
+   - **Tier 3 (Consensus & LLM-Judge)**: Independent judge evaluates candidate completeness and relevance against threshold score $\ge 7$.
+   - **Tier 4 (Fallback Retrieval & A/B Comparators)**: Runs complementary search method if score $< 7$, comparing candidates side-by-side.
+   - **Tier 5 (Deterministic Grep Search Fallback)**: Catches edge-case keywords when semantic pathways fail.
+3. **SQLite WAL State Checkpointing (`orchestration/checkpointer.js`)**: All state transitions, tool invocations, and evaluations are atomically recorded in a local SQLite database in WAL mode for replayability and audit traces.
+4. **Worker Thread Isolation (`orchestration/graphs/research-worker.js`)**: Heavy RLM research runs in a dedicated Node.js Worker Thread with periodic heartbeats every 5 seconds to keep the main event loop responsive.
+5. **Prompt Injection Hardening**: All retrieved documents are sanitized and encapsulated within `<document id="...">` XML blocks before injection into context dumps.
+
+---
+
+## 6. Resident Search Server (`system/search-server.js`)
+
+To eliminate Node.js cold-start overhead (~8 seconds per search), the engine provides a resident background process:
+- Communicates via JSON-RPC / NDJSON over standard I/O (`stdin`/`stdout`).
+- Retains LanceDB tables, ONNX embedding models, and vector indexes warm in memory, dropping response latency to **~1.5 seconds**.
+- Diagnostic logging is routed strictly to `stderr` to ensure protocol streams on `stdout` remain uncorrupted.
+
+---
+
+## 7. Knowledge Base Isolation Markers (`.davasko-local-kb` / `.kbpro-local-kb`)
+
+The system supports project-level overrides to decouple local submodules from global machine installations:
+- If a project directory contains a `.davasko-local-kb` or `.kbpro-local-kb` marker file, `system/lib/wiki-paths.js` pins all indexing and retrieval operations strictly to the local repository, ignoring global system-wide environment variables (`KBPRO_AI_CHAT_WIKI_DIR`).
+- Configurable via `system/scripts/setup-knowledge-base.js`.

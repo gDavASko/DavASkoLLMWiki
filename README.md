@@ -187,10 +187,14 @@ flowchart TD
 
 > ⚠️ **Important:** step 2 creates a *stub* summary (`related: []`, "No claims extracted") that **fails the linter on purpose**. You must fill in real **Key Claims** (each citing the raw source) and a non‑empty **related** list. This is what the **davasko-wiki-ingest** skill walks you through.
 
-### ⚙️ Indexer v3.x with Checkpoints and Safe Late Chunking (`build-index.js`)
+### ⚙️ Indexer v4.x with Checkpoints, Bidirectional Overlap and Safe Late Chunking (`build-index.js`)
 
-The indexer is engineered for high reliability when indexing enterprise-grade knowledge bases:
+The indexer is engineered for high reliability and deep context preservation when indexing enterprise-grade knowledge bases:
 
+* **Chunking Profile v4 (Bidirectional Overlap & Hierarchy Breadcrumbs):**
+  - Structural chunks target 200 words with a 300-word ceiling.
+  - **Bidirectional context window:** Each chunk boundary incorporates 32 words of context from the preceding chunk (`[Контекст предыдущего фрагмента: ...]`) and 32 words of context from the succeeding chunk (`[Контекст следующего фрагмента: ...]`), ensuring zero information loss across split boundaries.
+  - **Entity / Tab breadcrumbs:** Nested hierarchy metadata (`[parent_tab > tab_name]`) is prefixed directly into embedding inputs to preserve parent document semantics.
 * **Automatic Checkpoints every 20 documents:** Every 20 processed documents (`CHECKPOINT_INTERVAL = 20`), the accumulated embedding batch is atomically committed to LanceDB, the empty document cache is saved, and progress is recorded to `EMBEDDING_MANIFEST_FILE` with status `in_progress`. If the indexing run is interrupted (by user, power loss, or network timeout), subsequent runs **resume directly from the last checkpoint** instead of re-embedding from scratch.
 * **Manifest Status Lifecycle:** Starts with status `in_progress` and timestamp. Upon successful completion, status is updated to `complete`.
 * **Auto-switch to `--force`:** If embedding model profile or chunking strategy changes, or an incomplete index is detected, the system automatically switches to full rebuild mode.
@@ -206,7 +210,8 @@ One command searches by **keyword and meaning at the same time**, then writes th
 
 ```mermaid
 flowchart TD
-    Q(["❓ node system/query-wiki.js --auto '...'"]) --> ROUTER{"🧠 Query Router<br/>(Local LLM)"}
+    Q(["❓ node system/query-wiki.js --auto '...'"]) --> VAL["🛡️ Validate Request<br/>(Contracts & Limits)"]
+    VAL --> ROUTER{"🧠 Query Router<br/>(Local LLM)"}
     
     ROUTER -->|Code relations,<br/>Dependencies| G["🕸️ Graphify<br/>(AST Call Graph)"]
     ROUTER -->|Deep synthesis,<br/>Architecture| RLM["🤖 RLM Agent<br/>(Deep Research)"]
@@ -217,25 +222,54 @@ flowchart TD
     P --> B["🅱️ Stream B — Semantic<br/>(vector similarity)"]
     A & B --> MERGE["🔗 Merge, Graph Lift &<br/>Image Path Normalization"]
 
-    G & RLM & MERGE --> DUMP(["📝 .cursor-context-dump.md<br/>(Agent Context)"])
+    MERGE & RLM --> J1{"⚖️ Judge Initial<br/>(Score ≥ 7?)"}
+    J1 -->|Yes| NORM["✨ Normalize Response<br/>(<document> XML Wrapping)"]
+    J1 -->|No| FB["🔄 Fallback Tier<br/>(RAG ↔ RLM)"]
+    FB --> J2{"⚖️ Judge Fallback<br/>(Score ≥ 7?)"}
+    J2 -->|Yes| NORM
+    J2 -->|No| CMP1["🔀 Compare Answers<br/>(Pick Best A/B)"]
+    CMP1 --> GREP["🔎 Grep Search Fallback<br/>(Text Match Tier)"]
+    GREP --> J3{"⚖️ Judge Grep<br/>(Score ≥ 7?)"}
+    J3 -->|Yes| NORM
+    J3 -->|No| CMP2["🔀 Compare Final<br/>(Best Result)"]
+    CMP2 --> NORM
+    G --> NORM
+
+    NORM --> DUMP(["📝 .cursor-context-dump.md<br/>(Agent Context)"])
 ```
 
-**The Three Search Paths:**
-1. **RAG (Hybrid Search):** Standard mode. Fast semantic + symbolic search using the Jina vector model. Safely executed in isolated Worker Threads. **Image Path Normalization** automatically resolves relative image links to absolute ones against the layer root, preventing filename collisions across different projects.
-2. **RLM (Research Language Model):** Deep research agent. Best for complex, multi-hop architectural questions. Uses a local LLM (like Ollama) to read, synthesize, and explore the wiki iteratively.
-3. **Graphify:** Codebase knowledge graph. Best for resolving C# class inheritance, component dependencies, and method call chains directly from the AST.
+**The Search & Control Plane Architecture:**
+1. **LangGraph Query Supervisor:** Orchestrates multi-tier retrieval, fallbacks, and quality evaluation:
+   - **Validation Node:** Strict input contract checks and resource limits via `orchestration/contracts.js`.
+   - **Route Selection:** Intelligent tool assignment (`RAG`, `RLM`, `GRAPHIFY`) via `Query Router`.
+   - **LLM-Judge Evaluation:** Evaluates candidate answers against a threshold score $\ge 7$.
+   - **Fallback Tier (RAG $\leftrightarrow$ RLM):** If the primary route yields insufficient confidence, automatically triggers the alternate retrieval strategy.
+   - **Comparator Nodes (`compare_answers`, `compare_final`):** If no candidate achieves $\ge 7$, an LLM comparator compares candidates side-by-side and selects the highest-fidelity response.
+   - **Grep Fallback Tier:** If both semantic pathways fail, falls back to deterministic full-text search (`execute_grep_search`).
+   - **Prompt Injection Defense:** All retrieved documents are sanitized and wrapped in strict `<document>` XML tags (`wrapDocumentXml`), neutralizing hostile prompt injection attempts in raw docs.
+   - **SQLite WAL Checkpointer:** Graph execution states and traces are persisted to SQLite in WAL mode (`orchestration/checkpointer.js`), supporting execution resumes and audit logging.
+   - **Worker Thread Isolation:** Compute-heavy research sub-graphs run in dedicated Node.js Worker Threads with periodic Heartbeat logging every 5 seconds.
 
-**Why two streams in RAG?** Code identifiers (`CowController`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
-**Adaptive threshold** keeps only strong matches scoring at least `α · (best score for this query)`.
+2. **The Three Search Paths:**
+   - **RAG (Hybrid Search):** Fast semantic + symbolic search using the Jina vector model. Safely executed in isolated Worker Threads. **Image Path Normalization** automatically resolves relative image links to absolute ones against the layer root, preventing filename collisions across different projects.
+   - **RLM (Research Language Model):** Deep research agent. Best for complex, multi-hop architectural questions. Uses a local LLM (like Ollama) to read, synthesize, and explore the wiki iteratively.
+   - **Graphify:** Codebase knowledge graph. Best for resolving C# class inheritance, component dependencies, and method call chains directly from the AST.
+
+3. **Why two streams in RAG?** Code identifiers (`CowController`) need exact matching; natural‑language questions ("how does physics tuning work?") need meaning. Hybrid search does both and ranks them on one scale.
+**Adaptive threshold** keeps only strong matches scoring at least $\tau_q = \max(\text{junk\_floor}, \alpha \cdot \text{top\_score})$.
 
 ### ⚡ Resident Search Server (`system/search-server.js`)
-For seamless integration with IDEs (Cursor, VS Code), AI agents, and external chat servers (Mattermost, Slack), DavASko LLM Wiki includes a resident search server. It retains LanceDB tables and vector caches resident in memory, communicating via JSON-RPC over `stdin`/`stdout`. This drops query latency from ~8 seconds down to **~1.5 seconds**!
+For seamless integration with IDEs (Cursor, VS Code), AI agents, and external chat servers (Mattermost, Slack), DavASko LLM Wiki includes a resident search server. It retains LanceDB tables, ONNX runtimes, and vector caches resident in memory, communicating via JSON-RPC/NDJSON over `stdin`/`stdout`.
+- Eliminates the ~8s cold-start overhead per process invocation down to **~1.5 seconds** per query!
+- Pre-warms embedding models (`warmUp()`) upon initial server startup.
+- Safe serialization: diagnostical output is isolated to `stderr`, keeping `stdout` strictly clean for protocol data.
 
 ### 🧙‍♂️ Knowledge Base Setup Wizard (`system/scripts/setup-knowledge-base.js`)
 An interactive CLI setup tool to:
 * Auto-detect or clone the shared knowledge base repository on the machine.
-* Configure the `KBPRO_AI_CHAT_WIKI_DIR` environment variable.
-* Generate a local project override marker (`.davasko-local-kb`).
+* Configure the `KBPRO_AI_CHAT_WIKI_DIR` environment variable persistently.
+* Self-test retrieval and trigger auto-healing (dependency install, vector model init, index compilation).
+* Support local project override markers (`.davasko-local-kb` / `.kbpro-local-kb`) to isolate project-specific submodules from global host profiles.
 
 ---
 
@@ -343,27 +377,27 @@ flowchart LR
 | `node system/scripts/setup-local-llm.js` | Install and configure local Ollama for RLM and Query Routing. |
 | `node system/scripts/ingest-newdata.js` | Run the **write pipeline**: place sources, lint, **vectorize**. |
 | `node system/build-index.js [--force]` | Build / rebuild the vector index (incremental by default). |
-| `node system/query-wiki.js --auto "..."` | **Smart Routed Search** (picks RAG, RLM, or Graphify) → context dump. |
-| `node system/query-wiki.js --query "..."` | Manual **Hybrid search** (RAG only). |
+| `node system/query-wiki.js --auto "..." [--locations <paths>] [--top-k <num>]` | **Smart Routed Search** (LangGraph Supervisor: validates, routes to RAG/RLM/Graphify, LLM-Judge score $\ge 7$, RAG $\leftrightarrow$ RLM fallback, A/B comparator, Grep fallback) → `.cursor-context-dump.md`. |
+| `node system/query-wiki.js --query "..." [--locations <paths>] [--top-k <num>]` | Manual **Hybrid search** (RAG only) with optional layer and top-k filtering. |
 | `node system/query-wiki.js --rlm "..."` | Manual **Deep Research** (RLM agent). |
 | `node system/sync-ai-rules.js [--global]` | Sync IDE rules (append‑safe) + compile skill adapters. |
 | `node system/scripts/lint-wiki.js` | Validate encoding, frontmatter, links (must be **0 errors**). |
 | `node system/scripts/validate-links.js` | Check every `[[wiki link]]` and file link. |
-| `node system/search-server.js` | Start resident JSON-RPC search server (~1.5s latency). |
+| `node system/search-server.js` | Start resident JSON-RPC / NDJSON search server (~1.5s latency). |
 | `node system/scripts/setup-knowledge-base.js` | Interactive setup wizard for knowledge base environment and paths. |
 | `node system/scripts/check-staleness.js` | Detect wiki pages whose cited sources changed. |
 | `node system/scripts/eval-retrieval.js [--sweep]` | Measure retrieval quality (recall@k / MRR / nDCG) vs baselines. |
-| `npm test` | 32 unit tests of the retrieval core (no model needed). |
+| `npm test` | **42 unit tests** of the retrieval core, chunking, graphify, and orchestration (no model needed). |
 
 ---
 
 ## 10.1. Current index compatibility contract
 
 - `node system/build-index.js` is incremental: it re-embeds only new, changed, or removed source documents.
-- Chunking profile **v3** is part of the LanceDB format: structural chunks target 200 words, have a 300-word upper bound, and carry 32 words of context from the preceding chunk on every boundary after the first.
+- Chunking profile **v4** is part of the LanceDB format: structural chunks target 200 words, have a 300-word upper bound, carry bidirectional context (32 words backward context `[Контекст предыдущего фрагмента: ...]` and 32 words forward context `[Контекст следующего фрагмента: ...]`), and include document hierarchy breadcrumbs `[parent_tab > tab_name]`.
 - Changing a chunking or embedding profile requires the deliberate `node system/build-index.js --force`; an ordinary incremental run must not mix vectors created by different profiles.
 - A valid layer has `wiki.json` and at least one content directory: `wiki/` or `raw/`. Raw-only layers are indexed deliberately because Git omits empty `wiki/` directories.
-- **Fault-Tolerant Indexing:** Indexer v3.x writes checkpoints every 20 documents. The `in_progress` manifest ensures configuration validity and enables incremental completion after interruption.
+- **Fault-Tolerant Indexing:** Indexer v4.x writes checkpoints every 20 documents. The `in_progress` manifest ensures configuration validity and enables incremental completion after interruption.
 - **Late Chunking & Memory Safety:** The `late_chunk_max_words` parameter (default 6000) provides safe batching fallback to prevent GPU VRAM OOM errors.
 - **Unlimited Raw File Size:** By default `max_raw_file_bytes: 0` — all raw/ source documents are indexed without skipping.
 - Run `node system/scripts/audit-chunks.js --json` after a full rebuild to inspect chunk counts, overlap coverage, forced boundaries, and unusually large documents.
@@ -421,20 +455,28 @@ A few hard rules keep the KB machine‑readable (the linter enforces them):
 
 ```
 DavASkoLLMWiki/
-├── system/                      # engine v3.x
+├── orchestration/               # LangGraph Control Plane (StateGraph, Supervisor, Evaluators)
+│   ├── contracts.js             # state and action contracts, zod schemas
+│   ├── checkpointer.js          # SQLite WAL state checkpointer and trace store
+│   ├── evaluator.js             # LLM-judge (score >= 7) and A/B candidate comparator
+│   └── graphs/
+│       ├── query-supervisor.js  # 5-tier query orchestration supervisor graph
+│       └── research-worker.js   # isolated research worker thread graph
+├── system/                      # engine v4.x
 │   ├── build-index.js           # vectorization with checkpoints (batches of 20 docs)
-│   ├── query-wiki.js            # hybrid search (RAG / RLM / Graphify)
+│   ├── query-wiki.js            # hybrid search & supervisor CLI (RAG / RLM / Graphify)
 │   ├── query-target.js          # targeted search across specified layers
-│   ├── search-server.js         # resident JSON-RPC search server (~1.5s latency)
+│   ├── search-server.js         # resident JSON-RPC / NDJSON search server (~1.5s latency)
 │   ├── sync-ai-rules.js         # deploy rules/skills to IDEs (append-safe)
-│   ├── index-config.json        # chunking, Late Chunking and limit settings
+│   ├── index-config.json        # chunking (v4 profile), Late Chunking and limit settings
 │   ├── search-config.json       # hybrid search weights and thresholds (BM25 + LanceDB)
-│   ├── lib/                     # core: embedding-client, chunker, retrieval, wiki-paths
-│   ├── scripts/                 # deploy-wiki, setup-knowledge-base, ingest-newdata...
+│   ├── lib/                     # core: embedding-client, chunker (v4), retrieval, wiki-paths...
+│   ├── scripts/                 # deploy-wiki, setup-knowledge-base, ingest-newdata, lint-wiki...
+│   ├── tests/                   # 42 unit tests covering all core modules and orchestration
 │   ├── vendor/                  # offline npm dependencies (.tgz)
 │   └── models-cache/            # bundled model SOURCE (copied to system location)
 ├── skills/                      # the 5 portable skills (sources of truth)
-├── docs/paper/                  # the measured scientific report (EN + RU)
+├── docs/                        # documentation, guides, and scientific papers (EN + RU)
 ├── CLAUDE.md / AGENTS.md        # agent rules (Core Context Protocol)
 ├── README.md / README.ru.md     # this file
 └── LICENSE.md                   # Proprietary EULA

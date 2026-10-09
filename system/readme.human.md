@@ -21,6 +21,6 @@ Recommended workflow:
 The existing KBPro architecture documents remain in place and can be ingested into the
 wiki over time.
 
-Indexing is incremental by default. The embedding and chunking profiles are part of the index format;
-after either profile changes, rebuild intentionally with `node system/build-index.js --force` before
-resuming normal incremental runs.
+Indexing is incremental by default with chunking profile v4 (200 words target, 32-word bidirectional overlap, hierarchy breadcrumbs, and checkpoints every 20 documents). The embedding and chunking profiles are part of the index format; after either profile changes, rebuild intentionally with `node system/build-index.js --force` before resuming normal incremental runs.
+
+Search is orchestrated by the LangGraph Control Plane via `node system/query-wiki.js --auto "<query>"` (auto-routing to RAG, RLM, or Graphify, with consensus evaluation via LLM-Judge, fallback tiers, and A/B comparators). High-speed resident search is available via `node system/search-server.js` (~1.5s latency). The core retrieval and orchestration system is validated by 42 unit tests (`npm test`).
